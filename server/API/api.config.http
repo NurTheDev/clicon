@@ -1,2 +1,2 @@
 ### GET request for getting all the blogs
-GET  http://localhost:3000/api/v1/test
+GET  http://localhost:3000/home

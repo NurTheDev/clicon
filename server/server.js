@@ -1,13 +1,13 @@
 const connectDB = require("./src/database/database");
-const express = require("express");
-const app = express();
-require("dotenv").config();
-const PORT = process.env.PORT || 5000; // Use PORT environment variable if available, otherwise default to 5000
-connectDB().then(() => {
-    app.listen(PORT, () => {
+const app = require("./src/app");
+
+const PORT = process.env.PORT || 3000;
+
+connectDB().then(()=>{
+    app.listen(PORT, ()=>{
         console.log(`Server is running on port ${PORT}, http://localhost:${PORT}`);
     })
-}).catch((err) => {
-    console.error(err);
+}).catch((error)=>{
+    console.error("Error connecting to the database" ,error);
+    process.exit(1);
 })
-
