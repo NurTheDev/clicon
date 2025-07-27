@@ -21,7 +21,7 @@ app.use(process.env.API_VERSION, require("./routes/index"))
 // Error handler middleware
 app.use((error, req, res, next)=>{
     const statusCode = error.statusCode || 500;
-    console.error(error.message);
-    res.status(statusCode).send(error.message);
+    console.error(error, "from error handler middleware");
+    res.status(statusCode).send(error);
 })
 module.exports = app;
