@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const globalError = require("./utils/globalError")
 const cookieParser = require('cookie-parser');
 require("dotenv").config();
 // All middleware goes here
@@ -19,9 +20,5 @@ app.get("/", (req, res) => {
 app.use(process.env.API_VERSION, require("./routes/index"))
 
 // Error handler middleware
-app.use((error, req, res, next)=>{
-    const statusCode = error.statusCode || 500;
-    console.error(error, "from error handler middleware");
-    res.status(statusCode).send(error);
-})
+app.use(globalError)
 module.exports = app;
