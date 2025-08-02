@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const {genSalt, hash} = require("bcrypt");
+const {genSalt, hash, compare} = require("bcrypt");
 const {Schema, Types} = mongoose;
 const customError = require("../utils/customError");
 
@@ -82,6 +82,15 @@ userSchema.pre("save", async function (next) {
         next(error)
     }
 })
+
+// Compare password
+userSchema.methods.checkPassword = async function (password) {
+    try {
+        return await compare(password, this.password)
+    } catch (error) {
+       throw new customError(error.message, 400)
+    }
+}
 
 // Check if the Email is unique
 userSchema.pre("save", async function (next) {
