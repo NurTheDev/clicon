@@ -17,10 +17,13 @@ const userSchema = new Schema({
     },
     email: {
         type: String,
-        required: true,
         trim: true,
+        sparse: true,
         unique: true,
         match: [/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, "Please enter a valid email address"]
+    }, phone: {
+        type: String, trim: true, unique: true, sparse: true,
+        match: [/^\+?[0-9]{10,15}$/, "Please enter a valid phone number"]
     }, password: {
         type: String, required: true, trim: true,
     }, role: {
@@ -47,9 +50,6 @@ const userSchema = new Schema({
         type: String, default: "Bangladesh"
     }, zipCode: {
         type: String, trim: true
-    }, phone: {
-        type: String, trim: true,
-        match: [/^\+?[0-9]{10,15}$/, "Please enter a valid phone number"]
     }, dateOfBirth: Date, gender: {
         type: String, enum: ["male", "female", "other"]
     }, lastLoginAt: Date, lastLogOutAt: Date,
@@ -88,10 +88,16 @@ userSchema.methods.checkPassword = async function (password) {
     try {
         return await compare(password, this.password)
     } catch (error) {
-       throw new customError(error.message, 400)
+        throw new customError(error.message, 400)
     }
 }
-
+// Check at-least email or phone any one field is filled
+userSchema.pre("validate", function (next) {
+    if (!this.email && !this.phone) {
+        return next(new customError("please enter email or phone number", 400));
+    }
+    next();
+})
 // Check if the Email is unique
 userSchema.pre("save", async function (next) {
     try {
