@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const {customError} = require("../utils/customError");
+const customError = require("../utils/customError");
 
 const userValidation = Joi.object({
     name: Joi.string().required().trim().empty().messages({
@@ -30,6 +30,6 @@ exports.userValidation = async (req, next) => {
     try{
        return await userValidation.validateAsync(req.body);
     } catch (error){
-        next(new customError(`user validation error: ${error}`, 400))
+        throw new customError(error, 400)
     }
 }

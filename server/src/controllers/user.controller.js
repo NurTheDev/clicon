@@ -1,0 +1,10 @@
+const userSchema = require("../models/user.model")
+const customError = require("../utils/customError")
+const asyncHandler = require("../helpers/asyncHandler")
+const {success} = require("../utils/apiResponse")
+const {userValidation} = require("../validators/user.validator")
+exports.register = asyncHandler(async (req, res) => {
+    const {name, email, phone, password} = await userValidation(req)
+    const user = await userSchema.create({name, email, phone, password})
+    success(res, "User registered successfully", user, 201)
+})
