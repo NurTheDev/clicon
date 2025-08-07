@@ -7,6 +7,7 @@ const userSchema = new Schema({
     userName: {
         type: String,
         unique: true,
+        sparse: true,
         trim: true
     },
     name: {
@@ -100,7 +101,7 @@ userSchema.pre("validate", function (next) {
 // Check if the Email is unique
 userSchema.pre("save", async function (next) {
     try {
-        if (this.isModified("email")) {
+        if (this.isModified("email") && this.email) {
             const user = await this.constructor.findOne({email: this.email});
             if (user && user._id.toString() !== this._id.toString()) {
                 return next(new customError("Email already exists", 400))

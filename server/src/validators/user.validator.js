@@ -20,7 +20,7 @@ const userValidation = Joi.object({
     }),
 
 }).or('email', 'phone').messages({
-    "any.required": "Email or phone number is required",
+    'object.missing': "Email or phone number is required",
 }).options({
     abortEarly: true,
     allowUnknown: true
