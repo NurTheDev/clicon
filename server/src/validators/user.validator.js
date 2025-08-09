@@ -2,8 +2,8 @@ const Joi = require('joi');
 const customError = require("../utils/customError");
 
 const userValidation = Joi.object({
-    name: Joi.string().required().trim().empty().messages({
-        "any.required": "Name is required",
+    name: Joi.string().trim().empty().messages({
+        "string.empty": "Name is required",
         "string.trim": "Name filled with extra spaces",
     }),
     email: Joi.string().trim().email().pattern(new RegExp(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)).messages({

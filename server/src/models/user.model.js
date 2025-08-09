@@ -112,5 +112,4 @@ userSchema.pre("save", async function (next) {
         next(error)
     }
 })
-
 module.exports = mongoose.model("user", userSchema);
