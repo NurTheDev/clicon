@@ -4,7 +4,7 @@ const asyncHandler = require("../helpers/asyncHandler")
 const {success} = require("../utils/apiResponse")
 const {userValidation} = require("../validators/user.validator")
 const {generateOTP} = require("../utils/otp")
-const {verifyEmail} = require("../templet/emailTemplet")
+const {verifyEmail, forgetPassword} = require("../templet/emailTemplet")
 const {sendEmail} = require("../helpers/sendEmail")
 /**
  * Register user
@@ -23,12 +23,18 @@ exports.register = asyncHandler(async (req, res) => {
     const verifyLink = `http://localhost:3000/verify?email=${email}&otp=${otp}`
     // Send OTP to user through email
     const emailVerifyTemplate = verifyEmail(name, otp, expiry, verifyLink)
-    await sendEmail(email, emailVerifyTemplate)
+    await sendEmail(email, emailVerifyTemplate, "Email verification")
     user.emailVerificationToken = otp
     user.emailVerificationExpire = expiry
     await user.save()
     success(res, "User registered successfully", user, 201)
 })
+/**
+ * Verify email
+ * @type {(function(*, *): Promise<void>)|*}
+ * @returns {Promise<void>}
+ * @throws {customError}
+ */
 exports.emailVerify = asyncHandler(async (req, res) => {
     const {email, otp} = req.body
     if (!email || !otp) {
@@ -49,7 +55,12 @@ exports.emailVerify = asyncHandler(async (req, res) => {
     await user.save()
     success(res, "Email verified successfully", user, 200)
 })
-
+/**
+ * Login user
+ * @type {(function(*, *): Promise<void>)|*}
+ * @returns {Promise<void>}
+ * @throws {customError}
+ */
 exports.login = asyncHandler(async (req, res) => {
     console.log(req.body)
     const {email, phone, password} = await userValidation(req)
@@ -86,4 +97,58 @@ exports.login = asyncHandler(async (req, res) => {
         name: user.name,
         email: user.email
     }, 200)
+})
+/**
+ * Forgot password
+ * @type {(function(*, *): Promise<void>)|*}
+ * @returns {Promise<void>}
+ * @throws {customError}
+ */
+exports.forgotPassword = asyncHandler(async (req, res)=>{
+    const {email} = req.body
+    if(!email){
+        throw new customError("Email is required", 400)
+    }
+    const user = await userSchema.findOne({email})
+    if(!user){
+        throw new customError("User not found", 400)
+    }
+    const {otp, expiry} = generateOTP()
+    const verifyLink = `http://localhost:3000/reset-password?email=${email}&otp=${otp}`
+    const emailVerifyTemplate = forgetPassword(otp, expiry, verifyLink)
+    await sendEmail(email, emailVerifyTemplate, "Reset password email")
+    user.resetPasswordToken = otp
+    user.resetPasswordExpire = expiry
+    await user.save()
+    success(res, "Email sent successfully", null, 200)
+})
+/**
+ * Reset password
+ * @type {(function(*, *): Promise<void>)|*}
+ * @returns {Promise<void>}
+ * @throws {customError}
+ */
+exports.resetPassword = asyncHandler(async (req, res)=>{
+    const {email, otp, newPassword, confirmPassword} = req.body
+    if(!email || !otp || !newPassword || !confirmPassword){
+        throw new customError("All fields are required", 400)
+    }
+    const user = await userSchema.findOne({email})
+    if(!user){
+        throw new customError("User not found", 400)
+    }
+    if(user.resetPasswordToken !== otp){
+        throw new customError("Invalid OTP", 400)
+    }
+    if(user.resetPasswordExpire<Date.now()){
+        throw new customError("OTP expired", 400)
+    }
+    if(newPassword !== confirmPassword){
+        throw new customError("Passwords do not match", 400)
+    }
+    user.password = newPassword
+    user.resetPasswordToken = null
+    user.resetPasswordExpire = null
+    await user.save()
+    success(res, "Password reset successfully", null, 200)
 })

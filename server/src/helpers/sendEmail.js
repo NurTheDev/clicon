@@ -8,11 +8,11 @@ const transporter = nodemailer.createTransport({
         pass: process.env.APP_PASSWORD.replace(/_/g, ' ')
     },
 });
-exports.sendEmail = async (email, template) => {
+exports.sendEmail = async (email, template, subject) => {
     const info = await transporter.sendMail({
         from: "Clicon",
         to: email,
-        subject: "Email verification",
+        subject: subject,
         html: template
     })
     console.log("Message sent: %s", info.messageId);
