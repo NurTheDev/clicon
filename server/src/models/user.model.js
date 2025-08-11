@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 const {genSalt, hash, compare} = require("bcrypt");
 const {Schema, Types} = mongoose;
 const customError = require("../utils/customError");
+const {sign} = require("jsonwebtoken");
+require("dotenv").config();
 
 const userSchema = new Schema({
     userName: {
@@ -112,4 +114,35 @@ userSchema.pre("save", async function (next) {
         next(error)
     }
 })
+
+// Generate Access Token with JWT
+userSchema.methods.generateAccessToken = function () {
+    try {
+        return sign({
+                id: this._id,
+                role: this.role,
+                email: this.email,
+                phone: this.phone
+            },
+            process.env.ACCESS_TOKEN_SECRET_KEY,
+            {expiresIn: process.env.ACCESS_TOKEN_EXPIRY}
+        )
+    } catch (error) {
+        throw new customError(error, 400)
+    }
+}
+
+// Generate Refresh Token with JWT
+userSchema.methods.generateRefreshToken = function () {
+    try {
+        return sign({
+                id: this._id,
+            },
+            process.env.REFRESH_TOKEN_SECRET_KEY,
+            {expiresIn: process.env.REFRESH_TOKEN_EXPIRY})
+    } catch (error) {
+        throw new customError(error, 400)
+    }
+}
+
 module.exports = mongoose.model("user", userSchema);

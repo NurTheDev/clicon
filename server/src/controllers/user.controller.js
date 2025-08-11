@@ -41,5 +41,29 @@ exports.login = asyncHandler(async (req, res) => {
     if (!isMatch) {
         throw new customError("Invalid password", 400)
     }
-    success(res, "User logged in successfully", user, 200)
+
+    // Make an access token and refresh token
+    const accessToken = await user.generateAccessToken()
+    const refreshToken = await user.generateRefreshToken()
+    user.refreshToken = refreshToken
+    await user.save()
+    res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        maxAge: 60 * 60 * 1000, // 1 hour
+        sameSite: "none",
+        secure: process.env.NODE_ENV === "production",
+        path: "/"
+    })
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
+        sameSite: "none",
+        secure: process.env.NODE_ENV === "production",
+        path: "/"
+    })
+    success(res, "User logged in successfully", {
+        accessToken,
+        name: user.name,
+        email: user.email
+    }, 200)
 })
