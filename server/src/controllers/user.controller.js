@@ -29,6 +29,26 @@ exports.register = asyncHandler(async (req, res) => {
     await user.save()
     success(res, "User registered successfully", user, 201)
 })
+exports.emailVerify = asyncHandler(async (req, res) => {
+    const {email, otp} = req.body
+    if (!email || !otp) {
+        throw new customError("Email or OTP is required", 400)
+    }
+
+    const user = await userSchema.findOne({email})
+    if(!user){
+        throw new customError("User not found", 400)
+    } if(user.emailVerificationToken !== otp){
+        throw new customError("Invalid OTP", 400)
+    }if(user.emailVerificationExpire<Date.now()){
+        throw new customError("OTP expired", 400)
+    }
+    user.isEmailVerified = true
+    user.emailVerificationToken = null
+    user.emailVerificationExpire = null
+    await user.save()
+    success(res, "Email verified successfully", user, 200)
+})
 
 exports.login = asyncHandler(async (req, res) => {
     console.log(req.body)
@@ -45,7 +65,7 @@ exports.login = asyncHandler(async (req, res) => {
     // Make an access token and refresh token
     const accessToken = await user.generateAccessToken()
     const refreshToken = await user.generateRefreshToken()
-    user.refreshToken = refreshToken
+    user.refreshToken = refreshToken // save refresh token
     await user.save()
     res.cookie("accessToken", accessToken, {
         httpOnly: true,
