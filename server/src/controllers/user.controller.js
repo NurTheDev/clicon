@@ -42,11 +42,13 @@ exports.emailVerify = asyncHandler(async (req, res) => {
     }
 
     const user = await userSchema.findOne({email})
-    if(!user){
+    if (!user) {
         throw new customError("User not found", 400)
-    } if(user.emailVerificationToken !== otp){
+    }
+    if (user.emailVerificationToken !== otp) {
         throw new customError("Invalid OTP", 400)
-    }if(user.emailVerificationExpire<Date.now()){
+    }
+    if (user.emailVerificationExpire < Date.now()) {
         throw new customError("OTP expired", 400)
     }
     user.isEmailVerified = true
@@ -104,13 +106,13 @@ exports.login = asyncHandler(async (req, res) => {
  * @returns {Promise<void>}
  * @throws {customError}
  */
-exports.forgotPassword = asyncHandler(async (req, res)=>{
+exports.forgotPassword = asyncHandler(async (req, res) => {
     const {email} = req.body
-    if(!email){
+    if (!email) {
         throw new customError("Email is required", 400)
     }
     const user = await userSchema.findOne({email})
-    if(!user){
+    if (!user) {
         throw new customError("User not found", 400)
     }
     const {otp, expiry} = generateOTP()
@@ -128,22 +130,22 @@ exports.forgotPassword = asyncHandler(async (req, res)=>{
  * @returns {Promise<void>}
  * @throws {customError}
  */
-exports.resetPassword = asyncHandler(async (req, res)=>{
+exports.resetPassword = asyncHandler(async (req, res) => {
     const {email, otp, newPassword, confirmPassword} = req.body
-    if(!email || !otp || !newPassword || !confirmPassword){
+    if (!email || !otp || !newPassword || !confirmPassword) {
         throw new customError("All fields are required", 400)
     }
     const user = await userSchema.findOne({email})
-    if(!user){
+    if (!user) {
         throw new customError("User not found", 400)
     }
-    if(user.resetPasswordToken !== otp){
+    if (user.resetPasswordToken !== otp) {
         throw new customError("Invalid OTP", 400)
     }
-    if(user.resetPasswordExpire<Date.now()){
+    if (user.resetPasswordExpire < Date.now()) {
         throw new customError("OTP expired", 400)
     }
-    if(newPassword !== confirmPassword){
+    if (newPassword !== confirmPassword) {
         throw new customError("Passwords do not match", 400)
     }
     user.password = newPassword
@@ -151,4 +153,51 @@ exports.resetPassword = asyncHandler(async (req, res)=>{
     user.resetPasswordExpire = null
     await user.save()
     success(res, "Password reset successfully", null, 200)
+})
+
+/**
+ * Logout user
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @returns {Promise<void>}
+ * @throws {customError}
+ */
+exports.logout = asyncHandler(async (req, res) => {
+    const user = await userSchema.findById(req.user.id)
+    if (!user) {
+        throw new customError("User not found", 400)
+    }
+    //Clear cookie
+    res.clearCookie("accessToken", {
+        httpOnly: true,
+        sameSite: "none",
+        secure: process.env.NODE_ENV === "production",
+        path: "/"
+    })
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        sameSite: "none",
+        secure: process.env.NODE_ENV === "production",
+        path: "/"
+    })
+    user.refreshToken = null
+    await user.save()
+    success(res, "User logged out successfully", null, 200)
+})
+
+exports.getUser = asyncHandler(async (req, res) => {
+    const user = await userSchema.findById(req.user.id)
+    if (!user) {
+        throw new customError("User not found", 400)
+    }
+    success(res, "User found successfully", {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        address: user.address,
+        city: user.city,
+        state: user.state,
+        country: user.country
+
+    }, 200)
 })
