@@ -64,7 +64,6 @@ exports.emailVerify = asyncHandler(async (req, res) => {
  * @throws {customError}
  */
 exports.login = asyncHandler(async (req, res) => {
-    console.log(req.body)
     const {email, phone, password} = await userValidation(req)
     const user = await userSchema.findOne({$or: [{email}, {phone}]})
     if (!user) {
@@ -198,6 +197,5 @@ exports.getUser = asyncHandler(async (req, res) => {
         city: user.city,
         state: user.state,
         country: user.country
-
     }, 200)
 })
