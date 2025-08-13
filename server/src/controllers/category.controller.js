@@ -5,5 +5,5 @@ const asyncHandler = require("../helpers/asyncHandler")
 
 exports.createCategory = asyncHandler(async (req, res)=>{
     // const {name} = req.body
-    console.log(req.file)
+    console.log(req.files)
 })

@@ -9,5 +9,6 @@ router.route("/forgot-password").post(userController.forgotPassword)
 router.route("/reset-password").post(userController.resetPassword)
 router.route("/sign_out").post(authGard, userController.logout)
 router.route("/profile").get(authGard, userController.getUser)
+router.route("/refresh-token").post(userController.getRefreshToken)
 
 module.exports = router;

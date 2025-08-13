@@ -6,6 +6,7 @@ const {userValidation} = require("../validators/user.validator")
 const {generateOTP} = require("../utils/otp")
 const {verifyEmail, forgetPassword} = require("../templet/emailTemplet")
 const {sendEmail} = require("../helpers/sendEmail")
+const {verify} = require("jsonwebtoken")
 /**
  * Register user
  * @type {(function(*, *, *): Promise<void>)|*}
@@ -183,6 +184,12 @@ exports.logout = asyncHandler(async (req, res) => {
     success(res, "User logged out successfully", null, 200)
 })
 
+/**
+ * Get use
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @returns {Promise<void>}
+ * @throws {customError}
+ */
 exports.getUser = asyncHandler(async (req, res) => {
     const user = await userSchema.findById(req.user.id)
     if (!user) {
@@ -197,5 +204,35 @@ exports.getUser = asyncHandler(async (req, res) => {
         city: user.city,
         state: user.state,
         country: user.country
+    }, 200)
+})
+
+/**
+ * Get refresh token
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @returns {Promise<void>}
+ * @throws {customError}
+ */
+exports.getRefreshToken = asyncHandler(async (req, res)=>{
+    const {refreshToken} = req.cookies
+    if(!refreshToken){
+        throw new customError("Refresh token is required", 400)
+    }
+    const payload = verify(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY)
+    const user = await userSchema.findById(payload.id)
+    if(!user){
+        throw new customError("User not found", 400)
+    }
+    const accessToken = user.generateAccessToken()
+    res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        maxAge: 60 * 60 * 1000, // 1 hour
+        sameSite: "none",
+        secure: process.env.NODE_ENV === "production",
+        path: "/"
+    })
+    success(res, "Refresh token found successfully", {
+        accessToken,
+        role: user.role
     }, 200)
 })
