@@ -8,5 +8,18 @@ const storage = multer.diskStorage({
         cb(null, file.originalname)
     }
 })
-const upload = multer({storage: storage, limits: {fileSize: 1024 * 1024 * 15}}) // 15MB
+const fileFilter = (req, file, cb) => {
+    const validMimeTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+        "image/webp"
+    ]
+    if(!validMimeTypes.includes(file.mimetype)){
+        return cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE'), false)
+    }
+    cb(null, true)
+}
+
+const upload = multer({storage: storage, limits: {fileSize: 1024 * 1024 * 15}, fileFilter}) // 15MB
 module.exports = upload
