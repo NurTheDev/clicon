@@ -1,7 +1,15 @@
+import {lazy, Suspense} from "react";
+import {Route, Routes} from "react-router";
+
 const App = () => {
+    const Home = lazy(() => import("./Pages/mainLayout/Home/Home"));
     return (
         <div>
-            <h1 className={"bg-red-500"}>Hello</h1>
+            <Suspense fallback={<div>Loading...</div>}>
+                <Routes>
+                    <Route path="/" element={<Home/>}/>
+                </Routes>
+            </Suspense>
         </div>
     );
 };
