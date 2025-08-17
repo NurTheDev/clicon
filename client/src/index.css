@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
 }
 
 img {
     vertical-align: middle;
 }
-
+button {
+    cursor: pointer;
+}
 ul,
 li,
 ol {
@@ -209,7 +209,6 @@ a {
     font-family: var(--font-inter);
     letter-spacing: 0em;
 }
-
 /* ========= heading component  =============*/
 .heading1 {
     font-size: 32px;
@@ -227,9 +226,13 @@ a {
     font-size: 24px;
     font-weight: 600;
     line-height: 32px;
+}.heading4 {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 32px;
 }
 
-.heading4 {
+.heading5 {
     font-size: 16px;
     font-weight: bold;
     line-height: 56px;
@@ -257,11 +260,21 @@ a {
 }
 
 .display4 {
-    font-size: 36px;
+    font-size: 40px;
     font-weight: 600;
     line-height: 44px;
 }
 
+.display5 {
+    font-size: 36px;
+    font-weight: 600;
+    line-height: 44px;
+}
+.display6 {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 40px;
+}
 /* ========= display component  =============*/
 
 /* ========= label component  =============*/
@@ -419,6 +432,7 @@ a {
     justify-content: center;
     align-items: center;
 }
+
 .flexRowCenter {
     display: flex;
     flex-direction: row;
