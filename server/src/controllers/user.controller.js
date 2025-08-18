@@ -118,9 +118,10 @@ exports.login = asyncHandler(async (req, res) => {
     if (!user) {
         throw new customError("User not found", 400)
     }
-    if (!user.isEmailVerified && !user.isPhoneVerified) {
-        throw new customError("User not verified", 400)
-    }
+    // if (!user.isEmailVerified && !user.isPhoneVerified) {
+    //     const verifyLink = `http://localhost:3000${process.env.API_VERSION}/auth/verify-account`
+    //     return res.status(301).redirect(verifyLink)
+    // }
     const isMatch = await user.checkPassword(password)
     if (!isMatch) {
         throw new customError("Invalid password", 400)
@@ -150,6 +151,10 @@ exports.login = asyncHandler(async (req, res) => {
         name: user.name,
         email: user.email
     }, 200)
+})
+
+exports.verifyAccount = asyncHandler(async (req, res) => {
+    console.log("verify account")
 })
 /**
  * Forgot password
