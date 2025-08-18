@@ -7,6 +7,7 @@ const {generateOTP} = require("../utils/otp")
 const {verifyEmail, forgetPassword} = require("../templet/emailTemplet")
 const {sendEmail} = require("../helpers/sendEmail")
 const {verify} = require("jsonwebtoken")
+const sendSMS = require("../helpers/sendSMS");
 /**
  * Register user
  * @type {(function(*, *, *): Promise<void>)|*}
@@ -21,13 +22,23 @@ exports.register = asyncHandler(async (req, res) => {
     }
     // Get OTP
     const {otp, expiry} = generateOTP()
-    const verifyLink = `http://localhost:3000/verify?email=${email}&otp=${otp}`
-    // Send OTP to user through email
-    const emailVerifyTemplate = verifyEmail(name, otp, expiry, verifyLink)
-    await sendEmail(email, emailVerifyTemplate, "Email verification")
-    user.emailVerificationToken = otp
-    user.emailVerificationExpire = expiry
-    await user.save()
+    // if user create account via email send otp to email
+    if (email) {
+        const verifyLink = `http://localhost:3000/verify?email=${email}&otp=${otp}`
+        const emailVerifyTemplate = verifyEmail(name, otp, expiry, verifyLink)
+        await sendEmail(email, emailVerifyTemplate, "Email verification")
+        user.emailVerificationToken = otp
+        user.emailVerificationExpire = expiry
+        await user.save()
+    }
+    // if user create account via phone send otp to phone
+    if (phone) {
+        const smsTemplate = `Your Clicon OTP is ${otp}. It will expire on ${expiry.toLocaleString()}. Do not share this code with anyone.`
+        await sendSMS(phone, smsTemplate)
+        user.phoneVerificationToken = otp
+        user.phoneVerificationExpire = expiry
+        await user.save()
+    }
     success(res, "User registered successfully", user, 201)
 })
 /**
@@ -59,6 +70,33 @@ exports.emailVerify = asyncHandler(async (req, res) => {
     success(res, "Email verified successfully", user, 200)
 })
 /**
+ * Verify phone
+ * @type {(function(*, *): Promise<void>)|*}
+ * @returns {Promise<void>}
+ * @throws {customError}
+ */
+exports.phoneVerify = asyncHandler(async (req, res) => {
+    const {phone, otp} = req.body
+    if (!phone || !otp) {
+        throw new customError("Phone or OTP is required", 400)
+    }
+    const user = await userSchema.findOne({phone})
+    if (!user) {
+        throw new customError("User not found", 400)
+    }
+    if (user.phoneVerificationToken !== otp) {
+        throw new customError("Invalid OTP", 400)
+    }
+    if (user.phoneVerificationExpire < Date.now()) {
+        throw new customError("OTP expired", 400)
+    }
+    user.isPhoneVerified = true
+    user.phoneVerificationToken = null
+    user.phoneVerificationExpire = null
+    await user.save()
+    success(res, "Phone verified successfully", user, 200)
+})
+/**
  * Login user
  * @type {(function(*, *): Promise<void>)|*}
  * @returns {Promise<void>}
@@ -66,9 +104,22 @@ exports.emailVerify = asyncHandler(async (req, res) => {
  */
 exports.login = asyncHandler(async (req, res) => {
     const {email, phone, password} = await userValidation(req)
-    const user = await userSchema.findOne({$or: [{email}, {phone}]})
+    const query = []
+    if (email) {
+        query.push({email})
+    }
+    if (phone) {
+        query.push({phone})
+    }
+    if (query.length === 0) {
+        throw new customError("Email or phone is required", 400)
+    }
+    const user = await userSchema.findOne({$or: query})
     if (!user) {
         throw new customError("User not found", 400)
+    }
+    if (!user.isEmailVerified && !user.isPhoneVerified) {
+        throw new customError("User not verified", 400)
     }
     const isMatch = await user.checkPassword(password)
     if (!isMatch) {
@@ -213,14 +264,14 @@ exports.getUser = asyncHandler(async (req, res) => {
  * @returns {Promise<void>}
  * @throws {customError}
  */
-exports.getRefreshToken = asyncHandler(async (req, res)=>{
+exports.getRefreshToken = asyncHandler(async (req, res) => {
     const {refreshToken} = req.cookies
-    if(!refreshToken){
+    if (!refreshToken) {
         throw new customError("Refresh token is required", 400)
     }
     const payload = verify(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY)
     const user = await userSchema.findById(payload.id)
-    if(!user){
+    if (!user) {
         throw new customError("User not found", 400)
     }
     const accessToken = user.generateAccessToken()
