@@ -169,7 +169,7 @@ exports.verifyAccount = asyncHandler(async (req, res) => {
     }
 })
 /**
- * Forgot password
+ * Resend OTP
  * @type {(function(*, *): Promise<void>)|*}
  * @returns {Promise<void>}
  * @throws {customError}
@@ -202,6 +202,13 @@ exports.resendOTP = asyncHandler(async (req, res) => {
         success(res, "OTP for Phone sent successfully", null, 200)
     }
 })
+/**
+ * Forgot password
+ * @type {(function(*, *): Promise<void>)|*}
+ * @returns {Promise<void>}
+ * @throws {customError}
+ */
+
 exports.forgotPassword = asyncHandler(async (req, res) => {
     const {email} = req.body
     if (!email) {
