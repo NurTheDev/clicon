@@ -15,7 +15,7 @@ const multerErrorHandler = (err, req, res, next) => {
     } else if (err) {
         return next(new customError(err.message, 400));
     }
-    next(err);
+    next();
 };
 
 module.exports = multerErrorHandler;

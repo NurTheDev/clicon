@@ -163,7 +163,7 @@ exports.verifyAccount = asyncHandler(async (req, res) => {
             throw new customError("User not found", 400)
         }
         await verifyOTP(otp, user, "emailVerificationToken", "emailVerificationExpire")
-        await clearOTPField(otp, user, "emailVerificationToken", "emailVerificationExpire")
+        await clearOTPField(user, "emailVerificationToken", "emailVerificationExpire", "isEmailVerified")
         await user.save()
         success(res, "Email verified successfully", sanitizeUser(user), 200)
     }

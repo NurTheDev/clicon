@@ -8,16 +8,17 @@ const customError = require("../utils/customError")
  * @returns {Promise<void>}
  * @throws {customError}
  */
-const verifyOTP = (user, otp, tokenField, expiry)=>{
-    if(user[tokenField] !== otp){
+const verifyOTP = (otp, user, tokenField, expiry) => {
+    console.log("user:", user[tokenField], "otp:", otp)
+    if (user[tokenField] !== otp) {
         throw new customError("Invalid OTP", 400)
     }
-    if(user[expiry] < Date.now()){
+    if (user[expiry] < Date.now()) {
         throw new customError("OTP expired", 400)
     }
 }
 
-const clearOTPField = (user, tokenField, expiry, verificationField)=>{
+const clearOTPField = (user, tokenField, expiry, verificationField) => {
     user[verificationField] = true
     user[tokenField] = null
     user[expiry] = null

@@ -5,9 +5,9 @@ const authGard = require("../../middleware/authGard.middleware");
 const upload = require("../../middleware/multer.middleware");
 const multerErrorHandler = require("../../middleware/multerErrorHandler.middleware");
 
-router.route("/create-category").post(upload.fields([{
+router.route("/create-category").post(authGard, upload.fields([{
     name: "image",
     maxCount: 1
-}]), multerErrorHandler, authGard, categoryController.createCategory)
+}]), multerErrorHandler, categoryController.createCategory)
 
 module.exports = router
