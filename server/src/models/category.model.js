@@ -13,7 +13,6 @@ const categorySchema = new Schema({
     },
     slug: {
         type: String,
-        required: true,
         unique: true,
         trim: true
     },
@@ -46,6 +45,11 @@ categorySchema.pre("save", async function (next) {
     } catch (error) {
         next(error)
     }
+})
+
+categorySchema.pre("find", function (next) {
+    this.sort({createdAt: -1})
+    next()
 })
 
 module.exports = mongoose.model("category", categorySchema)
