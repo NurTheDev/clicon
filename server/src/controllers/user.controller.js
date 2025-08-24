@@ -2,12 +2,21 @@ const userSchema = require("../models/user.model")
 const customError = require("../utils/customError")
 const asyncHandler = require("../helpers/asyncHandler")
 const {success} = require("../utils/apiResponse")
-const {userValidation} = require("../validators/user.validator")
+const {
+    userValidation,
+    emailOTPValidation,
+    phoneOTPValidation,
+    verifyAccount,
+    resendOTPValidation
+} = require("../validators/user.validator")
 const {generateOTP} = require("../utils/otp")
 const {verifyEmail, forgetPassword} = require("../templet/emailTemplet")
 const {sendEmail} = require("../helpers/sendEmail")
 const {verify} = require("jsonwebtoken")
 const sendSMS = require("../helpers/sendSMS");
+const sanitizeUser = require("../utils/sanitizeUser");
+const {verifyOTP, clearOTPField} = require("../utils/otpVerification");
+const {emailOTPSend, phoneOTPSend} = require("../helpers/handleOTPSend");
 /**
  * Register user
  * @type {(function(*, *, *): Promise<void>)|*}
@@ -39,7 +48,7 @@ exports.register = asyncHandler(async (req, res) => {
         user.phoneVerificationExpire = expiry
         await user.save()
     }
-    success(res, "User registered successfully", user, 201)
+    success(res, "User registered successfully", sanitizeUser(user), 201)
 })
 /**
  * Verify email
@@ -48,26 +57,15 @@ exports.register = asyncHandler(async (req, res) => {
  * @throws {customError}
  */
 exports.emailVerify = asyncHandler(async (req, res) => {
-    const {email, otp} = req.body
-    if (!email || !otp) {
-        throw new customError("Email or OTP is required", 400)
-    }
-
+    const {email, otp} = await emailOTPValidation(req)
     const user = await userSchema.findOne({email})
     if (!user) {
         throw new customError("User not found", 400)
     }
-    if (user.emailVerificationToken !== otp) {
-        throw new customError("Invalid OTP", 400)
-    }
-    if (user.emailVerificationExpire < Date.now()) {
-        throw new customError("OTP expired", 400)
-    }
-    user.isEmailVerified = true
-    user.emailVerificationToken = null
-    user.emailVerificationExpire = null
+    await verifyOTP(user, otp, "emailVerificationToken", "emailVerificationExpire")
+    await clearOTPField(otp, user, "emailVerificationToken", "emailVerificationExpire")
     await user.save()
-    success(res, "Email verified successfully", user, 200)
+    success(res, "Email verified successfully", sanitizeUser(user), 200)
 })
 /**
  * Verify phone
@@ -76,23 +74,13 @@ exports.emailVerify = asyncHandler(async (req, res) => {
  * @throws {customError}
  */
 exports.phoneVerify = asyncHandler(async (req, res) => {
-    const {phone, otp} = req.body
-    if (!phone || !otp) {
-        throw new customError("Phone or OTP is required", 400)
-    }
+    const {phone, otp} = await phoneOTPValidation(req)
     const user = await userSchema.findOne({phone})
     if (!user) {
         throw new customError("User not found", 400)
     }
-    if (user.phoneVerificationToken !== otp) {
-        throw new customError("Invalid OTP", 400)
-    }
-    if (user.phoneVerificationExpire < Date.now()) {
-        throw new customError("OTP expired", 400)
-    }
-    user.isPhoneVerified = true
-    user.phoneVerificationToken = null
-    user.phoneVerificationExpire = null
+    await verifyOTP(user, otp, "phoneVerificationToken", "phoneVerificationExpire")
+    await clearOTPField(otp, user, "phoneVerificationToken", "phoneVerificationExpire")
     await user.save()
     success(res, "Phone verified successfully", user, 200)
 })
@@ -118,10 +106,9 @@ exports.login = asyncHandler(async (req, res) => {
     if (!user) {
         throw new customError("User not found", 400)
     }
-    // if (!user.isEmailVerified && !user.isPhoneVerified) {
-    //     const verifyLink = `http://localhost:3000${process.env.API_VERSION}/auth/verify-account`
-    //     return res.status(301).redirect(verifyLink)
-    // }
+    if (!user.isEmailVerified && !user.isPhoneVerified) {
+        throw new customError("User not verified", 400)
+    }
     const isMatch = await user.checkPassword(password)
     if (!isMatch) {
         throw new customError("Invalid password", 400)
@@ -152,9 +139,68 @@ exports.login = asyncHandler(async (req, res) => {
         email: user.email
     }, 200)
 })
-
+/**
+ * Verify account
+ * @type {(function(*, *): Promise<void>)|*}
+ * @returns {Promise<void>}
+ * @throws {customError}
+ */
 exports.verifyAccount = asyncHandler(async (req, res) => {
-    console.log("verify account")
+    const {email, phone, otp} = await verifyAccount(req)
+    if (phone) {
+        const user = await userSchema.findOne({phone})
+        if (!user) {
+            throw new customError("User not found", 400)
+        }
+        await verifyOTP(otp, user, "phoneVerificationToken", "phoneVerificationExpire")
+        await clearOTPField(otp, user, "phoneVerificationToken", "phoneVerificationExpire")
+        await user.save()
+        success(res, "Phone verified successfully", sanitizeUser(user), 200)
+    }
+    if (email) {
+        const user = await userSchema.findOne({email})
+        if (!user) {
+            throw new customError("User not found", 400)
+        }
+        await verifyOTP(otp, user, "emailVerificationToken", "emailVerificationExpire")
+        await clearOTPField(user, "emailVerificationToken", "emailVerificationExpire", "isEmailVerified")
+        await user.save()
+        success(res, "Email verified successfully", sanitizeUser(user), 200)
+    }
+})
+/**
+ * Resend OTP
+ * @type {(function(*, *): Promise<void>)|*}
+ * @returns {Promise<void>}
+ * @throws {customError}
+ */
+exports.resendOTP = asyncHandler(async (req, res) => {
+    const {email, phone} = await resendOTPValidation(req)
+    const query = []
+    if (email) {
+        query.push({email})
+    }
+    if (phone) {
+        query.push({phone})
+    }
+    if (query.length === 0) {
+        throw new customError("Email or phone is required", 400)
+    }
+    const user = await userSchema.findOne({$or: query})
+    if (!user) {
+        throw new customError("User not found", 400)
+    }
+    const {otp, expiry} = generateOTP()
+    if (email) {
+        //Check if enough time has passed
+        await emailOTPSend(user, email, otp, expiry)
+        success(res, "Email sent successfully", null, 200)
+    }
+    if (phone) {
+        //Check if enough time has passed
+        await phoneOTPSend(user, phone, otp, expiry)
+        success(res, "OTP for Phone sent successfully", null, 200)
+    }
 })
 /**
  * Forgot password
@@ -162,6 +208,7 @@ exports.verifyAccount = asyncHandler(async (req, res) => {
  * @returns {Promise<void>}
  * @throws {customError}
  */
+
 exports.forgotPassword = asyncHandler(async (req, res) => {
     const {email} = req.body
     if (!email) {
@@ -187,20 +234,12 @@ exports.forgotPassword = asyncHandler(async (req, res) => {
  * @throws {customError}
  */
 exports.resetPassword = asyncHandler(async (req, res) => {
-    const {email, otp, newPassword, confirmPassword} = req.body
-    if (!email || !otp || !newPassword || !confirmPassword) {
-        throw new customError("All fields are required", 400)
-    }
+    const {email, otp, newPassword, confirmPassword} = resendOTPValidation(req)
     const user = await userSchema.findOne({email})
     if (!user) {
         throw new customError("User not found", 400)
     }
-    if (user.resetPasswordToken !== otp) {
-        throw new customError("Invalid OTP", 400)
-    }
-    if (user.resetPasswordExpire < Date.now()) {
-        throw new customError("OTP expired", 400)
-    }
+    await verifyOTP(user, otp, "resetPasswordToken", "resetPasswordExpire")
     if (newPassword !== confirmPassword) {
         throw new customError("Passwords do not match", 400)
     }
@@ -251,16 +290,7 @@ exports.getUser = asyncHandler(async (req, res) => {
     if (!user) {
         throw new customError("User not found", 400)
     }
-    success(res, "User found successfully", {
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        address: user.address,
-        city: user.city,
-        state: user.state,
-        country: user.country
-    }, 200)
+    success(res, "User found successfully", sanitizeUser(user), 200)
 })
 
 /**

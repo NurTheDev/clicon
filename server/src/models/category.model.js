@@ -13,11 +13,13 @@ const categorySchema = new Schema({
     },
     slug: {
         type: String,
-        required: true,
         unique: true,
         trim: true
     },
-    image: String,
+    image: {
+        type: Object,
+        required: true
+    },
     isActive: Boolean,
     subCategories: [
         {type: Types.ObjectId, ref: "subCategory"}
@@ -39,14 +41,15 @@ categorySchema.pre("save", async function (next) {
                 strict: true
             })
         }
-        // Check if the slug is unique
-        const category = await this.constructor.findOne({slug: this.slug});
-        if (category && category._id.toString() !== this._id.toString()) throw new customError("Category already" +
-            " exists", 400)
         next()
     } catch (error) {
         next(error)
     }
+})
+
+categorySchema.pre("find", function (next) {
+    this.sort({createdAt: -1})
+    next()
 })
 
 module.exports = mongoose.model("category", categorySchema)
