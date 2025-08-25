@@ -33,7 +33,32 @@ exports.createCategory = asyncHandler(async (req, res) => {
  * @returns {Promise<void>}
  */
 exports.getAllCategories = asyncHandler(async (req, res) => {
-    const categories = await categorySchema.find()
+    const categories = await categorySchema.aggregate([
+        {
+            $lookup: {
+                from: "subcategories",
+                localField: "subCategories",
+                foreignField: "_id",
+                as: "subCategories"
+            }
+        },
+        {
+            $project: {
+                name: 1,
+                slug: 1,
+                image: 1,
+                subCategories: 1,
+                discount: 1,
+                isActive: 1,
+                createdAt: 1,
+                updatedAt: 1,
+            }
+        }, {
+            $sort: {
+                createdAt: -1
+            }
+        }
+    ])
     if (!categories) {
         throw new customError("Categories not found", 400)
     }

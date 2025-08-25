@@ -17,12 +17,24 @@ const subCategoryValidationSchema = Joi.object({
     abortEarly: true,
     allowUnknown: true
 })
+const updateSubCategoryValidationSchema = Joi.object({
+    name: Joi.string().trim().messages({
+        "string.empty": "Name is required",
+        "string.trim": "Name filled with extra spaces",
+    }),
+    categoryId: Joi.string().trim().messages({
+        "string.empty": "Category is required",
+        "string.trim": "Category filled with extra spaces",
+    })
+}).options({
+    abortEarly: true,
+    allowUnknown: true
+})
 
 exports.subCategoryValidation = async (req) => {
-    console.log(req.body)
     try {
         const categoryId = req.body.categoryId
-        const categoryExits = await categorySchema.findById({_id: categoryId})
+        const categoryExits = await categorySchema.findById(categoryId)
         console.log(categoryExits)
         if (!categoryExits) {
             throw new customError("Category not found", 404)
@@ -31,5 +43,17 @@ exports.subCategoryValidation = async (req) => {
     } catch (error) {
         console.error(error);
         throw new customError(error.details[0].message, 400)
+    }
+}
+exports.updateSubCategoryValidation = async (req) => {
+    try {
+        const categoryId = req.body.categoryId
+        const categoryExits = await categorySchema.findById(categoryId)
+        if (!categoryExits) {
+            throw new customError("Category not found", 404)
+        }
+        return await updateSubCategoryValidationSchema.validateAsync(req.body);
+    } catch (error) {
+        console.error(error);
     }
 }
