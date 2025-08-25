@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const testApi = require("./api/test.api");
 const authApi = require("./api/auth.api");
 const categoryApi = require("./api/category.api");
-router.use("/test", testApi);
+const subCategoryApi = require("./api/subCategory.api");
 router.use("/auth", authApi)
 router.use("/category", categoryApi)
+router.use("/subCategory", subCategoryApi)
 module.exports = router;

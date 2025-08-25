@@ -64,8 +64,8 @@ exports.getCategory = asyncHandler(async (req, res) => {
  * @returns {Promise<void>}
  */
 exports.updateCategory = asyncHandler(async (req, res) => {
-    const {name, image} = await updateCategoryValidation(req)
     const {slug} = req.params
+    const {name, image} = await updateCategoryValidation(req)
     const category = await categorySchema.findOne({slug})
     if (!category) throw new customError("Category not found", 400)
     if (name) category.name = name

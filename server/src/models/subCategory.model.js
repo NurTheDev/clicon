@@ -43,3 +43,4 @@ subCategorySchema.pre("save", async function (next) {
         next(error)
     }
 })
+module.exports = mongoose.model("subCategory", subCategorySchema)
