@@ -1,9 +1,7 @@
-const mongoose = require("mongoose");
-const {Schema, Types} = mongoose;
+const mongoose = require("mongoose")
 const slugify = require("slugify");
-
-require("dotenv").config();
-const categorySchema = new Schema({
+const {Schema, Types} = mongoose
+const subCategorySchema = new Schema({
     name: {
         type: String,
         required: true,
@@ -15,23 +13,22 @@ const categorySchema = new Schema({
         unique: true,
         trim: true
     },
-    image: {
-        type: Object,
-        required: true
+    discount: {
+        type: Types.ObjectId,
+        ref: "discount"
     },
     isActive: Boolean,
-    subCategories: [
-        {type: Types.ObjectId, ref: "subCategory"}
-    ],
-    discount: [
-        {type: Types.ObjectId, ref: "discount"}
-    ]
+    category: {
+        type: Types.ObjectId,
+        ref: "category",
+        required: true
+    }
 }, {
     timestamps: true,
     versionKey: false
 })
-// slugify the category name
-categorySchema.pre("save", async function (next) {
+// slugify the subCategory name
+subCategorySchema.pre("save", async function (next) {
     try {
         if (this.isModified("name")) {
             this.slug = slugify(this.name, {
@@ -42,13 +39,7 @@ categorySchema.pre("save", async function (next) {
         }
         next()
     } catch (error) {
+        console.error(error);
         next(error)
     }
 })
-
-categorySchema.pre("find", function (next) {
-    this.sort({createdAt: -1})
-    next()
-})
-
-module.exports = mongoose.model("category", categorySchema)

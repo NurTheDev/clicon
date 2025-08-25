@@ -309,7 +309,7 @@ exports.getRefreshToken = asyncHandler(async (req, res) => {
     if (!user) {
         throw new customError("User not found", 400)
     }
-    const accessToken = user.generateAccessToken()
+    const accessToken = await user.generateAccessToken()
     res.cookie("accessToken", accessToken, {
         httpOnly: true,
         maxAge: 60 * 60 * 1000, // 1 hour

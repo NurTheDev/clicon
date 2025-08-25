@@ -3,7 +3,7 @@ const customError = require("../utils/customError")
 const {success} = require("../utils/apiResponse")
 const asyncHandler = require("../helpers/asyncHandler")
 const {categoryValidation, updateCategoryValidation} = require("../validators/category.validator");
-const {uploadImage} = require("../helpers/claudinary");
+const {uploadImage, deleteImage} = require("../helpers/claudinary");
 
 /**
  * @description Create a new category
@@ -81,5 +81,9 @@ exports.updateCategory = asyncHandler(async (req, res) => {
  * @returns {Promise<void>}
  */
 exports.deleteCategory = asyncHandler(async (req, res) => {
-
+    const {slug} = req.params
+    const category = await categorySchema.findOneAndDelete({slug})
+    if (!category) throw new customError("Category not found", 400)
+    await deleteImage(category.image.public_id)
+    success(res, "Category deleted successfully", category, 200)
 })

@@ -26,4 +26,12 @@ exports.uploadImage = async (file) => {
         throw new customError(error.message, 400)
     }
 }
+exports.deleteImage = async (public_id) => {
+    try {
+        return await cloudinary.uploader.destroy(public_id)
+    } catch (error) {
+        console.error(error);
+        throw new customError(error.message, 400)
+    }
+}
 

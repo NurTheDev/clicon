@@ -4,6 +4,7 @@ const categoryController = require("../../controllers/category.controller");
 const authGard = require("../../middleware/authGard.middleware");
 const upload = require("../../middleware/multer.middleware");
 const multerErrorHandler = require("../../middleware/multerErrorHandler.middleware");
+const {deleteCategory} = require("../../controllers/category.controller");
 
 router.route("/create-category").post(authGard, upload.fields([{
     name: "image",
@@ -17,5 +18,6 @@ router.route("/update-category/:slug").put(authGard, upload.fields(
         maxCount: 1
     }]
 ), multerErrorHandler, categoryController.updateCategory)
+router.route("/delete-category/:slug").delete(authGard, deleteCategory)
 
 module.exports = router
