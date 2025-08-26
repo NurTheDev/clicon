@@ -52,19 +52,46 @@ exports.getSubCategory = asyncHandler(async (req, res) => {
     if (!subCategory) throw new customError("SubCategory not found", 400)
     success(res, "SubCategory fetched successfully", subCategory, 200)
 })
-
-exports.updateSubCategory = asyncHandler(async (req, res)=>{
+/**
+ * @description Update a subCategory by slug
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.updateSubCategory = asyncHandler(async (req, res) => {
     const {slug} = req.params
     const currentSubCategory = await subCategoryModel.findOne({slug})
-    if(!currentSubCategory) throw new customError("SubCategory not found", 400)
+    if (!currentSubCategory) throw new customError("SubCategory not found", 400)
     const {name, categoryId} = await updateSubCategoryValidation(req)
-    const updatedSubCategory = await subCategoryModel.findOneAndUpdate({slug}, {name, category: categoryId}, {new: true})
-    if(!updatedSubCategory) throw new customError("SubCategory update failed", 400)
-    if(categoryId && categoryId !== currentSubCategory.category.toString()){
+    const updatedSubCategory = await subCategoryModel.findOneAndUpdate({slug}, {
+        name,
+        category: categoryId
+    }, {new: true})
+    if (!updatedSubCategory) throw new customError("SubCategory update failed", 400)
+    if (categoryId && categoryId !== currentSubCategory.category.toString()) {
         //remove from old category
         await categorySchema.findOneAndUpdate({_id: currentSubCategory.category}, {$pull: {subCategories: currentSubCategory._id}}, {new: true})
         //add to new category
         await categorySchema.findOneAndUpdate({_id: categoryId}, {$push: {subCategories: updatedSubCategory._id}}, {new: true})
     }
     success(res, "SubCategory updated successfully", updatedSubCategory, 200)
+})
+
+/**
+ * @description Delete a subCategory by slug
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.deleteSubCategory = asyncHandler(async (req, res) => {
+    const {slug} = req.params
+    const subCategory = await subCategoryModel.findOneAndDelete({slug})
+    if (!subCategory) throw new customError("SubCategory not found", 400)
+//     update category now
+    const updatedCategory = await categorySchema.findOneAndUpdate({_id: subCategory.category}, {$pull: {subCategories: subCategory._id}}, {new: true})
+    if (!updatedCategory) throw new customError("SubCategory deleted successfully but failed to update category", 200)
+    success(res, "SubCategory deleted successfully", subCategory, 200)
+
 })

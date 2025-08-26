@@ -145,4 +145,4 @@ userSchema.methods.generateRefreshToken = function () {
     }
 }
 
-module.exports = mongoose.model("user", userSchema);
+module.exports = mongoose.models.user || mongoose.model("user", userSchema);

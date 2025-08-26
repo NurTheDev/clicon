@@ -51,4 +51,4 @@ categorySchema.pre("find", function (next) {
     next()
 })
 
-module.exports = mongoose.model("category", categorySchema)
+module.exports = mongoose.models.category || mongoose.model("category", categorySchema)
