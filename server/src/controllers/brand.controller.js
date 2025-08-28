@@ -63,3 +63,16 @@ exports.updateBrand = asyncHandler(async (req, res) => {
     if (!brand) throw new customError("Brand not found", 400)
     success(res, "Brand updated successfully", brand, 200)
 })
+/**
+ * @description Delete a brand by slug
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.deleteBrand = asyncHandler(async (req, res)=>{
+    const {slug} = req.params
+    const brand = await brandSchema.findOneAndDelete({slug})
+    if(!brand) throw new customError("Brand not found", 400)
+    success(res, "Brand deleted successfully", brand, 200)
+})

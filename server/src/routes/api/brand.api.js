@@ -16,6 +16,7 @@ router.route("/update-brand/:slug").put(authGard, upload.fields([
         maxCount: 1
     }
 ]), brandController.updateBrand)
+router.route("/delete-brand/:slug").delete(authGard, brandController.deleteBrand)
 
 router.use(multerErrorHandler)
 module.exports = router
