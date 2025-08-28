@@ -31,7 +31,7 @@ exports.categoryValidation = async (req) => {
             throw new customError("Image must be a jpeg, jpg, png or webp", 400)
         }
         return {
-            ...result, image: req.files.image[0]
+            ...result.value, image: req.files.image[0]
         }
 
     } catch (error) {
@@ -48,6 +48,7 @@ exports.categoryValidation = async (req) => {
 exports.updateCategoryValidation = async (req) => {
     try {
         const result = await updateCategoryValidationSchema.validateAsync(req.body);
+
         if (req.files && req.files.image && req.files.image[0]) {
             const validMimeTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
             if (!validMimeTypes.includes(req.files.image[0].mimetype)) {
