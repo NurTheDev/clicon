@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const slugify = require("slugify");
 const {Schema, Types} = mongoose
 
 const discountSchema = new Schema({
@@ -25,6 +26,8 @@ const discountSchema = new Schema({
     discountFor:{
         type: String,
         enum: ["all", "category", "subCategory", "brand", "product"],
+        default: "product",
+        required: true
     },
     discountType:{
         type: String,
@@ -34,22 +37,22 @@ const discountSchema = new Schema({
         type: Number,
         required: true
     },
-    category:{
+    category: [{
         type: Types.ObjectId,
         ref: "category"
-    },
-    subCategory:{
+    }],
+    subCategory: [{
         type: Types.ObjectId,
         ref: "subCategory"
-    },
-    brand:{
+    }],
+    brand: [{
         type: Types.ObjectId,
         ref: "brand"
-    },
-    product:{
+    }],
+    product: [{
         type: Types.ObjectId,
         ref: "product"
-    }
+    }]
 },{
     timestamps: true,
     versionKey: false
@@ -58,9 +61,33 @@ const discountSchema = new Schema({
 discountSchema.pre("save", async function (next) {
     try {
         if(this.isModified("name")){
-
+            this.slug = slugify(this.name,{
+                lower: true,
+                remove: /[*+~.()"'!:@]/g,
+                strict: true
+            })
         }
+        next()
     } catch (error) {
         console.error(error);
+        next(error)
     }
 })
+discountSchema.pre("findOneAndUpdate", async function (next) {
+    try {
+        const update = this.getUpdate()
+        if(update.name){
+            update.slug = slugify(update.name,{
+                lower: true,
+                remove: /[*+~.()"'!:@]/g,
+                strict: true
+            })
+        }
+        next()
+    } catch (error) {
+        console.error(error);
+        next(error)
+    }
+})
+
+module.exports = mongoose.models.discount || mongoose.model("discount", discountSchema)
