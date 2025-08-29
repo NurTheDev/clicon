@@ -47,10 +47,12 @@ exports.subCategoryValidation = async (req) => {
 }
 exports.updateSubCategoryValidation = async (req) => {
     try {
-        const categoryId = req.body.categoryId
-        const categoryExits = await categorySchema.findById(categoryId)
-        if (!categoryExits) {
-            throw new customError("Category not found", 404)
+        if (req.body.categoryId) {
+            const categoryId = req.body.categoryId
+            const categoryExits = await categorySchema.findById(categoryId)
+            if (!categoryExits) {
+                throw new customError("Category not found", 404)
+            }
         }
         return await updateSubCategoryValidationSchema.validateAsync(req.body);
     } catch (error) {

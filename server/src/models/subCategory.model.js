@@ -43,4 +43,20 @@ subCategorySchema.pre("save", async function (next) {
         next(error)
     }
 })
+subCategorySchema.pre("findOneAndUpdate", async function (next) {
+    try {
+        const update = this.getUpdate()
+        if (update.name) {
+            update.slug = slugify(update.name, {
+                lower: true,
+                remove: /[*+~.()"'!:@]/g,
+                strict: true
+            })
+        }
+        next()
+    } catch (error) {
+        console.error(error);
+        next(error)
+    }
+})
 module.exports = mongoose.models.subCategory || mongoose.model("subCategory", subCategorySchema)

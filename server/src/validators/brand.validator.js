@@ -34,7 +34,7 @@ exports.brandValidation = async (req) => {
     try {
         const result = brandValidationSchema.validate(req.body)
         //     check if image is exits
-        if (!req.files || req.files.image || req.files.image[0]) {
+        if (!req.files || !req.files.image || !req.files.image[0]) {
             throw new customError("Image is required", 400)
         }
         const validMimeTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
@@ -42,7 +42,7 @@ exports.brandValidation = async (req) => {
             throw new customError("Image must be a jpeg, jpg, png or webp", 400)
         }
         return {
-            ...result, image: req.files.image[0]
+            ...result.value, image: req.files.image[0]
         }
     } catch (error) {
         console.error(error);
@@ -58,17 +58,17 @@ exports.brandValidation = async (req) => {
 exports.updateValidation = async (req) => {
     try {
         const result = brandValidationSchema.validate(req.body)
-        //     check if image is exits
+        // Check if image exists and validate it
         if (req.files && req.files.image && req.files.image[0]) {
             const validMimeTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
             if (!validMimeTypes.includes(req.files.image[0].mimetype)) {
                 throw new customError("Image must be a jpeg, jpg, png or webp", 400)
             }
             return {
-                ...result, image: req.files.image[0]
+                ...result.value, image: req.files.image[0]
             };
         }
-        return result;
+        return result.value;
     } catch (error) {
         console.error(error);
         if (error.details) {
