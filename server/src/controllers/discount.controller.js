@@ -82,7 +82,7 @@ exports.updateDiscount = asyncHandler(async (req, res) => {
     const oldDiscount = await Discount.findOne({slug})
     if (!oldDiscount) throw new customError("Discount not found", 400)
     if (oldDiscount.category.length > 0) {
-        await categorySchema.updateMany({_id: {$in: oldDiscount.category}}, {$pull: {discount: oldDiscount._id}})
+         await categorySchema.updateMany({_id: {$in: oldDiscount.category}}, {$pull: {discount: oldDiscount._id}})
     }
     if (oldDiscount.subCategory.length > 0) {
         await subCategorySchema.updateMany({_id: {$in: oldDiscount.subCategory}}, {$pull: {discount: oldDiscount._id}})
@@ -119,4 +119,55 @@ exports.updateDiscount = asyncHandler(async (req, res) => {
         await productSchema.updateMany({_id: {$in: product}}, {$push: {discount: discount._id}})
     }
     return success(res, "Discount updated successfully", discount, 200)
+})
+
+/**
+ * @description Delete a discount
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.deleteDiscount = asyncHandler(async (req, res) => {
+    const {slug} = req.params
+    const discount = await Discount.findOneAndDelete({slug})
+    if (!discount) throw new customError("Discount not found", 400)
+    if (discount.category.length > 0) {
+        await categorySchema.updateMany({_id: {$in: discount.category}}, {$pull: {discount: discount._id}})
+    }
+    if (discount.subCategory.length > 0) {
+        await subCategorySchema.updateMany({_id: {$in: discount.subCategory}}, {$pull: {discount: discount._id}})
+    }
+    if (discount.brand.length > 0) {
+        await brandSchema.updateMany({_id: {$in: discount.brand}}, {$pull: {discount: discount._id}})
+    }
+    if (discount.product.length > 0) {
+        await productSchema.updateMany({_id: {$in: discount.product}}, {$pull: {discount: discount._id}})
+    }
+    return success(res, "Discount deleted successfully", discount, 200)
+})
+/**
+ * @description Get a discount
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.getDiscount = asyncHandler(async (req, res) => {
+    const {slug} = req.params
+    const discount = await Discount.findOne({slug})
+    if (!discount) throw new customError("Discount not found", 400)
+    return success(res, "Discount fetched successfully", discount, 200)
+})
+/**
+ * @description Get all discounts
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.getAllDiscount = asyncHandler(async (req, res) => {
+    const discounts = await Discount.find()
+    if (!discounts) throw new customError("Discount not found", 400)
+    return success(res, "Discount fetched successfully", discounts, 200)
 })
