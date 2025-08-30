@@ -39,7 +39,7 @@ const discountValidationSchema = Joi.object({
     brand: Joi.array().items(objectId),
     product: Joi.array().items(objectId),
 }).or("category", "subCategory", "brand", "product").messages({
-    "any.required": "Please select at least one of the following: category, subCategory, brand, product"
+    "object.missing": "Please select at least one of the following: category, subCategory, brand, product"
 }).options({
     abortEarly: true,
     allowUnknown: true
@@ -49,7 +49,7 @@ const updateDiscountValidationSchema = discountValidationSchema.fork(["name", "s
 
 const validateDiscount = async (req) => {
     try {
-        return await discountValidationSchema.validate(req.body)
+        return await discountValidationSchema.validateAsync(req.body)
     } catch (error) {
         console.error(error);
         throw new customError(error.details[0].message, 400)
@@ -57,7 +57,7 @@ const validateDiscount = async (req) => {
 }
 const updateDiscountValidation = async (req) => {
     try {
-        return await updateDiscountValidationSchema.validate(req.body)
+        return await updateDiscountValidationSchema.validateAsync(req.body)
     } catch (error) {
         console.error(error);
         throw new customError(error.details[0].message, 400)

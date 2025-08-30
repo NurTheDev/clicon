@@ -31,7 +31,7 @@ exports.categoryValidation = async (req) => {
             throw new customError("Image must be a jpeg, jpg, png or webp", 400)
         }
         return {
-            ...result.value, image: req.files.image[0]
+            ...result, image: req.files.image[0]
         }
 
     } catch (error) {
