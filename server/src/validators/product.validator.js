@@ -9,13 +9,13 @@ const singleProductValidationSchema = Joi.object({
     brand: objectId.required(),
     category: objectId.required(),
     subCategory: objectId.required(),
-    images: Joi.array().items(Joi.string().trim()).min(1).required(),
-    thumbnail: Joi.string().trim().required(),
+    images: Joi.array().items(Joi.string().trim()).min(1),
+    thumbnail: Joi.string().trim(),
     description: Joi.string().trim().required(),
     price: Joi.number().required(),
     stock: Joi.number().required(),
     tags: Joi.array().items(Joi.string().trim()).required(),
-    variantType: Joi.string().valid("single").required(),
+    variantType: Joi.string().valid("single").trim().required(),
     size: Joi.string().valid("xs", "s", "m", "l", "xl", "xxl"),
     color: Joi.string().valid("red", "blue", "green", "yellow", "black", "white", "gray", "brown", "purple", "orange", "custom"),
     customColor: Joi.string().trim(),
@@ -35,8 +35,8 @@ const multiProductValidationSchema = Joi.object({
     brand: objectId.required(),
     category: objectId.required(),
     subCategory: objectId.required(),
-    images: Joi.array().items(Joi.string().trim().uri()).min(1).required(),
-    thumbnail: Joi.string().trim().required(),
+    images: Joi.array().items(Joi.string().trim().uri()).min(1),
+    thumbnail: Joi.string().trim(),
     description: Joi.string().trim().required(),
     tags: Joi.array().items(Joi.string().trim()),
     variantType: Joi.string().valid("multiple").required(),
@@ -62,12 +62,14 @@ const variantValidationSchema = Joi.object({
 });
 
 exports.productValidation = async (req) => {
+    console.log(req.body)
     try {
         if (req.body.variantType === "single") {
             const result = await singleProductValidationSchema.validateAsync(req.body)
             if (!req.files || !req.files.images || req.files.images.length <= 0) throw new customError("Image is" +
                 " required", 400)
             //     check image mime type
+            console.log(req.files)
             const validMimeTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
             const hasInvalidImage = req.files.images.some(img => !validMimeTypes.includes(img.mimetype))
             if (hasInvalidImage) throw new customError("Image must be a jpeg, jpg, png or webp", 400)
@@ -85,7 +87,7 @@ exports.productValidation = async (req) => {
             return await multiProductValidationSchema.validateAsync(req.body)
         }
     } catch (error) {
-        console.error(error);
+        // console.error(error);
         throw new customError(error.details ? error.details[0].message : error.message, 400)
     }
 }
