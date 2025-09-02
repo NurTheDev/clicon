@@ -3,22 +3,27 @@ const slugify = require("slugify");
 const {Schema, Types} = mongoose
 
 const productSchema = new Schema({
-    name:{
+    name: {
         type: String,
         required: true,
         unique: true,
         trim: true
     },
-    slug:{
+    slug: {
         type: String,
         unique: true,
         trim: true,
-        lowercase: true,
-        required: true
+        lowercase: true
     },
-    images:[{
-        type: String,
-        trim: true,
+    images: [{
+        url: {
+            type: String,
+            required: true
+        },
+        public_id: {
+            type: String,
+            required: true
+        }
     }],
     isActive: {
         type: Boolean,
@@ -47,7 +52,7 @@ const productSchema = new Schema({
         }
     ],
     description: {
-        type:String,
+        type: String,
         required: true
     },
     price: {
@@ -67,20 +72,20 @@ const productSchema = new Schema({
     wholeSaleProfit: Number,
     retailProfit: Number,
     discountPrice: Number,
-    tags:[
+    tags: [
         {
             type: String,
             trim: true
         }
     ],
-    sku:{
+    sku: {
         type: String,
     },
-    warranty:{
+    warranty: {
         type: String,
         trim: true
     },
-    shipping:{
+    shipping: {
         type: String,
         trim: true
     },
@@ -88,65 +93,77 @@ const productSchema = new Schema({
         type: Boolean,
         default: true
     },
-    returnPolicy:{
+    returnPolicy: {
         type: String,
         trim: true
     },
-    minimumOrderQuantity:{
+    minimumOrderQuantity: {
         type: Number,
         required: true
     },
-    thumbnail:{
-        type: String,
-        required: true
+    thumbnail: {
+        url: {
+            type: String,
+            required: true
+        },
+        public_id: {
+            type: String,
+            required: true
+        }
     },
-    variantType:{
+    variantType: {
         type: String,
         enum: ["single", "multiple"],
         default: "single"
     },
-    variant:[
+    variant: [
         {
             type: Types.ObjectId,
             ref: "variant"
         }
     ],
-    size:{
+    size: {
         type: String,
         enum: ["xs", "s", "m", "l", "xl", "xxl"],
         default: "m"
     },
-    color:{
+    color: {
         type: String,
         enum: ["red", "blue", "green", "yellow", "black", "white", "gray", "brown", "purple", "orange", "custom"],
         default: "black"
     },
-    customColor:{
+    customColor: {
         type: String,
         trim: true
     },
-    groupUnit:{
+    groupUnit: {
         type: String,
         enum: ["box", "pack", "set", "pair", "unit", "other"],
         default: "unit"
     },
-    groupQuantity:{
+    groupQuantity: {
         type: Number,
         required: true
     },
-    unit:{
+    unit: {
         type: String,
         enum: ["piece", "kg", "gram", "litre", "ml", "other"],
         default: "piece"
     },
-    barCode:String,
-    QRCode:String,
-    alertQuantity:{
+    barCode: {
+        url: String,
+        public_id: String
+    },
+    QRCode: {
+        url: String,
+        public_id: String
+    },
+    alertQuantity: {
         type: Number,
         required: true,
         min: 5
     },
-    wearHouse:[
+    wearHouse: [
         {
             type: Types.ObjectId,
             ref: "wearHouse"
@@ -154,9 +171,9 @@ const productSchema = new Schema({
     ]
 })
 
-productSchema.pre("save",function(next){
+productSchema.pre("save", function (next) {
     try {
-        if(this.isModified("name")){
+        if (this.isModified("name")) {
             this.slug = slugify(this.name, {
                 lower: true,
                 remove: /[*+~.()"'!:@]/g,
@@ -169,7 +186,7 @@ productSchema.pre("save",function(next){
         next(error)
     }
 })
-productSchema.pre("findOneAndUpdate",function(next){
+productSchema.pre("findOneAndUpdate", function (next) {
     try {
         const update = this.getUpdate()
         if (update.name) {

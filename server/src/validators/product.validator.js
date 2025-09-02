@@ -62,14 +62,12 @@ const variantValidationSchema = Joi.object({
 });
 
 exports.productValidation = async (req) => {
-    console.log(req.body)
     try {
         if (req.body.variantType === "single") {
             const result = await singleProductValidationSchema.validateAsync(req.body)
             if (!req.files || !req.files.images || req.files.images.length <= 0) throw new customError("Image is" +
                 " required", 400)
             //     check image mime type
-            console.log(req.files)
             const validMimeTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
             const hasInvalidImage = req.files.images.some(img => !validMimeTypes.includes(img.mimetype))
             if (hasInvalidImage) throw new customError("Image must be a jpeg, jpg, png or webp", 400)
@@ -87,7 +85,7 @@ exports.productValidation = async (req) => {
             return await multiProductValidationSchema.validateAsync(req.body)
         }
     } catch (error) {
-        // console.error(error);
+        console.error(error);
         throw new customError(error.details ? error.details[0].message : error.message, 400)
     }
 }
