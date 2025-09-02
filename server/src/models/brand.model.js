@@ -19,6 +19,10 @@ const brandSchema = new Schema({
         type: Object,
         required: true,
     },
+    products: [{
+        type: Types.ObjectId,
+        ref: "product"
+    }],
     isActive: Boolean,
     discount: {
         type: Types.ObjectId,

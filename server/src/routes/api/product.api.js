@@ -14,6 +14,8 @@ router.route("/create-product").post(authGard, upload.fields([{
     maxCount: 1
 }]), productController.createProduct);
 
+router.route("/products").get(productController.getAllProducts);
+
 
 
 module.exports = router;

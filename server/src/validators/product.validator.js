@@ -1,5 +1,8 @@
 const Joi = require("joi")
 const customError = require("../utils/customError")
+const categorySchema = require("../models/category.model")
+const subCategorySchema = require("../models/subCategory.model")
+const brandSchema = require("../models/brand.model")
 const objectId = Joi.string().regex(/^[0-9a-fA-F]{24}$/).trim().messages({
     "string.pattern": "Invalid object id"
 })
@@ -78,6 +81,13 @@ exports.productValidation = async (req) => {
             if (!validMimeTypes.includes(req.files.thumbnail[0].mimetype)) {
                 throw new customError("Thumbnail must be a jpeg, jpg, png or webp", 400)
             }
+            // Check given category, subCategory and brand are valid or not
+            const categoryExits = await categorySchema.findById(result.category)
+            if (!categoryExits) throw new customError("Category not found", 404)
+            const subCategoryExits = await subCategorySchema.findById(result.subCategory)
+            if (!subCategoryExits) throw new customError("Sub category not found", 404)
+            const brandExits = await brandSchema.findById(result.brand)
+            if (!brandExits) throw new customError("Brand not found", 404)
             return {
                 ...result, images: req.files.images, thumbnail: req.files.thumbnail[0]
             }

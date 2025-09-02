@@ -4,6 +4,9 @@ const asyncHandler = require('../helpers/asyncHandler');
 const {success} = require('../utils/apiResponse');
 const {productValidation, updateValidation} = require('../validators/product.validator');
 const {uploadImage} = require('../helpers/claudinary');
+const CategorySchema = require('../models/category.model');
+const SubCategorySchema = require('../models/subCategory.model');
+const BrandSchema = require('../models/brand.model');
 const QRCode = require('qrcode');
 const bwipjs = require('bwip-js');
 require('dotenv').config();
@@ -67,5 +70,41 @@ exports.createProduct = asyncHandler(async (req, res) => {
     };
     await product.save();
     // now add the prodect _id to the category , subCategory , brand collection
+    await CategorySchema.findByIdAndUpdate(value.category, {$push: {products: product._id}});
+    await SubCategorySchema.findByIdAndUpdate(value.subCategory, {$push: {products: product._id}});
+    await BrandSchema.findByIdAndUpdate(value.brand, {$push: {products: product._id}});
     success(res, 'Product created successfully', product, 201);
+})
+
+exports.getAllProducts = asyncHandler(async (req, res) => {
+    let {page, limit, sortBy, order, search} = req.query;
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    sortBy = sortBy || 'createdAt';
+    order = order === 'desc' ? -1 : 1;
+    const skip = (page - 1) * limit;
+    const sortOptions = {};
+    sortOptions[sortBy] = order;
+    const query = {};
+    if (search) {
+        query.$or = [
+            {name: {$regex: search, $options: 'i'}},
+            {description: {$regex: search, $options: 'i'}}
+        ];
+    }
+    const products = await ProductSchema.find(query)
+        .populate('category', 'name slug')
+        .populate('subCategory', 'name slug')
+        .populate('brand', 'name slug')
+        .sort(sortOptions)
+        .skip(skip)
+        .limit(limit);
+    const total = await ProductSchema.countDocuments(query);
+    const totalPages = Math.ceil(total / limit);
+    success(res, 'Products retrieved successfully', {
+        products,
+        page,
+        totalPages,
+        total
+    });
 })

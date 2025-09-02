@@ -23,6 +23,9 @@ const categorySchema = new Schema({
     subCategories: [
         {type: Types.ObjectId, ref: "subCategory"}
     ],
+    products: [
+        {type: Types.ObjectId, ref: "product"}
+    ],
     discount: [
         {type: Types.ObjectId, ref: "discount"}
     ]

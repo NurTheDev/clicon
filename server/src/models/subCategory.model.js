@@ -17,6 +17,10 @@ const subCategorySchema = new Schema({
         type: Types.ObjectId,
         ref: "discount"
     },
+    products: [{
+        type: Types.ObjectId,
+        ref: "product"
+    }],
     isActive: Boolean,
     category: {
         type: Types.ObjectId,
