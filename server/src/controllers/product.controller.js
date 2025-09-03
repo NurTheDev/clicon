@@ -87,24 +87,24 @@ exports.createProduct = asyncHandler(async (req, res) => {
 exports.getAllProducts = asyncHandler(async (req, res) => {
     let {page, limit, sortBy, order, search} = req.query;
     page = parseInt(page, 10) || 1;
-    if(Number.isNaN(page) || page < 1) {
+    if (Number.isNaN(page) || page < 1) {
         page = DEFAULT.page
     }
     limit = parseInt(limit, 10)
-    if(Number.isNaN(limit) || limit < 1) {
+    if (Number.isNaN(limit) || limit < 1) {
         limit = DEFAULT.limit
     }
     limit = Math.min(limit, DEFAULT.maxLimit)
-    if(!sortBy || !ALLOWED_SORT_FIELDS.includes(sortBy)){
+    if (!sortBy || !ALLOWED_SORT_FIELDS.includes(sortBy)) {
         sortBy = DEFAULT.sortBy
     }
     order = String(order || DEFAULT.order).toLowerCase()
-    const sortOrder = order === "desc"? -1 : 1
-    if(search && String(search).length > DEFAULT.maxSearchLength) throw new customError(`Search term is too long. Maximum length is ${DEFAULT.maxSearchLength}`, 400)
+    const sortOrder = order === "desc" ? -1 : 1
+    if (search && String(search).length > DEFAULT.maxSearchLength) throw new customError(`Search term is too long. Maximum length is ${DEFAULT.maxSearchLength}`, 400)
     const skip = (page - 1) * limit
     const sortOptions = {[sortBy]: sortOrder}
     const query = {}
-    if(search && String(search).trim().length > 0) {
+    if (search && String(search).trim().length > 0) {
         const safeSearch = escapeRegex(String(search).trim().toLowerCase())
         const searchRegex = new RegExp(safeSearch, "i")
         query.$or = [
@@ -133,4 +133,62 @@ exports.getSingleProduct = asyncHandler(async (req, res) => {
     const product = await ProductSchema.findOne({slug}).populate("category").populate("subCategory").populate("brand").lean();
     if (!product) throw new customError('Product not found', 404);
     success(res, 'Product fetched successfully', product, 200);
+})
+
+exports.updateProduct = asyncHandler(async (req, res) => {
+    const {slug} = req.params;
+    const Oldproduct = await ProductSchema.findOne({slug});
+    if (!Oldproduct) throw new customError('Product not found', 404);
+    const value = await updateValidation(req);
+    const product = await ProductSchema.findOneAndUpdate({slug}, value, {new: true});
+    if (!product) throw new customError('Product update failed', 400);
+    if (value.images && value.images.length > 0) {
+        const images = [];
+        for (const image of value.images) {
+            const imageURL = await uploadImage(image.path);
+            images.push({
+                url: imageURL.secure_url,
+                public_id: imageURL.public_id
+            })
+        }
+        product.images = images;
+    }
+    if (value.thumbnail) {
+        const thumbnailUrl = await uploadImage(value.thumbnail.path);
+        product.thumbnail = {
+            url: thumbnailUrl.secure_url,
+            public_id: thumbnailUrl.public_id
+        }
+    }
+    await product.save();
+    if(value.category && value.category.toString() !== Oldproduct.category.toString()) {
+        await CategorySchema.findByIdAndUpdate(Oldproduct.category, {$pull: {products: Oldproduct._id}});
+        await CategorySchema.findByIdAndUpdate(value.category, {$push: {products: product._id}});
+    }
+    if(value.subCategory && value.subCategory.toString() !== Oldproduct.subCategory.toString()) {
+        await SubCategorySchema.findByIdAndUpdate(Oldproduct.subCategory, {$pull: {products: Oldproduct._id}});
+        await SubCategorySchema.findByIdAndUpdate(value.subCategory, {$push: {products: product._id}});
+    }
+    if(value.brand && value.brand.toString() !== Oldproduct.brand.toString()) {
+        await BrandSchema.findByIdAndUpdate(Oldproduct.brand, {$pull: {products: Oldproduct._id}});
+        await BrandSchema.findByIdAndUpdate(value.brand, {$push: {products: product._id}});
+    }
+    success(res, 'Product updated successfully', product, 200);
+})
+/**
+ * @description Delete a product by slug
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.deleteProduct = asyncHandler(async (req, res) => {
+    const {slug} = req.params;
+    const product = await ProductSchema.findOneAndDelete({slug});
+    if (!product) throw new customError('Product not found', 404);
+    // remove the product _id from the category , subCategory , brand collection
+    await CategorySchema.findByIdAndUpdate(product.category, {$pull: {products: product._id}});
+    await SubCategorySchema.findByIdAndUpdate(product.subCategory, {$pull: {products: product._id}});
+    await BrandSchema.findByIdAndUpdate(product.brand, {$pull: {products: product._id}});
+    success(res, 'Product deleted successfully', null, 200);
 })

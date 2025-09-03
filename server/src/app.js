@@ -3,9 +3,12 @@ const app = express();
 const cors = require('cors');
 const globalError = require("./utils/globalError")
 const cookieParser = require('cookie-parser');
+const morgan = require('morgan');
+
 require("dotenv").config();
 // All middleware goes here
 app.use(cors());
+app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(express.static("public"));

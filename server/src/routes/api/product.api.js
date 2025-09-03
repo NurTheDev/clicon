@@ -15,6 +15,15 @@ router.route("/create-product").post(authGard, upload.fields([{
 }]), productController.createProduct);
 
 router.route("/products").get(productController.getAllProducts);
+router.route("/product/:slug").get(productController.getSingleProduct);
+router.route("/update-product/:slug").put(authGard, upload.fields([{
+    name: 'images',
+    maxCount: 10
+}, {
+    name: 'thumbnail',
+    maxCount: 1
+}]), productController.updateProduct);
+
 
 
 
