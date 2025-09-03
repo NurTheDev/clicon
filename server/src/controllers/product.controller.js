@@ -12,6 +12,8 @@ const bwipjs = require('bwip-js');
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
+const {DEFAULT, ALLOWED_SORT_FIELDS} = require("../constants/constant");
+const {escapeRegex} = require("../utils");
 
 /**
  * @description Create a new product
@@ -75,36 +77,60 @@ exports.createProduct = asyncHandler(async (req, res) => {
     await BrandSchema.findByIdAndUpdate(value.brand, {$push: {products: product._id}});
     success(res, 'Product created successfully', product, 201);
 })
-
+/**
+ * @description Get all products with pagination, sorting and searching
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
 exports.getAllProducts = asyncHandler(async (req, res) => {
     let {page, limit, sortBy, order, search} = req.query;
-    page = parseInt(page) || 1;
-    limit = parseInt(limit) || 10;
-    sortBy = sortBy || 'createdAt';
-    order = order === 'desc' ? -1 : 1;
-    const skip = (page - 1) * limit;
-    const sortOptions = {};
-    sortOptions[sortBy] = order;
-    const query = {};
-    if (search) {
-        query.$or = [
-            {name: {$regex: search, $options: 'i'}},
-            {description: {$regex: search, $options: 'i'}}
-        ];
+    page = parseInt(page, 10) || 1;
+    if(Number.isNaN(page) || page < 1) {
+        page = DEFAULT.page
     }
-    const products = await ProductSchema.find(query)
-        .populate('category', 'name slug')
-        .populate('subCategory', 'name slug')
-        .populate('brand', 'name slug')
-        .sort(sortOptions)
-        .skip(skip)
-        .limit(limit);
-    const total = await ProductSchema.countDocuments(query);
-    const totalPages = Math.ceil(total / limit);
-    success(res, 'Products retrieved successfully', {
-        products,
-        page,
-        totalPages,
-        total
-    });
+    limit = parseInt(limit, 10)
+    if(Number.isNaN(limit) || limit < 1) {
+        limit = DEFAULT.limit
+    }
+    limit = Math.min(limit, DEFAULT.maxLimit)
+    if(!sortBy || !ALLOWED_SORT_FIELDS.includes(sortBy)){
+        sortBy = DEFAULT.sortBy
+    }
+    order = String(order || DEFAULT.order).toLowerCase()
+    const sortOrder = order === "desc"? -1 : 1
+    if(search && String(search).length > DEFAULT.maxSearchLength) throw new customError(`Search term is too long. Maximum length is ${DEFAULT.maxSearchLength}`, 400)
+    const skip = (page - 1) * limit
+    const sortOptions = {[sortBy]: sortOrder}
+    const query = {}
+    if(search && String(search).trim().length > 0) {
+        const safeSearch = escapeRegex(String(search).trim().toLowerCase())
+        const searchRegex = new RegExp(safeSearch, "i")
+        query.$or = [
+            {name: searchRegex},
+            {description: searchRegex},
+            {tags: searchRegex}
+        ]
+    }
+    const [products, total] = await Promise.all([
+        ProductSchema.find(query).populate("category").populate("subCategory").populate("brand").sort(sortOptions).skip(skip).limit(limit).lean(),
+        ProductSchema.countDocuments(query)
+    ])
+    const totalPages = Math.ceil(total / limit)
+    const pagination = {total, totalPages, page, limit}
+    success(res, "Products fetched successfully", {products, pagination}, 200)
+})
+/**
+ * @description Get a single product by slug
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.getSingleProduct = asyncHandler(async (req, res) => {
+    const {slug} = req.params;
+    const product = await ProductSchema.findOne({slug}).populate("category").populate("subCategory").populate("brand").lean();
+    if (!product) throw new customError('Product not found', 404);
+    success(res, 'Product fetched successfully', product, 200);
 })
