@@ -329,7 +329,7 @@ const MiddleNav = () => {
 };
 
 const BottomNav = () => {
-    const features = [
+    const features: { title: string, icon: React.ReactNode }[] = [
         {title: "Trace Order", icon: Icons.location}
         , {title: "Compare", icon: Icons.compare}
         , {title: "24/7 Support", icon: Icons.support}
@@ -365,7 +365,7 @@ const BottomNav = () => {
 
                         {/* Desktop / tablet: show features inline */}
                         <div className="hidden md:flex items-center gap-2 ml-4 flex-wrap">
-                            {features.map((item, index) => (
+                            {features.map((item: { title: string, icon: React.ReactNode }, index: number) => (
                                 <button
                                     key={index}
                                     aria-label={item.title}
@@ -420,4 +420,4 @@ const Navbar = () => {
     );
 };
 
-export default React.memo(Navbar) || Navbar;
+export default React.memo(Navbar);

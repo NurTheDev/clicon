@@ -7,6 +7,5 @@ type Assets = {
 const assets : Assets  = {
     blackLogo : blackLogo,
     cliconCircle : cliconCircle
-
 }
 export default assets

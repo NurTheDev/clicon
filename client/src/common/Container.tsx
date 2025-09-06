@@ -2,7 +2,7 @@ import React from "react";
 type Props = {
     children: React.ReactNode
 }
-const Container : React.FC<Props> = ({children}: { children: React.ReactNode }) => {
+const Container : React.FC<Props> = ({children}: Props) => {
     return (
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {children}
@@ -10,4 +10,5 @@ const Container : React.FC<Props> = ({children}: { children: React.ReactNode }) 
     );
 };
 
-export default React.memo(Container) || Container;
+export default React.memo(Container);
+
