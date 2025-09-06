@@ -14,5 +14,5 @@ exports.DEFAULT = {
     sortBy: "createdAt",
     order: "desc",
     maxSearchLength: 100,
-    maxLimit: 100
+    maxLimit: 30
 }
