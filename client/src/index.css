@@ -1,5 +1,7 @@
 @import "tailwindcss";
-
+@plugin "daisyui" {
+    themes: light --default;
+}
 * {
     box-sizing: border-box;
 }
@@ -437,5 +439,11 @@ a {
     display: flex;
     flex-direction: row;
     justify-content: center;
+    align-items: center;
+}
+.flexRowBetween{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
 }

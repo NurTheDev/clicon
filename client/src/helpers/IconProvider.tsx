@@ -1,21 +1,42 @@
 import React from "react";
-import {FaXTwitter,FaArrowRightLong, FaMagnifyingGlass} from "react-icons/fa6";
-import {FaFacebook, FaPinterestP, FaRedditAlien, FaYoutube, FaInstagram, FaCartArrowDown, FaHeart, FaUser} from "react-icons/fa";
+import {FaXTwitter, FaArrowRightLong, FaMagnifyingGlass, FaArrowsRotate} from "react-icons/fa6";
+import {
+    FaFacebook,
+    FaPinterestP,
+    FaRedditAlien,
+    FaYoutube,
+    FaInstagram,
+    FaCartArrowDown,
+    FaHeart,
+    FaUser, FaHeadphones
+} from "react-icons/fa";
+import {LuMenu} from "react-icons/lu";
+import {IoClose} from "react-icons/io5";
+import {TfiLocationPin} from "react-icons/tfi";
+import {IoMdHelp} from "react-icons/io";
+import {MdWifiCalling3} from "react-icons/md";
 
 type Icons = {
     [key: string]: React.ReactNode
 }
-const Icons : Icons = {
-    "twitter":<FaXTwitter/>,
-    "facebook":<FaFacebook/>,
-    "pinterest":<FaPinterestP/>,
-    "reddit":<FaRedditAlien/>,
-    "youtube":<FaYoutube/>,
-    "instagram":<FaInstagram/>,
-    "cart":<FaCartArrowDown/>,
-    "heart":<FaHeart/>,
-    "user":<FaUser/>,
-    "rightArrow":<FaArrowRightLong/>,
-    "search":<FaMagnifyingGlass/>
+const Icons: Icons = {
+    "twitter": <FaXTwitter/>,
+    "facebook": <FaFacebook/>,
+    "pinterest": <FaPinterestP/>,
+    "reddit": <FaRedditAlien/>,
+    "youtube": <FaYoutube/>,
+    "instagram": <FaInstagram/>,
+    "cart": <FaCartArrowDown/>,
+    "heart": <FaHeart/>,
+    "user": <FaUser/>,
+    "rightArrow": <FaArrowRightLong/>,
+    "search": <FaMagnifyingGlass/>,
+    "menu": <LuMenu/>,
+    "close": <IoClose/>,
+    "location": <TfiLocationPin />,
+    "compare": <FaArrowsRotate />,
+    "support": <FaHeadphones/>,
+    "help": <IoMdHelp/>,
+    "phone" : <MdWifiCalling3/>
 }
 export default Icons

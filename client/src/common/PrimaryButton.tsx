@@ -12,4 +12,4 @@ const PrimaryButton: React.FC<buttonTypes> = ({children, className}) => {
     );
 };
 
-export default PrimaryButton;
+export default React.memo(PrimaryButton) || PrimaryButton;
