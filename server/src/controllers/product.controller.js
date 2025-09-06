@@ -14,6 +14,8 @@ const fs = require('fs');
 const path = require('path');
 const {DEFAULT, ALLOWED_SORT_FIELDS} = require("../constants/constant");
 const {escapeRegex} = require("../utils");
+const NodeCache = require( "node-cache" );
+const myCache = new NodeCache( { stdTTL: 100, checkperiod: 120 } );
 
 /**
  * @description Create a new product
@@ -134,7 +136,12 @@ exports.getSingleProduct = asyncHandler(async (req, res) => {
     if (!product) throw new customError('Product not found', 404);
     success(res, 'Product fetched successfully', product, 200);
 })
-
+/** * @description Update a product by slug
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
 exports.updateProduct = asyncHandler(async (req, res) => {
     const {slug} = req.params;
     const Oldproduct = await ProductSchema.findOne({slug});
@@ -180,6 +187,7 @@ exports.updateProduct = asyncHandler(async (req, res) => {
         await BrandSchema.findByIdAndUpdate(Oldproduct.brand, {$pull: {products: Oldproduct._id}});
         await BrandSchema.findByIdAndUpdate(value.brand, {$push: {products: product._id}});
     }
+
     success(res, 'Product updated successfully', product, 200);
 })
 /**
