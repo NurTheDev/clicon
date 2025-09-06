@@ -3,7 +3,7 @@ const ProductSchema = require('../models/product.model');
 const asyncHandler = require('../helpers/asyncHandler');
 const {success} = require('../utils/apiResponse');
 const {productValidation, updateValidation} = require('../validators/product.validator');
-const {uploadImage} = require('../helpers/claudinary');
+const {uploadImage, deleteImage} = require('../helpers/claudinary');
 const CategorySchema = require('../models/category.model');
 const SubCategorySchema = require('../models/subCategory.model');
 const BrandSchema = require('../models/brand.model');
@@ -144,6 +144,13 @@ exports.updateProduct = asyncHandler(async (req, res) => {
     if (!product) throw new customError('Product update failed', 400);
     if (value.images && value.images.length > 0) {
         const images = [];
+        // delete old images from cloudinary
+        if (Oldproduct.images && Oldproduct.images.length > 0) {
+            for (const img of Oldproduct.images) {
+                await deleteImage(img.public_id);
+            }
+        }
+        // upload new images to cloudinary
         for (const image of value.images) {
             const imageURL = await uploadImage(image.path);
             images.push({
@@ -161,15 +168,15 @@ exports.updateProduct = asyncHandler(async (req, res) => {
         }
     }
     await product.save();
-    if(value.category && value.category.toString() !== Oldproduct.category.toString()) {
+    if (value.category && value.category.toString() !== Oldproduct.category.toString()) {
         await CategorySchema.findByIdAndUpdate(Oldproduct.category, {$pull: {products: Oldproduct._id}});
         await CategorySchema.findByIdAndUpdate(value.category, {$push: {products: product._id}});
     }
-    if(value.subCategory && value.subCategory.toString() !== Oldproduct.subCategory.toString()) {
+    if (value.subCategory && value.subCategory.toString() !== Oldproduct.subCategory.toString()) {
         await SubCategorySchema.findByIdAndUpdate(Oldproduct.subCategory, {$pull: {products: Oldproduct._id}});
         await SubCategorySchema.findByIdAndUpdate(value.subCategory, {$push: {products: product._id}});
     }
-    if(value.brand && value.brand.toString() !== Oldproduct.brand.toString()) {
+    if (value.brand && value.brand.toString() !== Oldproduct.brand.toString()) {
         await BrandSchema.findByIdAndUpdate(Oldproduct.brand, {$pull: {products: Oldproduct._id}});
         await BrandSchema.findByIdAndUpdate(value.brand, {$push: {products: product._id}});
     }
