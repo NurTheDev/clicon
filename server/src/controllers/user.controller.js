@@ -210,22 +210,37 @@ exports.resendOTP = asyncHandler(async (req, res) => {
  */
 
 exports.forgotPassword = asyncHandler(async (req, res) => {
-    const {email} = req.body
-    if (!email) {
-        throw new customError("Email is required", 400)
+    const {email, phone} = req.body
+    if (!email && !phone) {
+        throw new customError("Email or phone is required", 400)
     }
-    const user = await userSchema.findOne({email})
-    if (!user) {
-        throw new customError("User not found", 400)
+    if(phone){
+        const user = await userSchema.findOne({phone})
+        if (!user) {
+            throw new customError("User not found", 400)
+        }
+        const {otp, expiry} = generateOTP()
+        const smsTemplate = `Your Clicon OTP is ${otp}. It will expire on ${expiry.toLocaleString()}. Do not share this code with anyone.`
+        await sendSMS(phone, smsTemplate)
+        user.resetPasswordToken = otp
+        user.resetPasswordExpire = expiry
+        await user.save()
+        return success(res, "OTP sent to phone successfully", null, 200)
     }
-    const {otp, expiry} = generateOTP()
-    const verifyLink = `http://localhost:3000/reset-password?email=${email}&otp=${otp}`
-    const emailVerifyTemplate = forgetPassword(otp, expiry, verifyLink)
-    await sendEmail(email, emailVerifyTemplate, "Reset password email")
-    user.resetPasswordToken = otp
-    user.resetPasswordExpire = expiry
-    await user.save()
-    success(res, "Email sent successfully", null, 200)
+   if(email){
+       const user = await userSchema.findOne({email})
+       if (!user) {
+           throw new customError("User not found", 400)
+       }
+       const {otp, expiry} = generateOTP()
+       const verifyLink = `http://localhost:3000/reset-password?email=${email}&otp=${otp}`
+       const emailVerifyTemplate = forgetPassword(otp, expiry, verifyLink)
+       await sendEmail(email, emailVerifyTemplate, "Reset password email")
+       user.resetPasswordToken = otp
+       user.resetPasswordExpire = expiry
+       await user.save()
+       success(res, "Email sent successfully", null, 200)
+   }
 })
 /**
  * Reset password
@@ -234,20 +249,37 @@ exports.forgotPassword = asyncHandler(async (req, res) => {
  * @throws {customError}
  */
 exports.resetPassword = asyncHandler(async (req, res) => {
-    const {email, otp, newPassword, confirmPassword} = resendOTPValidation(req)
-    const user = await userSchema.findOne({email})
-    if (!user) {
-        throw new customError("User not found", 400)
+    const {email, phone, otp, newPassword, confirmPassword} = resendOTPValidation(req)
+   if(email){
+       const user = await userSchema.findOne({email})
+       if (!user) {
+           throw new customError("User not found", 400)
+       }
+       await verifyOTP(user, otp, "resetPasswordToken", "resetPasswordExpire")
+       if (newPassword !== confirmPassword) {
+           throw new customError("Passwords do not match", 400)
+       }
+       user.password = newPassword
+       user.resetPasswordToken = null
+       user.resetPasswordExpire = null
+       await user.save()
+       success(res, "Password reset successfully", null, 200)
+   }
+    if(phone){
+        const user = await userSchema.findOne({phone})
+        if (!user) {
+            throw new customError("User not found", 400)
+        }
+        await verifyOTP(user, otp, "resetPasswordToken", "resetPasswordExpire")
+        if (newPassword !== confirmPassword) {
+            throw new customError("Passwords do not match", 400)
+        }
+        user.password = newPassword
+        user.resetPasswordToken = null
+        user.resetPasswordExpire = null
+        await user.save()
+        success(res, "Password reset successfully", null, 200)
     }
-    await verifyOTP(user, otp, "resetPasswordToken", "resetPasswordExpire")
-    if (newPassword !== confirmPassword) {
-        throw new customError("Passwords do not match", 400)
-    }
-    user.password = newPassword
-    user.resetPasswordToken = null
-    user.resetPasswordExpire = null
-    await user.save()
-    success(res, "Password reset successfully", null, 200)
 })
 
 /**

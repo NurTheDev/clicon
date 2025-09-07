@@ -51,7 +51,13 @@ exports.createProduct = asyncHandler(async (req, res) => {
             public_id: value.name + qrCode.substring(11, 20) + Date.now()
         }
     });
-    if (!product) throw new customError('Product creation failed', 400);
+    if (!product){
+        await deleteImage(thumbnailUrl.public_id);
+        for (const img of images) {
+            await deleteImage(img.public_id);
+        }
+        throw new customError('Product creation failed', 400)
+    } ;
     const barCode = await bwipjs.toBuffer({
         bcid: 'code128',       // Barcode type
         text: product._id.toString(),    // Text to encode

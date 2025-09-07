@@ -20,6 +20,7 @@ exports.createCategory = asyncHandler(async (req, res) => {
         image: {url: imgResult.secure_url, public_id: imgResult.public_id}
     })
     if (!category) {
+        await deleteImage(imgResult.public_id)
         throw new customError("Category creation failed", 400)
     }
     success(res, "category created successfully", category, 201)
