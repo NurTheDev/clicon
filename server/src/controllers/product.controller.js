@@ -14,8 +14,8 @@ const fs = require('fs');
 const path = require('path');
 const {DEFAULT, ALLOWED_SORT_FIELDS} = require("../constants/constant");
 const {escapeRegex} = require("../utils");
-const NodeCache = require( "node-cache" );
-const myCache = new NodeCache( { stdTTL: 100, checkperiod: 120 } );
+const NodeCache = require("node-cache");
+const myCache = new NodeCache({stdTTL: 100, checkperiod: 120});
 
 /**
  * @description Create a new product
@@ -206,4 +206,192 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
     await SubCategorySchema.findByIdAndUpdate(product.subCategory, {$pull: {products: product._id}});
     await BrandSchema.findByIdAndUpdate(product.brand, {$pull: {products: product._id}});
     success(res, 'Product deleted successfully', null, 200);
+})
+
+/**
+ * @description Get filtered products by category, subCategory, brand, price range
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.getFilteredProducts = asyncHandler(async (req, res) => {
+    let {page, limit, sortBy, order, category, subCategory, brand, minPrice, maxPrice, tag} = req.query;
+    page = parseInt(page, 10) || 1;
+    if (Number.isNaN(page) || page < 1) {
+        page = DEFAULT.page
+    }
+    limit = parseInt(limit, 10)
+    if (Number.isNaN(limit) || limit < 1) {
+        limit = DEFAULT.limit
+    }
+    limit = Math.min(limit, DEFAULT.maxLimit)
+    if (!sortBy || !ALLOWED_SORT_FIELDS.includes(sortBy)) {
+        sortBy = DEFAULT.sortBy
+    }
+    order = String(order || DEFAULT.order).toLowerCase()
+    const sortOrder = order === "desc" ? -1 : 1
+    const skip = (page - 1) * limit
+    const sortOptions = {[sortBy]: sortOrder}
+    const query = {}
+    if (category) {
+        query.category = category
+    }
+    if (subCategory) {
+        query.subCategory = subCategory
+    }
+    if (brand) {
+        query.brand = brand
+    }
+    if (tag) {
+        const safeTag = escapeRegex(String(tag).trim().toLowerCase())
+        query.tags = new RegExp(safeTag, "i")
+    }
+    if (minPrice && !maxPrice) {
+        minPrice = parseFloat(minPrice)
+        if (!Number.isNaN(minPrice) && minPrice >= 0) {
+            query.price = {$gte: minPrice}
+        }
+    }
+    if (!minPrice && maxPrice) {
+        maxPrice = parseFloat(maxPrice)
+        if (!Number.isNaN(maxPrice) && maxPrice > 0) {
+            query.price = {$lte: maxPrice}
+        }
+    }
+    if (minPrice && maxPrice) {
+        minPrice = parseFloat(minPrice)
+        maxPrice = parseFloat(maxPrice)
+        if (!Number.isNaN(minPrice) && !Number.isNaN(maxPrice) && minPrice >= 0 && maxPrice > 0 && maxPrice >= minPrice) {
+            query.price = {$gte: minPrice, $lte: maxPrice}
+        }
+    }
+    const [products, total] = await Promise.all([
+        ProductSchema.find(query).populate("category").populate("subCategory").populate("brand").sort(sortOptions).skip(skip).limit(limit).lean(),
+        ProductSchema.countDocuments(query)
+    ])
+    const totalPages = Math.ceil(total / limit)
+    const pagination = {total, totalPages, page, limit}
+    success(res, "Filtered products fetched successfully", {products, pagination}, 200)
+})
+/** * @description Get total number of products
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.getTotalProducts = asyncHandler(async (req, res) => {
+    const cacheKey = 'totalProducts';
+    let total = myCache.get(cacheKey);
+    if (total === undefined) {
+        total = await ProductSchema.countDocuments();
+        myCache.set(cacheKey, total);
+    }
+    success(res, "Total products fetched successfully", {total}, 200);
+})
+/**
+ * @description Get total number of products in a category
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.getTotalProductsInCategory = asyncHandler(async (req, res) => {
+    const {categoryId} = req.params;
+    const cacheKey = `totalProductsInCategory_${categoryId}`;
+    let total = myCache.get(cacheKey);
+    if (total === undefined) {
+        total = await ProductSchema.countDocuments({category: categoryId});
+        myCache.set(cacheKey, total);
+    }
+    success(res, "Total products in category fetched successfully", {total}, 200);
+})
+/**
+ * @description Get total number of products in a subCategory
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.getTotalProductsInSubCategory = asyncHandler(async (req, res) => {
+    const {subCategoryId} = req.params;
+    const cacheKey = `totalProductsInSubCategory_${subCategoryId}`;
+    let total = myCache.get(cacheKey);
+    if (total === undefined) {
+        total = await ProductSchema.countDocuments({subCategory: subCategoryId});
+        myCache.set(cacheKey, total);
+    }
+    success(res, "Total products in subCategory fetched successfully", {total}, 200);
+})
+/**
+ * @description Get total number of products in a brand
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.getTotalProductsInBrand = asyncHandler(async (req, res) => {
+    const {brandId} = req.params;
+    const cacheKey = `totalProductsInBrand_${brandId}`;
+    let total = myCache.get(cacheKey);
+    if (total === undefined) {
+        total = await ProductSchema.countDocuments({brand: brandId});
+        myCache.set(cacheKey, total);
+    }
+    success(res, "Total products in brand fetched successfully", {total}, 200);
+})
+/** * @description Get all products with low stock
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.getLowStockProducts = asyncHandler(async (req, res) => {
+    const products = await ProductSchema.find({$expr: {$lte: ["$stock", "$alertQuantity"]}}).populate("category").populate("subCategory").populate("brand").lean();
+    success(res, "Low stock products fetched successfully", {products}, 200);
+})
+/**
+ * @description Get all products with a specific tag
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.getProductsByTag = asyncHandler(async (req, res) => {
+    const {tag} = req.params;
+    if (!tag || String(tag).trim().length === 0) throw new customError("Tag is required", 400)
+    if (String(tag).length > DEFAULT.maxSearchLength) throw new customError(`Tag is too long. Maximum length is ${DEFAULT.maxSearchLength}`, 400)
+    const safeTag = escapeRegex(String(tag).trim().toLowerCase())
+    const tagRegex = new RegExp(safeTag, "i")
+    const products = await ProductSchema.find({tags: tagRegex}).populate("category").populate("subCategory").populate("brand").lean();
+    success(res, "Products by tag fetched successfully", {products}, 200);
+})
+/** * @description Get related products by category and subCategory
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.getRelatedProducts = asyncHandler(async (req, res) => {
+    const {productId} = req.params;
+    const product = await ProductSchema.findById(productId).lean();
+    if (!product) throw new customError('Product not found', 404);
+    const products = await ProductSchema.find({
+        _id: {$ne: product._id},
+        $or: [
+            {category: product.category},
+            {subCategory: product.subCategory}
+        ]
+    }).limit(10).populate("category").populate("subCategory").populate("brand").lean();
+    success(res, "Related products fetched successfully", {products}, 200);
+})
+/** * @description Get all products that are on discount
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+exports.getDiscountedProducts = asyncHandler(async (req, res) => {
+    const products = await ProductSchema.find({discount: {$ne: null}}).populate("category").populate("subCategory").populate("brand").lean();
+    success(res, "Discounted products fetched successfully", {products}, 200);
 })
