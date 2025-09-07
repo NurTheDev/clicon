@@ -6,7 +6,7 @@ type buttonTypes = {
 }
 const PrimaryButton: React.FC<buttonTypes> = ({children, className}) => {
     return (
-        <button className={className + "py-3"}>
+        <button className={className }>
             {children}
         </button>
     );

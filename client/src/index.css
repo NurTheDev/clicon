@@ -433,6 +433,11 @@ a {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}.flexColumnStart {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: start;
 }
 
 .flexRowCenter {
