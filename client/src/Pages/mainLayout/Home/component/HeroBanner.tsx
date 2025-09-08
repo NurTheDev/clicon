@@ -7,7 +7,6 @@ import {heroBannerInfo} from "../../../../data";
 import Slider from "../../../../helpers/Slider.tsx";
 
 const HeroBanner = () => {
-    console.log(heroBannerInfo)
     return (
         <div>
             <Container>
@@ -43,11 +42,10 @@ const HeroBanner = () => {
                                     <div className={"max-h-[200px] lg:max-h-[300px] "}>
                                         <img src={getImgUrl(item.image)} alt={"product image"}
                                              className={"object-contain max-h-[200px] lg:max-h-[300px]"}/>
-                                        <p className={"lg:w-24 lg:h-24 w-14 h-14 rounded-full bg-secondary-500" +
-                                            " text-gray-00 font-public-sans text-[22px] font-semibold flexRowCenter" +
-                                            "absolute top-0 right-0 z-10"}>{item.price}</p>
                                     </div>
-
+                                    {/*<p className={"lg:w-24 lg:h-24 w-14 h-14 rounded-full bg-secondary-500" +*/}
+                                    {/*    " text-gray-00 font-public-sans text-[22px] font-semibold flexRowCenter " +*/}
+                                    {/*    "absolute bottom-0 right-1/4 z-10"}>{item.price}</p>*/}
                                 </div>
                             ))}
                         </Slider>

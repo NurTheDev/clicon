@@ -18,7 +18,7 @@ const Slider: React.FC<SliderProps> = ({
                                            slidesPerView = 1,
                                        }) => {
     const slides = React.Children.toArray(children).map((child, index) => (
-        <SwiperSlide key={index}>{child}</SwiperSlide>
+        <SwiperSlide  key={index}>{child}</SwiperSlide>
     ));
     return (
         <div >
