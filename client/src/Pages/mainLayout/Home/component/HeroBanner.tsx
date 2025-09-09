@@ -16,7 +16,7 @@ const HeroBanner = () => {
                         <Slider>
                             {heroBannerInfo.map((item, index) => (
                                 <div key={index}
-                                     className={"flexRowBetween flex flex-col-reverse lg:flex-row justify-between" +
+                                     className={"flex flex-col-reverse lg:flex-row justify-between" +
                                          " lg:gap-0 gap-8 relative "}>
                                     <div className={"flexColumnStart gap-4"}>
                                         <p className={"text-secondary-600 body-medium-600 font-public-sans"}>
