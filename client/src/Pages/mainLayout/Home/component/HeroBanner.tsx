@@ -30,8 +30,9 @@ const HeroBanner = () => {
                                 <span>{Icons.rightArrow}</span>
                             </PrimaryButton>
                         </div>
-                        <div>
+                        <div className={"relative"}>
                             <img src={getImgUrl("ps5.png")} alt={"product image"}/>
+                            <p className={"w-20 h-20 rounded-full absolute right-3 top-5 bg-secondary-500 flexRowCenter"}>$299</p>
                         </div>
                     </div>
                     <div className={"grid grid-row-2 gap-4"}>
