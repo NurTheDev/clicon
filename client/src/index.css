@@ -427,6 +427,12 @@ a {
 }
 
 /* ========= body component =============*/
+/*Switer dot costomizse */
+.swiper-pagination-bullets{
+    bottom: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+}
 /*========= flex properties =============*/
 .flexColumnCenter {
     display: flex;

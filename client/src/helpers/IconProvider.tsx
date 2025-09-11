@@ -11,10 +11,12 @@ import {
     FaUser, FaHeadphones
 } from "react-icons/fa";
 import {LuMenu} from "react-icons/lu";
-import {IoClose} from "react-icons/io5";
+import {IoClose, IoTrophyOutline} from "react-icons/io5";
 import {TfiLocationPin} from "react-icons/tfi";
 import {IoMdHelp} from "react-icons/io";
 import {MdWifiCalling3} from "react-icons/md";
+import {BsBoxSeam, BsCreditCard} from "react-icons/bs";
+import {BiHeadphone} from "react-icons/bi";
 
 type Icons = {
     [key: string]: React.ReactNode
@@ -37,6 +39,11 @@ const Icons: Icons = {
     "compare": <FaArrowsRotate />,
     "support": <FaHeadphones/>,
     "help": <IoMdHelp/>,
-    "phone" : <MdWifiCalling3/>
+    "phone" : <MdWifiCalling3/>,
+    "box": <BsBoxSeam />,
+    "trophy": <IoTrophyOutline/>,
+    "creditCard": <BsCreditCard/>,
+    "headphones": <BiHeadphone/>
+
 }
 export default Icons

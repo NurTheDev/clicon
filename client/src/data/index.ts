@@ -1,4 +1,32 @@
-export const heroBannerInfo = [
+const heroBannerInfo: [{
+    id: number;
+    heading: string;
+    title: string;
+    description: string;
+    price: string;
+    image: string
+}, { id: number; heading: string; title: string; description: string; price: string; image: string }, {
+    id: number;
+    heading: string;
+    title: string;
+    description: string;
+    price: string;
+    image: string
+}, { id: number; heading: string; title: string; description: string; price: string; image: string }, {
+    id: number;
+    heading: string;
+    title: string;
+    description: string;
+    price: string;
+    image: string
+}, { id: number; heading: string; title: string; description: string; price: string; image: string }, {
+    id: number;
+    heading: string;
+    title: string;
+    description: string;
+    price: string;
+    image: string
+}] = [
     {
         id: 1,
         heading: "Xbox Consoles",
@@ -28,7 +56,7 @@ export const heroBannerInfo = [
         heading: "PC Gaming",
         title: "BUILD YOUR RIG",
         description: "High-performance components and accessories for every budget.",
-        price: "From $99",
+        price: "$99",
         image: "earbards.png",
     },
     {
@@ -36,7 +64,7 @@ export const heroBannerInfo = [
         heading: "VR Headsets",
         title: "STEP INTO NEW WORLDS",
         description: "Immersive experiences with next-gen tracking and optics.",
-        price: "From $299",
+        price: "$299",
         image: "camera.png",
     },
     {
@@ -44,7 +72,7 @@ export const heroBannerInfo = [
         heading: "Gaming Laptops",
         title: "POWER ON THE GO",
         description: "Thin, powerful laptops with high-refresh displays.",
-        price: "From $899",
+        price: "$899",
         image: "tv.png",
     },
     {
@@ -52,7 +80,8 @@ export const heroBannerInfo = [
         heading: "Accessories",
         title: "LEVEL UP YOUR SETUP",
         description: "Controllers, headsets, and gear for every platform.",
-        price: "From $29",
+        price: "$29",
         image: "keyboard.png",
     },
 ];
+export {heroBannerInfo};
