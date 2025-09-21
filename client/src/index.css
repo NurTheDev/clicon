@@ -3,7 +3,6 @@
 @plugin "daisyui" {
     themes: light --default;
 }
-F
 
 /* Universal box-sizing */
 *, *::before, *::after {

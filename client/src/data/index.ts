@@ -84,4 +84,38 @@ const heroBannerInfo: [{
         image: "keyboard.png",
     },
 ];
-export {heroBannerInfo};
+const categoryShop: { title: string; image: string }[] = [
+    {
+        title: "Pixel",
+        image: "pixel5.png",
+    },
+    {
+        title: "Gaming Console",
+        image: "ps5.png",
+    },
+    {
+        title: "SmartPhone",
+        image: "phone.png",
+    },
+    {
+        title: "TWS wireless",
+        image: "earbards.png",
+    },
+    {
+        title: "Camera & Photo",
+        image: "camera.png",
+    },
+    {
+       title: "TV & Homes",
+        image: "tv.png",
+    },
+    {
+       title: "Accessories",
+        image: "keyboard.png",
+    },
+    {
+        title: "Headphones",
+        image: "headphone.png",
+    }
+];
+export {heroBannerInfo, categoryShop};
