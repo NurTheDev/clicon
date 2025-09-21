@@ -1,32 +1,65 @@
+/* Imports for Tailwind — keep these when using Tailwind's build pipeline */
 @import "tailwindcss";
 @plugin "daisyui" {
     themes: light --default;
 }
-* {
+F
+
+/* Universal box-sizing */
+*, *::before, *::after {
     box-sizing: border-box;
 }
 
+/* Fluid base font-size: scales between 14px (small phones) and 18px (large screens).
+   This makes rem-based typography responsive automatically. */
+html {
+    font-size: clamp(14px, 1.6vw, 18px);
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
+/* Accessible images */
 img {
     vertical-align: middle;
+    max-width: 100%;
+    height: auto;
+    display: block;
 }
+
+/* Buttons */
 button {
     cursor: pointer;
+    outline: none;
+    transition: box-shadow 0.18s ease, transform 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
 }
-ul,
-li,
-ol {
-    list-style: none;
+button:focus {
+    box-shadow: 0 0 0 3px var(--color-primary-200, #ffcead);
+}
+button:active {
+    transform: translateY(1px);
 }
 
+/* Lists */
+ul, ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+li { margin: 0; }
+
+/* Links */
 a {
     text-decoration: none;
+    color: inherit;
+    transition: color 0.18s ease;
 }
+a:focus, a:hover { color: var(--color-primary-500, #fa8232); outline: none; }
 
-span,
-a {
-    display: inline-block;
-}
+/* Inline elements */
+span, a { display: inline-block; }
 
+/* CSS Variables for colors and fonts (unchanged) */
 :root {
     /* base gray */
     --color-gray-00: #ffffff;
@@ -179,282 +212,170 @@ a {
     --font-public-sans: var(--font-public-sans);
 }
 
-/* common css properties */
-.heading1,
-.heading2,
-.heading3,
-.heading4,
-.display1,
-.display2,
-.display3,
-.display4,
-.label1,
-.label2,
-.body-xxl-400,
-.body-xxl-500,
-.body-xxl-600,
-.body-xl-400,
-.body-xl-500,
-.body-xl-600,
-.body-large-400,
-.body-large-500,
-.body-large-600,
-.body-medium-400,
-.body-medium-500,
-.body-medium-600,
-.body-small-400,
-.body-small-500,
-.body-small-600,
-.body-xs-400,
-.body-xs-500,
-.body-xs-600 {
-    font-family: var(--font-inter);
-    letter-spacing: 0em;
+/* Base font family for the site */
+body {
+    font-family: var(--font-inter, "Inter", sans-serif);
+    color: var(--color-gray-900);
+    background-color: var(--color-gray-00);
+    margin: 0;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
 }
-/* ========= heading component  =============*/
+
+/* Fluid typography using rems and clamp for key scale steps.
+   REM values are based on html font-size above. */
+
+/* Headings (H1-H4) */
 .heading1 {
-    font-size: 32px;
+    font-size: clamp(1.6rem, 3.6vw, 2.5rem); /* ~32px at medium, up to 40px */
     font-weight: 600;
-    line-height: 40px;
+    line-height: 1.25;
+    margin: 0;
 }
-
 .heading2 {
-    font-size: 28px;
+    font-size: clamp(1.4rem, 3.0vw, 2.125rem); /* ~28px */
     font-weight: 600;
-    line-height: 32px;
+    line-height: 1.2;
+    margin: 0;
 }
-
 .heading3 {
-    font-size: 24px;
+    font-size: clamp(1.25rem, 2.5vw, 1.5rem); /* ~24px */
     font-weight: 600;
-    line-height: 32px;
-}.heading4 {
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 32px;
+    line-height: 1.3;
+    margin: 0;
 }
-
+.heading4 {
+    font-size: clamp(1.125rem, 2.0vw, 1.25rem); /* ~20px */
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 0;
+}
 .heading5 {
-    font-size: 16px;
-    font-weight: bold;
-    line-height: 56px;
-    letter-spacing: 1.2%;
-}
-
-/* ========= heading component  =============*/
-/* ========= display component  =============*/
-.display1 {
-    font-size: 64px;
-    font-weight: 600;
-    line-height: 72px;
-}
-
-.display2 {
-    font-size: 64px;
-    font-weight: 600;
-    line-height: 72px;
-}
-
-.display3 {
-    font-size: 48px;
-    font-weight: 600;
-    line-height: 64px;
-}
-
-.display4 {
-    font-size: 40px;
-    font-weight: 600;
-    line-height: 44px;
-}
-
-.display5 {
-    font-size: 36px;
-    font-weight: 600;
-    line-height: 44px;
-}
-.display6 {
-    font-size: 32px;
+    font-size: clamp(0.9375rem, 1.8vw, 1rem); /* ~16px -> 16 */
     font-weight: 700;
-    line-height: 40px;
-}
-/* ========= display component  =============*/
-
-/* ========= label component  =============*/
-.label1 {
-    font-size: 18px;
-    font-weight: 500;
-    line-height: 28px;
+    line-height: 1.4;
+    letter-spacing: 0.012em;
+    margin: 0;
 }
 
-.label2 {
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 24px;
+/* Display (larger titles) */
+.display1 {
+    font-size: clamp(2.75rem, 7.5vw, 4rem); /* fluid from ~44px to 64px */
+    font-weight: 700;
+    line-height: 1.05;
+    margin: 0;
 }
+.display2 { font-size: clamp(2.5rem, 6.5vw, 4rem); font-weight: 600; line-height: 1.08; margin:0; }
+.display3 { font-size: clamp(2rem, 5.0vw, 3rem); font-weight: 600; line-height: 1.1; margin:0; }
+.display4 { font-size: clamp(1.75rem, 4.2vw, 2.5rem); font-weight: 600; line-height: 1.12; margin:0; }
+.display5 { font-size: clamp(1.5rem, 3.6vw, 2.25rem); font-weight: 600; line-height: 1.15; margin:0; }
+.display6 { font-size: clamp(1.25rem, 3.0vw, 2rem); font-weight: 700; line-height: 1.18; margin:0; }
 
-.label3 {
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 20px;
+/* Labels */
+.label1 { font-size: clamp(1rem, 2.2vw, 1.125rem); font-weight: 500; line-height: 1.55; }
+.label2 { font-size: clamp(0.9375rem, 2.0vw, 1rem); font-weight: 500; line-height: 1.5; }
+.label3 { font-size: clamp(0.875rem, 1.8vw, 0.875rem); font-weight: 500; line-height: 1.4; }
+.label4 { font-size: 0.75rem; font-weight: 500; line-height: 1.5; }
+.label5 { font-size: 0.6875rem; font-weight: 500; line-height: 1.45; }
+
+/* Body text scale */
+.body-xxl-400 { font-size: clamp(1.125rem, 2.2vw, 1.5rem); font-weight: 400; line-height: 1.45; }
+.body-xl-400, .body-xl-500, .body-xl-600 { font-size: clamp(1rem, 2.0vw, 1.25rem); line-height: 1.45; }
+.body-xl-400 { font-weight: 400; }
+.body-xl-500 { font-weight: 500; }
+.body-xl-600 { font-weight: 600; }
+
+.body-large-400, .body-large-500, .body-large-600 {
+    font-size: clamp(.9375rem, 1.8vw, 1rem);
+    line-height: 1.45;
 }
+.body-large-400 { font-weight: 400; }
+.body-large-500 { font-weight: 500; }
+.body-large-600 { font-weight: 600; }
 
-.label4 {
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 150%;
+.body-medium-400, .body-medium-500, .body-medium-600 {
+    font-size: clamp(.875rem, 1.6vw, .875rem);
+    line-height: 1.35;
 }
+.body-medium-400 { font-weight: 400; }
+.body-medium-500 { font-weight: 500; }
+.body-medium-600 { font-weight: 600; }
 
-.label5 {
-    font-size: 11px;
-    font-weight: 500;
-    line-height: 16px;
+.body-small-400, .body-small-500, .body-small-600 {
+    font-size: .75rem;
+    line-height: 1.25;
 }
+.body-small-400 { font-weight: 400; }
+.body-small-500 { font-weight: 500; }
+.body-small-600 { font-weight: 600; }
 
-/* ========= label component  =============*/
-/* ========= body component =============*/
-.body-xxl-400 {
-    font-size: 24px;
-    font-weight: 400;
-    line-height: 32px;
+/* Tiny / XS */
+.body-tiny-400, .body-tiny-500, .body-tiny-600,
+.body-xs-400, .body-xs-500, .body-xs-600 {
+    font-size: .6875rem;
+    line-height: 1.1;
 }
+.body-xs-400 { font-weight: 400; }
+.body-xs-500 { font-weight: 500; }
+.body-xs-600 { font-weight: 600; }
 
-.body-xl-400 {
-    font-size: 20px;
-    font-weight: 400;
-    line-height: 28px;
-}
-
-.body-xl-500 {
-    font-size: 20px;
-    font-weight: 500;
-    line-height: 28px;
-}
-
-.body-xl-600 {
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 28px;
-}
-
-.body-large-400 {
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 24px;
-}
-
-.body-large-500 {
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 24px;
-}
-
-.body-large-600 {
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 24px;
-}
-
-.body-medium-400 {
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 20px;
-}
-
-.body-medium-500 {
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 20px;
-}
-
-.body-medium-600 {
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 20px;
-}
-
-.body-small-400 {
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 16px;
-}
-
-.body-small-500 {
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 16px;
-}
-
-.body-small-600 {
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 16px;
-}
-
-.body-tiny-400 {
-    font-size: 11px;
-    font-weight: 400;
-    line-height: 12px;
-}
-
-.body-tiny-500 {
-    font-size: 11px;
-    font-weight: 500;
-    line-height: 12px;
-}
-
-.body-tiny-600 {
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 12px;
-}
-
-.body-xs-400 {
-    font-size: 10px;
-    font-weight: 400;
-    line-height: 11px;
-}
-
-.body-xs-500 {
-    font-size: 10px;
-    font-weight: 500;
-    line-height: 11px;
-}
-
-.body-xs-600 {
-    font-size: 10px;
-    font-weight: 600;
-    line-height: 11px;
-}
-
-/* ========= body component =============*/
-/*Switer dot costomizse */
-.swiper-pagination-bullets{
+/* Swiper pagination: responsive positioning */
+.swiper-pagination-bullets {
     bottom: 0 !important;
     left: 0 !important;
     transform: none !important;
 }
-/*========= flex properties =============*/
+
+/* Flex utilities - prefer Tailwind classes, but keep simple fallbacks */
 .flexColumnCenter {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-}.flexColumnStart {
+}
+.flexColumnStart {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: start;
+    align-items: flex-start;
 }
-
 .flexRowCenter {
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
 }
-.flexRowBetween{
+.flexRowBetween {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
 }
+
+/* Small-screen adjustments (tighten spacing, reduce large displays) */
+@media (max-width: 420px) {
+    .display1 { font-size: clamp(2.25rem, 9.5vw, 3rem); }
+    .heading1 { font-size: clamp(1.4rem, 5.0vw, 1.8rem); }
+    body { line-height: 1.35; }
+}
+
+/* Large-screen adjustments (increase readability on very large viewports) */
+@media (min-width: 1400px) {
+    body { line-height: 1.5; }
+    .display1 { font-size: clamp(3.5rem, 5.5vw, 5rem); }
+}
+
+/* Utility: truncate long words and avoid overflow in small UI blocks */
+.truncate-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Accessibility: focus-visible for keyboard users */
+:focus:not(:focus-visible) { outline: none; box-shadow: none; }
+:focus-visible { outline: 2px solid var(--color-primary-500); outline-offset: 2px; }
+
+/* End of file */
