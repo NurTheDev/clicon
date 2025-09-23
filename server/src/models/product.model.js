@@ -169,7 +169,7 @@ const productSchema = new Schema({
             ref: "wearHouse"
         }
     ]
-})
+}, {timestamps: true})
 
 productSchema.pre("save", function (next) {
     try {

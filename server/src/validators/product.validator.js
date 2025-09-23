@@ -41,7 +41,6 @@ const multiProductValidationSchema = Joi.object({
     brand: objectId.required(),
     category: objectId.required(),
     subCategory: objectId.required(),
-    images: Joi.array().items(Joi.string().trim().uri()).min(1),
     thumbnail: Joi.string().trim(),
     description: Joi.string().trim().required(),
     tags: Joi.array().items(Joi.string().trim()),
@@ -50,25 +49,8 @@ const multiProductValidationSchema = Joi.object({
     abortEarly: false,
     allowUnknown: true,
 });
-const variantValidationSchema = Joi.object({
-    product: objectId.required(),
-    price: Joi.number().required(),
-    stock: Joi.number().required(),
-    sku: Joi.string().trim(),
-    size: Joi.string().valid("xs", "s", "m", "l", "xl", "xxl"),
-    color: Joi.string().valid("red", "blue", "green", "yellow", "black", "white", "gray", "brown", "purple", "orange", "custom"),
-    customColor: Joi.string().trim(),
-    images: Joi.array().items(Joi.string().trim().uri()),
-    barCode: Joi.string().trim(),
-    QRCode: Joi.string().trim(),
-    alertQuantity: Joi.number().min(5),
-}).options({
-    abortEarly: false,
-    allowUnknown: true,
-});
 
 exports.productValidation = async (req) => {
-
     try {
         if (req.body.variantType === "single") {
             const result = await singleProductValidationSchema.validateAsync(req.body)
@@ -99,7 +81,27 @@ exports.productValidation = async (req) => {
                 ...result, images: req.files.images, thumbnail: req.files.thumbnail[0]
             }
         } else {
-            return await multiProductValidationSchema.validateAsync(req.body)
+            const result = await multiProductValidationSchema.validateAsync(req.body)
+            if (!req.files || !req.files.thumbnail || !req.files.thumbnail[0]) {
+                throw new customError("Thumbnail is required", 400)
+            }
+            const validMimeTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
+            if (!validMimeTypes.includes(req.files.thumbnail[0].mimetype)) {
+                throw new customError("Thumbnail must be a jpeg, jpg, png or webp", 400)
+            }
+            // Check given category, subCategory and brand are valid or not
+            if (!result.category) throw new customError("Category is required", 400)
+            if (!result.subCategory) throw new customError("Sub category is required", 400)
+            if (!result.brand) throw new customError("Brand is required", 400)
+            const categoryExits = await categorySchema.findById(result.category)
+            if (!categoryExits) throw new customError("Category not found", 404)
+            const subCategoryExits = await subCategorySchema.findById(result.subCategory)
+            if (!subCategoryExits) throw new customError("Sub category not found", 404)
+            const brandExits = await brandSchema.findById(result.brand)
+            if (!brandExits) throw new customError("Brand not found", 404)
+            return {
+                ...result, thumbnail: req.files.thumbnail[0]
+            }
         }
     } catch (error) {
         console.error(error);
