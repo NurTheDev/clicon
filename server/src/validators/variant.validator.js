@@ -26,6 +26,7 @@ const variantValidationSchema = Joi.object({
 exports.variantValidation = async (req) => {
     try {
         const result = await variantValidationSchema.validateAsync(req.body)
+        console.log(result)
         if (!req.files || !req.files.images || req.files.images.length <= 0) throw new customError("Image is" +
             " required", 400)
         //     check image mime type
