@@ -1,6 +1,7 @@
 import HeroBanner from "./component/HeroBanner.tsx";
 import Features from "./component/Features.tsx";
 import CategoryShop from "./component/CategoryShop.tsx";
+import FeaturedProduct from "./component/FeaturedProduct.tsx";
 
 const Home = () => {
     return (
@@ -9,6 +10,7 @@ const Home = () => {
                 <HeroBanner/>
                 <Features/>
                 <CategoryShop/>
+                <FeaturedProduct/>
             </div>
         </div>
     );

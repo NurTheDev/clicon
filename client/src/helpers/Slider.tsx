@@ -13,7 +13,7 @@ import {Navigation, Pagination, Autoplay} from 'swiper/modules';
 type SliderProps = {
     children: React.ReactNode;
     spaceBetween?: number;
-    slidesPerView?: number | 'auto';
+    slidesPerView?: number;
     animationDuration?: number;
     animation?: 'slide' | 'fade' | 'cube' | 'coverflow' | 'flip';
     dots?: boolean;
@@ -21,6 +21,8 @@ type SliderProps = {
     loop?: boolean;
     navigation?: boolean;
     mobileBreakpointPx?: number;
+    tabletBreakpointPx?: number;
+    desktopBreakpointPx?: number;
 };
 const Slider: React.FC<SliderProps> = ({
                                            children,
@@ -29,11 +31,12 @@ const Slider: React.FC<SliderProps> = ({
                                            animationDuration = 3000,
                                            animation = 'slide',
                                            dots = true,
-                                           autoPlay = true,
+                                           autoPlay = false,
                                            loop = true,
                                            navigation = false,
                                            mobileBreakpointPx = 640,
                                            tabletBreakpointPx = 641,
+                                           desktopBreakpointPx = 1024,
                                        }) => {
     const slides = React.Children.toArray(children).map((child, index) => (
         <SwiperSlide key={index}>{child}</SwiperSlide>
@@ -43,6 +46,7 @@ const Slider: React.FC<SliderProps> = ({
         0: {slidesPerView: 1},
         [mobileBreakpointPx]: {slidesPerView},
         [tabletBreakpointPx]: {slidesPerView: slidesPerView >= 2 ? slidesPerView - 2 : 1},
+        [desktopBreakpointPx]: {slidesPerView},
     };
     return (
         <div>
