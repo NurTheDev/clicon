@@ -16,7 +16,7 @@ const variantSchema = new Schema({
     },
     stock: {type: Number, default: 0},
     size: {
-        type: String, enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'], default: 'M'
+        type: String, enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'], default: 'M', capitalize: true
     },
     color: {
         type: String,

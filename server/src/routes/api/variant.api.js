@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const productController = require('../../controllers/product.controller');
+const variantController = require('../../controllers/variant.controller');
 const authGard = require('../../middleware/authGard.middleware');
 const upload = require('../../middleware/multer.middleware');
 const multerErrorHandler = require('../../middleware/multerErrorHandler.middleware');
@@ -13,6 +13,6 @@ router.route("/create-variant").post(authGard, upload.fields([{
 }, {
     name: 'thumbnail',
     maxCount: 1
-}]), productController.createProduct);
+}]), variantController.createProduct);
 
 module.exports = router;
