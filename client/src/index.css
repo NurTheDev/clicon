@@ -353,6 +353,82 @@ body {
     align-items: center;
 }
 
+/* ====================== Swiper button ===================*/
+/* Base button styles */
+.swiper-button-prev,
+.swiper-button-next {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 50%;
+    background: var(--color-primary-500);
+    color: var(--color-gray-00) !important;
+    display: flex;
+    backdrop-filter: blur(4px) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    transition: background .25s, transform .25s, opacity .25s;
+    font-size: 18px !important; /* fallback if using text */
+    position: absolute;
+    top: 50%;
+    margin-top: -21px;
+}
+
+.swiper-button-prev::after,
+.swiper-button-next::after {
+    /* Swiper injects unicode by default; we override with an SVG arrow */
+    content: "";
+    width: 18px;
+    height: 18px;
+    display: block;
+    background: currentColor;
+    mask: url("data:image/svg+xml;utf8,<svg fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M15 18l-6-6 6-6'/></svg>") center / contain no-repeat;
+}
+
+/* Flip arrow for next */
+.swiper-button-next::after {
+    transform: rotate(180deg);
+}
+
+/* Hover / focus */
+.swiper-button-prev:hover,
+.swiper-button-next:hover,
+.swiper-button-prev:focus-visible,
+.swiper-button-next:focus-visible {
+    background: rgba(0,0,0,0.75);
+    outline: none;
+    transform: scale(1.05);
+}
+
+/* Active press feedback */
+.swiper-button-prev:active,
+.swiper-button-next:active {
+    transform: scale(0.95);
+}
+
+/* Disabled state from Swiper */
+.swiper-button-disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Smaller screens: reduce size */
+@media (max-width: 480px) {
+    .swiper-button-prev,
+    .swiper-button-next {
+        width: 34px !important;
+        height: 34px !important;
+        margin-top: -17px;
+    }
+    .swiper-button-prev::after,
+    .swiper-button-next::after {
+        width: 14px !important;
+        height: 14px !important;
+    }
+}
+
 /* Small-screen adjustments (tighten spacing, reduce large displays) */
 @media (max-width: 420px) {
     .display1 { font-size: clamp(2.25rem, 9.5vw, 3rem); }

@@ -12,7 +12,7 @@ const CategoryShop = () => {
                     Shop with Categorys
                 </h2>
                 <div className={"mt-5 lg:mt-10"}>
-                    <Slider slidesPerView={6} dots={false}>
+                    <Slider slidesPerView={6} dots={false} autoPlay={true} loop={true} spaceBetween={30} animationDuration={2000} navigation={true}>
                         {categoryShop.map((item, index) => (
                             <div key={index} className={"flexColumnCenter gap-y-4 py-6 px-3 max-h-[250px] h-full"}>
                                 <img className={"max-w-[148px] max-h-[148px]"} src={getImgUrl(item.image)} alt=""/>
