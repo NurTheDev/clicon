@@ -118,8 +118,8 @@ exports.getAllVariants = asyncHandler(async (req, res) => {
 })
 
 /**
- * Get a single variant by ID
- * @route GET /api/v1/variants/:id
+ * Get a single variant by slug
+ * @route GET /api/v1/variants/:slug
  * @access Public
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
@@ -132,8 +132,8 @@ exports.getSingleVariant = asyncHandler(async (req, res) => {
     success(res, "Variant retrieved successfully", variant, 200)
 })
 /**
- * Update a variant by ID
- * @route PUT /api/v1/variants/:id
+ * Update a variant by slug
+ * @route PUT /api/v1/variants/:slug
  * @access Private
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
@@ -176,6 +176,15 @@ exports.updateVariant = asyncHandler(async (req, res) => {
     success(res, "Variant updated successfully", updatedVariant, 200)
 })
 
+/**
+ * Delete an image from a variant
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @route DELETE /api/v1/variants/:slug/images
+ * @access Private
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Object} - Updated variant object
+ */
 exports.deleteImage = asyncHandler(async (req, res) => {
     const {slug} = req.params
     const {public_id} = req.body
@@ -188,4 +197,33 @@ exports.deleteImage = asyncHandler(async (req, res) => {
     existingVariant.images = existingVariant.images.filter(img => img.public_id !== public_id)
     await existingVariant.save()
     success(res, "Image deleted successfully", existingVariant, 200)
+})
+
+/**
+ * Delete a variant by slug
+ * @route DELETE /api/v1/variants/:slug
+ * @access Private
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Object} - Success message
+ */
+
+exports.deleteVariant = asyncHandler(async (req, res) => {
+    const {slug} = req.params
+    const existingVariant = await variantSchema.findOne({slug})
+    if (!existingVariant) throw new customError("Variant not found", 404)
+    // delete images from cloudinary
+    const imageDeletePromises = existingVariant.images.map(img => deleteImage(img.public_id))
+    await Promise.all(imageDeletePromises)
+    // delete barcode from cloudinary
+    if (existingVariant.barCode && existingVariant.barCode.public_id) {
+        await deleteImage(existingVariant.barCode.public_id)
+    }
+    // remove variant from product
+    await productSchema.findByIdAndUpdate(existingVariant.product, {
+        $pull: {variant: existingVariant._id}
+    })
+    // delete variant
+    await variantSchema.findByIdAndDelete(existingVariant._id)
+    success(res, "Variant deleted successfully", null, 200)
 })

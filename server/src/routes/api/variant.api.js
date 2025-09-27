@@ -30,8 +30,8 @@ router.route("/update-variant/:slug").put(authGard, upload.fields([{
     maxCount: 1
 }]), variantController.updateVariant);
 
-// // delete variant
-// router.route("/delete-variant/:id").delete(authGard, variantController.deleteVariant);
+// delete variant
+router.route("/delete-variant/:slug").delete(authGard, variantController.deleteVariant);
 
 
 // delete image from variant
