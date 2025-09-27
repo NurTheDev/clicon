@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const {Schema, Types} = mongoose;
 
 const variantSchema = new Schema({
-    product: {type: Types.ObjectId, ref: 'Product', required: true},
+    product: {type: Types.ObjectId, ref: 'product', required: true},
     sku: {type: String, unique: true},
     price: {type: Number, required: true},
     salePrice: {
@@ -36,7 +36,7 @@ variantSchema.pre('save', function (next) {
         if (this.isModified('sku') || this.isNew) {
             this.sku = `${this.product.toString().slice(-4).toUpperCase()}-${this.size}-${this.color}-${Math.floor(1000 + Math.random() * 9000)}`;
         }
-        if (this.isModified('slug') || this.isNew) {
+        if (this.isModified('color') || this.isNew) {
             this.slug = `${this.product.toString().slice(-4).toLowerCase()}-${this.size.toLowerCase()}-${this.color.toLowerCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
         }
         next();
@@ -44,17 +44,27 @@ variantSchema.pre('save', function (next) {
         console.error(error);
     }
 })
-variantSchema.pre('findOneAndUpdate', function (next) {
+variantSchema.pre('findOneAndUpdate', async function (next) {
     try {
         const update = this.getUpdate();
-        if (update.sku) {
-            update.sku = `${update.product.toString().slice(-4).toUpperCase()}-${update.size}-${update.color}-${Math.floor(1000 + Math.random() * 9000)}`;
-            update.slug = `${update.product.toString().slice(-4).toLowerCase()}-${update.size.toLowerCase()}-${update.color.toLowerCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
-            this.setUpdate(update);
+        let product = update.product
+        let size = update.size
+        let color = update.color
+        if (!product || !size || !color) {
+            const doc = await this.model.findOne(this.getQuery());
+            product = product || doc.product
+            size = size || doc.size
+            color = color || doc.color
+
+        }
+        if (color || size) {
+            update.slug = `${product.toString().slice(-4).toLowerCase()}-${size.toLowerCase()}-${color.toLowerCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+            update.sku = `${product.toString().slice(-4).toUpperCase()}-${size.toUpperCase()}-${color.toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`
         }
         next();
     } catch (error) {
         console.error(error);
     }
 })
+
 module.exports = mongoose.models.Variant || mongoose.model('Variant', variantSchema);

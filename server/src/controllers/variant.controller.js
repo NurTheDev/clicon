@@ -1,7 +1,7 @@
 const customError = require('../utils/customError');
 const asyncHandler = require('../helpers/asyncHandler');
 const {success} = require('../utils/apiResponse');
-const {variantValidation} = require('../validators/variant.validator');
+const {variantValidation, updateVariantValidation} = require('../validators/variant.validator');
 const {uploadImage, deleteImage} = require('../helpers/claudinary');
 const variantSchema = require('../models/variant.model');
 const productSchema = require('../models/product.model');
@@ -57,11 +57,18 @@ exports.createProduct = asyncHandler(async (req, res) => {
         barCode: barcodeUrl
     }
     const variant = await variantSchema.create(variantData)
-    if (!variant) throw new customError("Variant creation failed", 400)
+    if (!variant) {
+        // delete newly uploaded images from cloudinary in case of failure
+        const deletePromises = images.map(img => deleteImage(img.public_id))
+        await Promise.all(deletePromises)
+        // delete barcode from cloudinary
+        await deleteImage(barcodeUrl.public_id)
+        throw new customError("Variant creation failed", 400)
+    }
     await productSchema.findByIdAndUpdate(result.product, {
         $push: {variant: variant._id}
     })
-    success(res, "Variant created successfully",variant, 201)
+    success(res, "Variant created successfully", variant, 201)
 })
 
 /**
@@ -86,7 +93,7 @@ exports.getAllVariants = asyncHandler(async (req, res) => {
             filterOptions[key] = {$in: filters[key].split(',')}
         } else if (key === 'price') {
             const [min, max] = filters[key].split(',')
-            filterOptions[key] = { $gte: parseFloat(min), $lte: parseFloat(max) }
+            filterOptions[key] = {$gte: parseFloat(min), $lte: parseFloat(max)}
         } else if (key === 'isActive') {
             filterOptions[key] = filters[key] === 'true'
         } else {
@@ -94,8 +101,7 @@ exports.getAllVariants = asyncHandler(async (req, res) => {
         }
     }
     const total = await variantSchema.countDocuments(filterOptions)
-    const variants = await variantSchema.find(filterOptions)
-        .populate('product', 'name slug')
+    const variants = await variantSchema.find(filterOptions).populate("product")
         .sort({[sortBy]: order})
         .skip(skip)
         .limit(limit)
@@ -109,4 +115,77 @@ exports.getAllVariants = asyncHandler(async (req, res) => {
             limit
         }
     }, 200)
+})
+
+/**
+ * Get a single variant by ID
+ * @route GET /api/v1/variants/:id
+ * @access Public
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Object} - Variant object
+ */
+exports.getSingleVariant = asyncHandler(async (req, res) => {
+    const {slug} = req.params
+    const variant = await variantSchema.findOne({slug}).populate("product")
+    if (!variant) throw new customError("Variant not found", 404)
+    success(res, "Variant retrieved successfully", variant, 200)
+})
+/**
+ * Update a variant by ID
+ * @route PUT /api/v1/variants/:id
+ * @access Private
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Object} - Updated variant object
+ */
+exports.updateVariant = asyncHandler(async (req, res) => {
+    const {slug} = req.params
+    const existingVariant = await variantSchema.findOne({slug})
+    if (!existingVariant) throw new customError("Variant not found", 404)
+    const result = await updateVariantValidation(req)
+    const product = await productSchema.findById(result.product)
+    if (!product) throw new customError("Product not found", 404)
+    // upload new images to cloudinary
+    let images = existingVariant.images
+    if (result.images && result.images.length > 0) {
+        const imageUploadPromises = result.images.map(img => uploadImage(img.path))
+        const imageResponses = await Promise.all(imageUploadPromises)
+        const newImages = imageResponses.map(img => ({
+            url: img.secure_url,
+            public_id: img.public_id
+        }))
+        images = images.concat(newImages)
+    }
+    const variantData = {
+        ...result,
+        images
+    }
+    const updatedVariant = await variantSchema.findOneAndUpdate(existingVariant._id, variantData, {
+        new: true,
+        runValidators: true
+    })
+    if (!updatedVariant) {
+        // delete newly uploaded images from cloudinary in case of failure
+        if (result.images && result.images.length > 0) {
+            const deletePromises = images.slice(-result.images.length).map(img => deleteImage(img.public_id))
+            await Promise.all(deletePromises)
+        }
+        throw new customError("Variant update failed", 400)
+    }
+    success(res, "Variant updated successfully", updatedVariant, 200)
+})
+
+exports.deleteImage = asyncHandler(async (req, res) => {
+    const {slug} = req.params
+    const {public_id} = req.body
+    const existingVariant = await variantSchema.findOne({slug})
+    if (!existingVariant) throw new customError("Variant not found", 404)
+    if (!public_id) throw new customError("Image public_id is required", 400)
+    // delete image from cloudinary
+    await deleteImage(public_id)
+    // remove image from variant
+    existingVariant.images = existingVariant.images.filter(img => img.public_id !== public_id)
+    await existingVariant.save()
+    success(res, "Image deleted successfully", existingVariant, 200)
 })
