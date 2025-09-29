@@ -64,6 +64,12 @@ const couponSchema = new Schema({
     applicableCategories: [
         {type: Types.ObjectId, ref: "category"}
     ],
+    applicableSubCategories: [
+        {type: Types.ObjectId, ref: "subCategory"}
+    ],
+    applicableBrands: [
+        {type: Types.ObjectId, ref: "brand"}
+    ],
     slug: {
         type: String,
         unique: true,

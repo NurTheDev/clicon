@@ -7,6 +7,7 @@ const brandApi = require("./api/brand.api");
 const discountApi = require("./api/discount.api");
 const productApi = require("./api/product.api");
 const variantApi = require("./api/variant.api");
+const couponApi = require("./api/coupon.api");
 router.use("/auth", authApi)
 router.use("/category", categoryApi)
 router.use("/subCategory", subCategoryApi)
@@ -14,5 +15,6 @@ router.use("/brand", brandApi)
 router.use("/discount", discountApi)
 router.use("/product", productApi)
 router.use("/variant", variantApi)
+router.use("/coupon", couponApi)
 
 module.exports = router;
