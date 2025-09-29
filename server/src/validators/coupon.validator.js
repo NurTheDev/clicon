@@ -37,16 +37,13 @@ const baseFields = {
         "number.min": "Discount value cannot be negative",
     }),
     maxDiscountAmount: Joi.when("discountType", {
-        is: "percentage",
-        then: Joi.number()
+        is: "percentage", then: Joi.number()
             .min(0)
             .required()
             .messages({
-                "any.required":
-                    "Max discount amount is required when discount type is percentage",
+                "any.required": "Max discount amount is required when discount type is percentage",
                 "number.min": "Max discount amount cannot be negative",
-            }),
-        otherwise: Joi.number()
+            }), otherwise: Joi.number()
             .min(0)
             .optional()
             .messages({
@@ -57,44 +54,38 @@ const baseFields = {
         "number.min": "Minimum purchase amount cannot be negative",
     }),
     startDate: Joi.date().required().messages({
-        "any.required": "Start date is required",
-        "date.base": "Start date must be a valid date",
+        "any.required": "Start date is required", "date.base": "Start date must be a valid date",
     }),
     endDate: Joi.date().required().messages({
-        "any.required": "End date is required",
-        "date.base": "End date must be a valid date",
+        "any.required": "End date is required", "date.base": "End date must be a valid date",
     }),
     usageLimitPerUser: Joi.number().integer().min(1).default(1).messages({
-        "number.base": "Usage limit per user must be a number",
-        "number.min": "Usage limit per user must be at least 1",
+        "number.base": "Usage limit per user must be a number", "number.min": "Usage limit per user must be at least 1",
     }),
     usageLimitTotal: Joi.number().integer().min(1).messages({
-        "number.base": "Total usage limit must be a number",
-        "number.min": "Total usage limit must be at least 1",
+        "number.base": "Total usage limit must be a number", "number.min": "Total usage limit must be at least 1",
     }),
     isActive: Joi.boolean().default(true),
     applicableProducts: Joi.array()
-        .items(objectId.messages({ "string.pattern.base": "Invalid product ID" }))
+        .items(objectId.messages({"string.pattern.base": "Invalid product ID"}))
         .unique()
         .messages({
             "array.unique": "Duplicate product IDs are not allowed",
         }),
     applicableCategories: Joi.array()
-        .items(
-            objectId.messages({
-                "string.pattern.base": "Invalid category ID",
-            })
-        )
+        .items(objectId.messages({
+            "string.pattern.base": "Invalid category ID",
+        }))
         .unique()
         .messages({
             "array.unique": "Duplicate category IDs are not allowed",
         }),
+    applicableSubCategories: Joi.array().items(Joi.string().length(24).hex()),
+    applicableBrands: Joi.array().items(Joi.string().length(24).hex()),
     usersUsed: Joi.array()
-        .items(
-            objectId.messages({
-                "string.pattern.base": "Invalid user ID inside usersUsed",
-            })
-        )
+        .items(objectId.messages({
+            "string.pattern.base": "Invalid user ID inside usersUsed",
+        }))
         .messages({
             "array.base": "usersUsed must be an array of user IDs",
         }),
@@ -102,14 +93,11 @@ const baseFields = {
         .trim()
         .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
         .messages({
-            "string.pattern.base":
-                "Slug must be lowercase, alphanumeric, and may contain hyphens (no leading/trailing hyphen)",
+            "string.pattern.base": "Slug must be lowercase, alphanumeric, and may contain hyphens (no leading/trailing hyphen)",
             "string.trim": "Slug filled with extra spaces",
-        }),
-    // totalUsed should generally be controlled internally, but allow optional validation
+        }), // totalUsed should generally be controlled internally, but allow optional validation
     totalUsed: Joi.number().integer().min(0).messages({
-        "number.base": "Total used must be a number",
-        "number.min": "Total used cannot be negative",
+        "number.base": "Total used must be a number", "number.min": "Total used cannot be negative",
     }),
 };
 
@@ -182,30 +170,21 @@ const createCouponValidationSchema = Joi.object(baseFields)
         if (value.discountType === "percentage") {
             if (value.discountValue <= 0 || value.discountValue > 100) {
                 return helpers.error("any.invalid", {
-                    message:
-                        "For percentage discount type, discount value must be between 1 and 100",
+                    message: "For percentage discount type, discount value must be between 1 and 100",
                 });
             }
         }
 
         // If discountType = fixed, maxDiscountAmount is irrelevant (may be allowed but not required)
-        if (
-            value.discountType === "fixed" &&
-            value.maxDiscountAmount !== undefined
-        ) {
+        if (value.discountType === "fixed" && value.maxDiscountAmount !== undefined) {
             // You could choose to strip it:
             // delete value.maxDiscountAmount;
         }
 
         // usageLimitTotal >= usageLimitPerUser if both provided
-        if (
-            value.usageLimitTotal !== undefined &&
-            value.usageLimitPerUser !== undefined &&
-            value.usageLimitTotal < value.usageLimitPerUser
-        ) {
+        if (value.usageLimitTotal !== undefined && value.usageLimitPerUser !== undefined && value.usageLimitTotal < value.usageLimitPerUser) {
             return helpers.error("any.invalid", {
-                message:
-                    "Total usage limit must be greater than or equal to usage limit per user",
+                message: "Total usage limit must be greater than or equal to usage limit per user",
             });
         }
 
@@ -220,9 +199,7 @@ const createCouponValidationSchema = Joi.object(baseFields)
  * All fields optional, but still validated
  */
 const updateCouponValidationSchema = Joi.object({
-    ...Object.fromEntries(
-        Object.entries(baseFields).map(([k, v]) => [k, v.optional()])
-    ),
+    ...Object.fromEntries(Object.entries(baseFields).map(([k, v]) => [k, v.optional()])),
 })
     .min(1)
     .custom((value, helpers) => {
@@ -240,34 +217,26 @@ const updateCouponValidationSchema = Joi.object({
         if (value.discountType === "percentage" && value.discountValue !== undefined) {
             if (value.discountValue <= 0 || value.discountValue > 100) {
                 return helpers.error("any.invalid", {
-                    message:
-                        "For percentage discount type, discount value must be between 1 and 100",
+                    message: "For percentage discount type, discount value must be between 1 and 100",
                 });
             }
             if (value.maxDiscountAmount === undefined) {
                 return helpers.error("any.invalid", {
-                    message:
-                        "Max discount amount is required when discount type is percentage",
+                    message: "Max discount amount is required when discount type is percentage",
                 });
             }
         }
 
-        if (
-            value.usageLimitTotal !== undefined &&
-            value.usageLimitPerUser !== undefined &&
-            value.usageLimitTotal < value.usageLimitPerUser
-        ) {
+        if (value.usageLimitTotal !== undefined && value.usageLimitPerUser !== undefined && value.usageLimitTotal < value.usageLimitPerUser) {
             return helpers.error("any.invalid", {
-                message:
-                    "Total usage limit must be greater than or equal to usage limit per user",
+                message: "Total usage limit must be greater than or equal to usage limit per user",
             });
         }
 
         return value;
     })
     .messages({
-        "object.min": "At least one field must be provided to update",
-        "any.invalid": "{{#message}}",
+        "object.min": "At least one field must be provided to update", "any.invalid": "{{#message}}",
     });
 
 /**
@@ -275,36 +244,25 @@ const updateCouponValidationSchema = Joi.object({
  */
 
 function validateCreateCoupon(payload) {
-    const { error, value } = createCouponValidationSchema.validate(payload.body, {
-        abortEarly: false,
-        stripUnknown: true,
+    const {error, value} = createCouponValidationSchema.validate(payload.body, {
+        abortEarly: false, stripUnknown: true,
     });
     if (error) {
-        throw new customError(
-            error.details.map((d) => d.message).join("; "),
-            400
-        );
+        throw new customError(error.details.map((d) => d.message).join("; "), 400);
     }
     return value;
 }
 
 function validateUpdateCoupon(payload) {
-    const { error, value } = updateCouponValidationSchema.validate(payload.body, {
-        abortEarly: false,
-        stripUnknown: true,
+    const {error, value} = updateCouponValidationSchema.validate(payload.body, {
+        abortEarly: false, stripUnknown: true,
     });
     if (error) {
-        throw customError(
-            error.details.map((d) => d.message).join("; "),
-            400
-        );
+        throw customError(error.details.map((d) => d.message).join("; "), 400);
     }
     return value;
 }
 
 module.exports = {
-    createCouponValidationSchema,
-    updateCouponValidationSchema,
-    validateCreateCoupon,
-    validateUpdateCoupon,
+    createCouponValidationSchema, updateCouponValidationSchema, validateCreateCoupon, validateUpdateCoupon,
 };
