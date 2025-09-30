@@ -67,7 +67,8 @@ const userSchema = new Schema({
     phoneVerificationExpire: Date,
     refreshToken: String,
     refreshTokenExpire: Date,
-    isTwoFactorEnabled: {type: Boolean, default: false}
+    isTwoFactorEnabled: {type: Boolean, default: false},
+    reviews: [{type: Types.ObjectId, ref: "review"}],
 }, {
     timestamps: true,
     versionKey: false

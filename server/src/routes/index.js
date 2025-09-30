@@ -8,6 +8,7 @@ const discountApi = require("./api/discount.api");
 const productApi = require("./api/product.api");
 const variantApi = require("./api/variant.api");
 const couponApi = require("./api/coupon.api");
+const reviewApi = require("./api/review.api");
 router.use("/auth", authApi)
 router.use("/category", categoryApi)
 router.use("/subCategory", subCategoryApi)
@@ -16,5 +17,6 @@ router.use("/discount", discountApi)
 router.use("/product", productApi)
 router.use("/variant", variantApi)
 router.use("/coupon", couponApi)
+router.use("/review", reviewApi)
 
 module.exports = router;
