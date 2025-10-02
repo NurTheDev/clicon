@@ -93,41 +93,7 @@ warrantyInformationSchema.pre("save", function (next) {
 /**
  * Pre findOneAndUpdate: recalc durationDays if dates change
  */
-warrantyInformationSchema.pre("findOneAndUpdate", function (next) {
-    try {
-        const update = this.getUpdate() || {};
-        const hasStart = Object.prototype.hasOwnProperty.call(update, "startDate");
-        const hasEnd = Object.prototype.hasOwnProperty.call(update, "endDate");
-
-        if (hasStart || hasEnd) {
-            this.model
-                .findOne(this.getQuery())
-                .then(doc => {
-                    if (!doc) return next();
-                    const startDate = hasStart ? new Date(update.startDate) : doc.startDate;
-                    const endDate = hasEnd ? new Date(update.endDate) : doc.endDate;
-                    if (startDate && endDate) {
-                        const diffDays = Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-                        update.durationDays = diffDays;
-                    }
-                    if (endDate && endDate < new Date()) {
-                        // Only auto-expire if currently active and status not explicitly changing
-                        if (doc.status === "ACTIVE" && update.status === undefined) {
-                            update.status = "EXPIRED";
-                            update.isActive = false;
-                        }
-                    }
-                    this.setUpdate(update);
-                    next();
-                })
-                .catch(next);
-        } else {
-            next();
-        }
-    } catch (err) {
-        next(err);
-    }
-});
+""
 
 /**
  * Virtual convenience
