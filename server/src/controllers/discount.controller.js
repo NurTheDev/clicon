@@ -6,6 +6,7 @@ const {success} = require("../utils/apiResponse")
 const categorySchema = require("../models/category.model")
 const subCategorySchema = require("../models/subCategory.model")
 const brandSchema = require("../models/brand.model")
+const productSchema = require("../models/product.model")
 /**
  * @description Create a new discount
  * @type {(function(*, *, *): Promise<void>)|*}
@@ -39,22 +40,25 @@ exports.createDiscount = asyncHandler(async (req, res) => {
         product
     })
     if (!discount) throw new customError("Discount creation failed", 400)
-    if (discountFor === "category" && category.length > 0) {
-        const categories = await categorySchema.updateMany({_id: {$in: category}}, {$push: {discount: discount._id}})
-        if (!categories) throw new customError("Category not found", 400)
+    const modelMap = {
+        category: {model: categorySchema, ids: category},
+        subCategory: {model: subCategorySchema, ids: subCategory},
+        brand: {model: brandSchema, ids: brand},
+        product: {model: productSchema, ids: product},
     }
-    if (discountFor === "subCategory" && subCategory.length > 0) {
-        const subCategories = await subCategorySchema.updateMany({_id: {$in: subCategory}}, {$push: {discount: discount._id}})
-        if (!subCategories) throw new customError("SubCategory not found", 400)
+
+    async function updateRelatedModels(discountFor, discountId) {
+        const entry = modelMap[discountFor];
+        if (!entry) return;
+        const {model, ids} = entry;
+        if (!Array.isArray(ids) || ids.length === 0) return;
+        const result = await model.updateMany({_id: {$in: ids}}, {$addToSet: {discount: discountId}});
+        if ((result.matchedCount ?? result.n) === 0) {
+            throw new customError(`No valid ${discountFor} found for the provided IDs`, 400);
+        }
     }
-    if (discountFor === "brand" && brand.length > 0) {
-        const brands = await brandSchema.updateMany({_id: {$in: brand}}, {$push: {discount: discount._id}})
-        if (!brands) throw new customError("Brand not found", 400)
-    }
-    if (discountFor === "product" && product.length > 0) {
-        const products = await productSchema.updateMany({_id: {$in: product}}, {$push: {discount: discount._id}})
-        if (!products) throw new customError("Product not found", 400)
-    }
+
+    await updateRelatedModels(discountFor, discount._id);
     return success(res, "Discount Created successfully", discount, 201)
 })
 /**
@@ -82,7 +86,7 @@ exports.updateDiscount = asyncHandler(async (req, res) => {
     const oldDiscount = await Discount.findOne({slug})
     if (!oldDiscount) throw new customError("Discount not found", 400)
     if (oldDiscount.category.length > 0) {
-         await categorySchema.updateMany({_id: {$in: oldDiscount.category}}, {$pull: {discount: oldDiscount._id}})
+        await categorySchema.updateMany({_id: {$in: oldDiscount.category}}, {$pull: {discount: oldDiscount._id}})
     }
     if (oldDiscount.subCategory.length > 0) {
         await subCategorySchema.updateMany({_id: {$in: oldDiscount.subCategory}}, {$pull: {discount: oldDiscount._id}})
