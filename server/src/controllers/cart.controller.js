@@ -13,21 +13,23 @@ exports.createCart = asyncHandler(async (req, res) => {
     const existingCart = await cartSchema.findOne({
         isActive: true,
         $or: [
-            { userId: result.userId },
-            { guestId: result.guestId }
+            {userId: result.userId},
+            {guestId: result.guestId}
         ]
-    }).lean();
-    if (!existingCart) {
-        let price = 0;
-        let totalPrice = 0;
-        let totalQuantity = 0;
-        let product = {}
-        if (result.variant) {
-            product = await variantSchema.findById(result.variant)
-        } else {
-            product = await productSchema.findById(result.product)
-        }
+    });
+    let price = 0;
+    let totalPrice = 0;
+    let totalQuantity = 0;
+    let product = {}
+    if (result.variant) {
+        product = await variantSchema.findById(result.variant)
+    } else {
+        product = await productSchema.findById(result.product)
         if (!product) throw new customError("Product not found", 400);
+    }
+    if (!product) throw new customError("Product not found", 400);
+
+    if (!existingCart) {
         price = product.salePrice || product.price;
         totalPrice = price * result.quantity;
         totalQuantity = result.quantity;
@@ -45,6 +47,46 @@ exports.createCart = asyncHandler(async (req, res) => {
         result.totalQuantity = totalQuantity;
         const cart = new cartSchema(result);
         await cart.save();
-        return success(res, 201, "Cart created successfully", cart);
+        return success(res, "Cart created successfully", cart, 201);
+    }
+
+    if (existingCart) {
+        // If cart exists, update the existing cart
+        const itemIndex = existingCart.items.findIndex(item => {
+            if (item.product.toString() !== result.product) return false;
+            if (result.variant) {
+                if (!item.variant) return false;
+                if (item.variant.toString() !== result.variant.toString()) return false
+            }
+            if (result.color && item.color !== result.color) return false;
+            if (result.size && item.size !== result.size) return false;
+            return true;
+        })
+        price = product.salePrice || product.price;
+        totalPrice = price * result.quantity;
+        totalQuantity = result.quantity;
+        if (itemIndex > -1) {
+            // If product exists in cart, update the quantity and total
+            existingCart.items[itemIndex].quantity += result.quantity;
+            existingCart.items[itemIndex].total += totalPrice;
+            existingCart.items[itemIndex].finalPrice += totalPrice;
+        } else {
+            // If product does not exist in cart, add new item
+            existingCart.items.push({
+                product: result.product,
+                variant: result.variant,
+                color: result.color,
+                size: result.size,
+                quantity: result.quantity,
+                price: price,
+                total: totalPrice,
+                finalPrice: totalPrice
+            });
+        }
+        // Update cart totals
+        existingCart.totalQuantity += totalQuantity;
+        existingCart.totalPrice += totalPrice;
+        await existingCart.save();
+        return success(res, "Cart updated successfully", existingCart, 200);
     }
 })
