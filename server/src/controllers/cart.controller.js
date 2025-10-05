@@ -92,6 +92,7 @@ exports.createCart = asyncHandler(async (req, res) => {
             // If product exists in cart, update the quantity and total
             existingCart.items[itemIndex].quantity += result.quantity;
             existingCart.items[itemIndex].total += totalPrice;
+            existingCart.items[itemIndex].discount += discount;
             existingCart.items[itemIndex].finalPrice += (totalPrice - discount);
         } else {
             // If product does not exist in cart, add new item
