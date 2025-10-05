@@ -85,6 +85,7 @@ exports.updateDiscount = asyncHandler(async (req, res) => {
     } = await updateDiscountValidation(req)
     const oldDiscount = await Discount.findOne({slug})
     if (!oldDiscount) throw new customError("Discount not found", 400)
+    // Now update the related models to remove the discount from old associations
     if (oldDiscount.category.length > 0) {
         await categorySchema.updateMany({_id: {$in: oldDiscount.category}}, {$pull: {discount: oldDiscount._id}})
     }
@@ -97,6 +98,7 @@ exports.updateDiscount = asyncHandler(async (req, res) => {
     if (oldDiscount.product.length > 0) {
         await productSchema.updateMany({_id: {$in: oldDiscount.product}}, {$pull: {discount: oldDiscount._id}})
     }
+    // Now update the discountS
     const discount = await Discount.findOneAndUpdate({slug}, {
         name,
         startAt,
