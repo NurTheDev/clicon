@@ -17,9 +17,7 @@ exports.createCart = asyncHandler(async (req, res) => {
             {guestId: result.guestId}
         ]
     });
-    let price = 0;
-    let totalPrice = 0;
-    let totalQuantity = 0;
+
     let product = {}
     if (result.variant) {
         product = await variantSchema.findById(result.variant)
@@ -28,7 +26,17 @@ exports.createCart = asyncHandler(async (req, res) => {
         if (!product) throw new customError("Product not found", 400);
     }
     if (!product) throw new customError("Product not found", 400);
-
+    // Check stock availability
+    if (product.stock < result.quantity) {
+        throw new customError(`Only ${product.stock} items in stock`, 400);
+    }
+    let price = 0;
+    let totalPrice = 0;
+    let totalQuantity = 0;
+    let discount = 0
+    // First calcute the discount if any
+    console.log(product.discount)
+    return
     if (!existingCart) {
         price = product.salePrice || product.price;
         totalPrice = price * result.quantity;
@@ -41,7 +49,8 @@ exports.createCart = asyncHandler(async (req, res) => {
             quantity: result.quantity,
             price: price,
             total: totalPrice,
-            finalPrice: totalPrice
+            discount: discount,
+            finalPrice: totalPrice - discount
         }]
         result.totalPrice = totalPrice;
         result.totalQuantity = totalQuantity;
