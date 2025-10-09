@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
 const {Schema, Types} = mongoose;
-
-
 const warrantyClaimSchema = new Schema({
     claimNumber: {type: String, required: true, trim: true},
     status: {

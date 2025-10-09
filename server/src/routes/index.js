@@ -11,6 +11,11 @@ const couponApi = require("./api/coupon.api");
 const reviewApi = require("./api/review.api");
 const warehouseApi = require("./api/warehouse.api");
 const cartApi = require("./api/cart.api");
+const orderApi = require("./api/order.api");
+const deliveryApi = require("./api/delivery.api");
+
+router.use("/delivery", deliveryApi)
+router.use("/order", orderApi)
 router.use("/auth", authApi)
 router.use("/category", categoryApi)
 router.use("/subCategory", subCategoryApi)

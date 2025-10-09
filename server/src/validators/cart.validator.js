@@ -68,43 +68,31 @@ async function validateCreateCart(req) {
         abortEarly: false,
         stripUnknown: true
     });
-
     if (error) {
         throw new Error(error.details.map(d => d.message).join("; "));
     }
-
-    // // 2. If userId present, verify user existence (skip for guest carts)
-    // if (value.userId) {
-    //     const userExists = await userSchema.exists({ _id: value.userId });
-    //     if (!userExists) {
-    //         throw new Error("Invalid userId: no such user");
-    //     }
-    // }
-    //
-    // // 3. Validate products (batch)
-    // if (value.items && value.items.length > 0) {
-    //     const productIds = [...new Set(value.items.map(i => i.product))];
-    //     const foundProducts = await productSchema.find(
-    //         { _id: { $in: productIds } },
-    //         { _id: 1 }
-    //     ).lean();
-    //     if (foundProducts.length !== productIds.length) {
-    //         throw new Error("One or more items have invalid product IDs");
-    //     }
-    //
-    //     // 4. Validate variants (only those provided)
-    //     const variantIds = [...new Set(value.items.filter(i => i.variant).map(i => i.variant))];
-    //     if (variantIds.length > 0) {
-    //         const foundVariants = await variantSchema.find(
-    //             { _id: { $in: variantIds } },
-    //             { _id: 1 }
-    //         ).lean();
-    //         if (foundVariants.length !== variantIds.length) {
-    //             throw new Error("One or more items have invalid variant IDs");
-    //         }
-    //     }
-    // }
-
+    // check variant belongs to product
+    if (value.variant) {
+        const variant = await variantSchema.findById(value.variant);
+        if (!variant) {
+            throw new Error("Variant not found");
+        }
+        if (variant.product.toString() !== value.product) {
+            throw new Error("Variant does not belong to the specified product");
+        }
+    }
+    // 2. Check user exists if userId provided
+    if (value.userId) {
+        const user = await userSchema.findById(value.userId);
+        if (!user) {
+            throw new Error("User not found");
+        }
+    }
+    // 3. Check product exists
+    const product = await productSchema.findById(value.product);
+    if (!product) {
+        throw new Error("Product not found");
+    }
     return value;
 }
 

@@ -28,7 +28,15 @@ const variantSchema = new Schema({
     }],
     isActive: {type: Boolean, default: true},
     slug: {type: String, unique: true, lowercase: true, trim: true},
-    alertStock: {type: Number, default: 5}
+    alertStock: {type: Number, default: 5},
+    totalSales: {
+        type: Number,
+        default: 0
+    },
+    isBestSelling:{
+        type: Boolean,
+        default: false
+    }
 }, {timestamps: true});
 
 variantSchema.pre('save', function (next) {

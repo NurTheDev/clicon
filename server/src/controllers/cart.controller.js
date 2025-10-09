@@ -5,7 +5,7 @@ const {validateCreateCart, validateUpdateCart} = require('../validators/cart.val
 const asyncHandler = require("../helpers/asyncHandler");
 const productSchema = require("../models/product.model");
 const variantSchema = require("../models/variant.model");
-
+const {getIOInstance} = require("../socket/socket");
 /**
  * @description Create or update a cart
  * @type {(function(*, *, *): Promise<void>)|*}
@@ -56,7 +56,7 @@ exports.createCart = asyncHandler(async (req, res) => {
             }
         }
     }
-
+    const io = getIOInstance();
     if (!existingCart) {
         price = product.salePrice || product.price;
         totalPrice = price * result.quantity;
@@ -76,6 +76,15 @@ exports.createCart = asyncHandler(async (req, res) => {
         result.totalQuantity = totalQuantity;
         const cart = new cartSchema(result);
         await cart.save();
+        const room = String(result.userId || result.guestId);
+        console.log("emitting to room:", room, "size:",
+            io.sockets.adapter.rooms.get(room)?.size || 0);
+
+        io.to(room).emit("addToCart", {
+            cartId: cart._id,
+            items: cart.items,
+            totalPrice: cart.totalPrice
+        });
         return success(res, "Cart created successfully", cart, 201);
     }
     if (existingCart) {
@@ -119,6 +128,9 @@ exports.createCart = asyncHandler(async (req, res) => {
         existingCart.totalPrice += totalPrice;
         console.log(discount)
         await existingCart.save();
+        const room2 = String(result.userId || result.guestId);
+        console.log("emitting to room:", room2, "size:",)
+        io.to(room2).emit("addToCart", { cartId: existingCart._id, items: existingCart.items, totalPrice: existingCart.totalPrice });
         return success(res, "Cart updated successfully", existingCart, 200);
     }
 })
@@ -153,7 +165,7 @@ exports.updateCart = asyncHandler(async (req, res) => {
     const {userId} = req.params;
     const quantity = parseInt(req.body.quantity, 10);
     const {productId, variantId} = req.body;
-    if(!userId) throw new customError("userId is required", 400);
+    if (!userId) throw new customError("userId is required", 400);
     if (!productId && !variantId) throw new customError("productId or variantId is required", 400);
     if (isNaN(quantity)) throw new customError("Valid quantity is required", 400);
     const cart = await cartSchema.findById(userId);
@@ -172,7 +184,7 @@ exports.updateCart = asyncHandler(async (req, res) => {
         // Update item quantity
         const item = cart.items[findIndex];
         let product = {};
-        if(item.variant){
+        if (item.variant) {
             product = await variantSchema.findById(item.variant);
         } else {
             product = await productSchema.findById(item.product).populate("discount");
@@ -186,7 +198,7 @@ exports.updateCart = asyncHandler(async (req, res) => {
         // Recalculate discount
         let discount = 0;
         let discountObject = null;
-        if(product.discount) discountObject = product.discount;
+        if (product.discount) discountObject = product.discount;
         if (discountObject) {
             const now = new Date();
             if (discountObject.startAt <= now && discountObject.endAt >= now) {
@@ -218,7 +230,7 @@ exports.updateCart = asyncHandler(async (req, res) => {
 exports.incrementCartItem = asyncHandler(async (req, res) => {
     const {userId} = req.params;
     const {productId, variantId} = req.body;
-    if(!userId) throw new customError("userId is required", 400);
+    if (!userId) throw new customError("userId is required", 400);
     if (!productId && !variantId) throw new customError("productId or variantId is required", 400);
     const cart = await cartSchema.findById(userId);
     if (!cart) throw new customError("Cart not found", 404);
@@ -226,7 +238,7 @@ exports.incrementCartItem = asyncHandler(async (req, res) => {
     if (findIndex === -1) throw new customError("Item not found in cart", 404);
     const item = cart.items[findIndex];
     let product = {};
-    if(item.variant){
+    if (item.variant) {
         product = await variantSchema.findById(item.variant);
     } else {
         product = await productSchema.findById(item.product).populate("discount");
@@ -240,7 +252,7 @@ exports.incrementCartItem = asyncHandler(async (req, res) => {
     // Recalculate discount
     let discount = 0;
     let discountObject = null;
-    if(product.discount) discountObject = product.discount;
+    if (product.discount) discountObject = product.discount;
     if (discountObject) {
         const now = new Date();
         if (discountObject.startAt <= now && discountObject.endAt >= now) {
@@ -271,7 +283,7 @@ exports.incrementCartItem = asyncHandler(async (req, res) => {
 exports.decrementCartItem = asyncHandler(async (req, res) => {
     const {userId} = req.params;
     const {productId, variantId} = req.body;
-    if(!userId) throw new customError("userId is required", 400);
+    if (!userId) throw new customError("userId is required", 400);
     if (!productId && !variantId) throw new customError("productId or variantId is required", 400);
     const cart = await cartSchema.findById(userId);
     if (!cart) throw new customError("Cart not found", 404);
@@ -288,7 +300,7 @@ exports.decrementCartItem = asyncHandler(async (req, res) => {
         return success(res, "Item removed from cart", cart, 200);
     } else {
         let product = {};
-        if(item.variant){
+        if (item.variant) {
             product = await variantSchema.findById(item.variant);
         } else {
             product = await productSchema.findById(item.product).populate("discount");
@@ -301,7 +313,7 @@ exports.decrementCartItem = asyncHandler(async (req, res) => {
         // Recalculate discount
         let discount = 0;
         let discountObject = null;
-        if(product.discount) discountObject = product.discount;
+        if (product.discount) discountObject = product.discount;
         if (discountObject) {
             const now = new Date();
             if (discountObject.startAt <= now && discountObject.endAt >= now) {
@@ -325,11 +337,11 @@ exports.decrementCartItem = asyncHandler(async (req, res) => {
 //Delete cart Item
 /**
  * @description Delete a cart
-    * @type {(function(*, *, *): Promise<void>)|*}
-    * @param {Object} req - The request object
-    * @param {Object} res - The response object
-    * @returns {Promise<void>}
-    */
+ * @type {(function(*, *, *): Promise<void>)|*}
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
 exports.deleteCartItem = asyncHandler(async (req, res) => {
     const {userId} = req.params;
     const {productId, variantId} = req.body;
@@ -344,7 +356,7 @@ exports.deleteCartItem = asyncHandler(async (req, res) => {
     cart.totalQuantity -= cart.items[findIndex].quantity;
     cart.items.splice(findIndex, 1);
     await cart.save();
-    if(cart.items.length === 0){
+    if (cart.items.length === 0) {
         // If cart is empty, delete the cart
         await cartSchema.findByIdAndDelete(userId);
         return success(res, "Cart is empty now, so cart deleted", null, 200);

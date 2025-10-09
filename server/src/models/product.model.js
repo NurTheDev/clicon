@@ -168,7 +168,15 @@ const productSchema = new Schema({
             type: Types.ObjectId,
             ref: "wearHouse"
         }
-    ]
+    ],
+    totalSales: {
+        type: Number,
+        default: 0
+    },
+    isBestSelling:{
+        type: Boolean,
+        default: false
+    }
 }, {timestamps: true})
 
 productSchema.pre("save", function (next) {
