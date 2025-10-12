@@ -74,7 +74,7 @@ const couponSchema = new Schema({
         type: String,
         unique: true,
         trim: true
-    },
+    }
 }, {
     timestamps: true,
     versionKey: false

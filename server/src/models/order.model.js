@@ -67,7 +67,7 @@ const orderSchema = new Schema({
         phoneNumber: {type: String, trim: true},
         email: {type: String, trim: true}
     },
-    deliveryZone: {type: String, trim: true, enum: ["INSIDE_DHAKA", "OUTSIDE_DHAKA", "INTERNATIONAL"], required: true},
+    deliveryCharge: {type: Types.ObjectId, ref: "deliveryCharge", required: true},
     isBillingAddressSameAsShipping: {type: Boolean, default: true},
     paymentMethod: {type: String, trim: true, required: true, enum: ["COD", "SSL_COMMERZ"]},
     paymentStatus: {
@@ -86,7 +86,7 @@ const orderSchema = new Schema({
     meta: {
         type: Map, of: String
     },
-    deliveryInfo: {type: Types.ObjectId, ref: "delivery"},
+    deliveryInfo: {type: Types.ObjectId, ref: "deliveryCharge"},
 }, {
     timestamps: true, versionKey: false
 });

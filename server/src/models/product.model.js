@@ -29,10 +29,10 @@ const productSchema = new Schema({
         type: Boolean,
         default: true
     },
-    discount: {
+    discount: [{
         type: Types.ObjectId,
         ref: "discount"
-    },
+    }],
     subCategory: {
         type: Types.ObjectId,
         ref: "subCategory"

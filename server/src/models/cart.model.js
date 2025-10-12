@@ -15,7 +15,7 @@ const cartItemSchema = new Schema({
 }, {_id: false})
 
 const cartSchema = new Schema({
-    userId: {type: Types.ObjectId, ref: "user", required: true, unique: true},
+    userId: {type: Types.ObjectId, ref: "user",unique: true},
     guestId: {type: String, trim: true},
     items: {type: [cartItemSchema], default: []},
     totalQuantity: {type: Number, required: true, min: 0, default: 0},
@@ -26,6 +26,17 @@ const cartSchema = new Schema({
     updatedBy: {type: Types.ObjectId, ref: "user"}
 }, {
     timestamps: true, versionKey: false
+})
+
+// Check that either userId or guestId is provided
+cartSchema.pre("validate", async function (next) {
+    if (!this.userId && !this.guestId) {
+        return next(new customError("Either userId or guestId must be provided", 400));
+    }
+    if (this.userId && this.guestId) {
+        return next(new customError("Only one of userId or guestId should be provided", 400));
+    }
+    next();
 })
 
 module.exports = mongoose.models.cart || mongoose.model("cart", cartSchema)

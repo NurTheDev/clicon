@@ -61,12 +61,12 @@ const orderSchema = Joi.object({
     verificationToken: Joi.string().trim().allow(null),
     paymentDetails: Joi.any(),
     notes: Joi.string().trim(),
-    deliveryZone: Joi.string().trim().required(),
     isActive: Joi.boolean().default(true),
     createdBy: Joi.string(),
     updatedBy: Joi.string(),
     meta: Joi.object().pattern(Joi.string(), Joi.string()),
-    deliveryInfo: Joi.string()
+    deliveryInfo: Joi.string(),
+    deliveryCharge: Joi.string().required()
 });
 const orderValidation = async (req) => {
     try {
