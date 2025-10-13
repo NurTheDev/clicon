@@ -37,7 +37,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
             variant.stock -= item.quantity;
             variant.totalSales += item.quantity;
             // Update isBestSelling flag
-            if (variant.totalSales >= 100) { // Example threshold for best selling
+            if (variant.totalSales >= 100) { // Example threshold for best-selling
                 variant.isBestSelling = true;
             }
             await variant.save();
