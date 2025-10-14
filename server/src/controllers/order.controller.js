@@ -10,6 +10,11 @@ const {DeliveryCharge} = require('../models/delivery.model');
 const couponSchema = require('../models/coupon.model');
 const crypto = require('crypto');
 const invoice = require("../models/invoice.model");
+require('dotenv').config();
+const SSLCommerzPayment = require('sslcommerz-lts')
+const store_id = process.env.STORE_ID;
+const store_passwd = process.env.STORE_PASSWORD;
+const is_live = process.env.NODE_ENV === 'production';
 // Create Order
 exports.createOrder = asyncHandler(async (req, res) => {
     // Check if cart exists for user or guest
@@ -20,6 +25,8 @@ exports.createOrder = asyncHandler(async (req, res) => {
         throw new customError('Cart not found', 404);
     }
     try {
+        const invoiceCode = `INV-${crypto.randomBytes(6).toString('hex').toUpperCase()}`
+        const transitionCode = `TRANS-${crypto.randomBytes(6).toString('hex').toUpperCase()}`
         // Generate unique order number
         result.orderNumber = `ORD-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
         result.orderDate = new Date();
@@ -178,7 +185,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
             result.totalQuantity = cart.totalQuantity;
             result.taxAmount = 0; // Assuming no tax for simplicity
             // generate transaction id
-            result.transactionId = `TXN-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
+            result.transactionId = transitionCode;
             // Now save the order
             const newOrder = new orderSchema.Order(result);
             await newOrder.save();
@@ -186,7 +193,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
             await cartSchema.findByIdAndDelete(cart._id);
             // create an invoice
             const newInvoice = new invoice({
-                invoiceNumber: `INV-${crypto.randomBytes(6).toString('hex').toUpperCase()}`,
+                invoiceNumber: invoiceCode,
                 orderId: newOrder._id,
                 userId: result.user || result.guestId || null,
                 billingAddress: result.billingAddress,
@@ -210,6 +217,105 @@ exports.createOrder = asyncHandler(async (req, res) => {
             });
             await newInvoice.save();
             return success(res, 'Order created successfully', newOrder, 201);
+        } else if (result.paymentMethod === 'SSL_COMMERZ') {
+            //     Check product delivery charge
+            if (!result.deliveryCharge) {
+                throw new customError('Delivery Zone is required', 400);
+            }
+            const deliveryCharge = await DeliveryCharge.findById(result.deliveryCharge);
+            if (!deliveryCharge) {
+                throw new customError('Delivery Charge not found', 404);
+            }
+            result.shippingAmount = deliveryCharge.amount;
+            result.finalAmount = cart.totalPrice - discountAmount + deliveryCharge.amount;
+            //     Now save the order
+            result.lineItems = cart.items.map(item => ({
+                product: item.product,
+                variant: item.variant || null,
+                quantity: item.quantity,
+                unitPrice: item.price,
+                totalPrice: item.total * item.quantity,
+                taxAmount: 0, // Assuming no tax for simplicity
+                discountAmount: item.discount || 0,
+                sku: item.sku || '',
+                name: item.name || item.product.name || item.variant.name || '',
+                description: item.description || '',
+                attributes: item.attributes || {}
+            }))
+            result.totalAmount = cart.totalPrice;
+            result.totalQuantity = cart.totalQuantity;
+            result.taxAmount = 0; // Assuming no tax for simplicity
+            // generate transaction id
+            result.transactionId = transitionCode;
+            // Now save the order
+            const newOrder = new orderSchema.Order(result);
+            await newOrder.save();
+            // Clear the cart
+            await cartSchema.findByIdAndDelete(cart._id);
+            // create an invoice
+            const newInvoice = new invoice({
+                invoiceNumber: invoiceCode,
+                orderId: newOrder._id,
+                userId: result.user || result.guestId || null,
+                billingAddress: result.billingAddress,
+                shippingAddress: result.shippingAddress,
+                items: newOrder.lineItems.map(item => ({
+                    productId: item.product,
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.unitPrice,
+                    total: item.totalPrice
+                })),
+                subtotal: newOrder.totalAmount,
+                taxAmount: newOrder.taxAmount,
+                shippingAmount: newOrder.shippingAmount,
+                totalAmount: newOrder.finalAmount,
+                currency: newOrder.currency,
+                issueDate: new Date(),
+                dueDate: null,
+                status: result.paymentStatus === 'COMPLETED' ? 'PAID' : 'UNPAID',
+                notes: result.notes || ''
+            });
+            await newInvoice.save();
+            const data = {
+                total_amount: newOrder.finalAmount,
+                currency: newOrder.currency || 'BDT',
+                tran_id: transitionCode, // use order id or transaction id from your database
+                success_url: process.env.SSL_COMMERZE_SUCCESS_URL,
+                fail_url: process.env.SSL_COMMERZE_FAIL_URL,
+                cancel_url: process.env.SSL_COMMERZE_CANCEL_URL,
+                ipn_url: process.env.SSL_COMMERZE_IPN_URL,
+                shipping_method: 'NO',
+                product_name: newOrder.lineItems.length > 0 ? newOrder.lineItems[0].name : 'Product',
+                product_category: 'General',
+                product_profile: 'general',
+                cus_name: result.shippingAddress ? result.shippingAddress.fullName : 'Customer',
+                cus_email: result.user ? result.user.email : (result.guestEmail || ""),
+                cus_add1: result.shippingAddress ? result.shippingAddress.addressLine1 : 'Address',
+                cus_add2: result.shippingAddress ? result.shippingAddress.addressLine2 : '',
+                cus_city: result.shippingAddress ? result.shippingAddress.city : 'City',
+                cus_state: result.shippingAddress ? result.shippingAddress.state : 'State',
+                cus_postcode: result.shippingAddress ? result.shippingAddress.postalCode : '0000',
+                cus_country: result.shippingAddress ? result.shippingAddress.country : 'Country',
+                cus_phone: result.shippingAddress ? result.shippingAddress.phoneNumber : '01700000000',
+                cus_fax: '',
+                ship_name: result.shippingAddress ? result.shippingAddress.fullName : 'Customer',
+                ship_add1: result.shippingAddress ? result.shippingAddress.addressLine1 : 'Address',
+                ship_add2: result.shippingAddress ? result.shippingAddress.addressLine2 : '',
+                ship_city: result.shippingAddress ? result.shippingAddress.city : 'City',
+                ship_state: result.shippingAddress ? result.shippingAddress.state : 'State',
+                ship_postcode: result.shippingAddress ? result.shippingAddress.postalCode : '0000',
+                ship_country: result.shippingAddress ? result.shippingAddress.country : 'Country',
+            };
+            const sslcommerz = new SSLCommerzPayment(store_id, store_passwd, is_live)
+            sslcommerz.init(data).then(apiResponse => {
+                // Redirect the user to payment gateway
+                let GatewayPageURL = apiResponse.GatewayPageURL
+                return success(res, 'Order created successfully', {order: newOrder, redirectURL: GatewayPageURL}, 201);
+            }).catch(error => {
+                console.error('SSLCommerz Payment Initialization Error:', error);
+                throw new customError('SSLCommerz Payment Initialization Failed', 500);
+            });
         }
     } catch (error) {
         console.error('Error creating order:', error);
