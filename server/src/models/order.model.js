@@ -34,7 +34,7 @@ const orderSchema = new Schema({
     totalAmount: {type: Number, required: true, min: 0},
     totalQuantity: {type: Number, required: true, min: 0},
     taxAmount: {type: Number, required: true, min: 0},
-    discountAmount: {type: Number, required: true, min: 0},
+    discountAmount: {type: Number, min: 0},
     shippingAmount: {type: Number, required: true, min: 0},
     finalAmount: {type: Number, required: true, min: 0},
     currency: {type: String, trim: true, required: true, default: "BDT"},
