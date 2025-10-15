@@ -25,7 +25,7 @@ const addressSchema = Joi.object({
     phoneNumber: Joi.string().trim().pattern(new RegExp(/^\+?[0-9]{10,15}$/)).messages({
         "string.pattern.base": "Invalid phone number"
     }),
-    email: Joi.string().trim().email()
+    email: Joi.string().trim().email().required()
 });
 
 const orderSchema = Joi.object({

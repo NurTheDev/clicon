@@ -12,8 +12,8 @@ const crypto = require('crypto');
 const invoice = require("../models/invoice.model");
 require('dotenv').config();
 const SSLCommerzPayment = require('sslcommerz-lts')
-const store_id = process.env.STORE_ID;
-const store_passwd = process.env.STORE_PASSWORD;
+const store_id = process.env.SSL_COMMERZE_STORE_ID;
+const store_passwd = process.env.SSL_COMMERZE_STORE_PASSWORD;
 const is_live = process.env.NODE_ENV === 'production';
 // Create Order
 exports.createOrder = asyncHandler(async (req, res) => {
@@ -250,8 +250,6 @@ exports.createOrder = asyncHandler(async (req, res) => {
             // Now save the order
             const newOrder = new orderSchema.Order(result);
             await newOrder.save();
-            // Clear the cart
-            await cartSchema.findByIdAndDelete(cart._id);
             // create an invoice
             const newInvoice = new invoice({
                 invoiceNumber: invoiceCode,
@@ -290,7 +288,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
                 product_category: 'General',
                 product_profile: 'general',
                 cus_name: result.shippingAddress ? result.shippingAddress.fullName : 'Customer',
-                cus_email: result.user ? result.user.email : (result.guestEmail || ""),
+                cus_email: result.shippingAddress ? result.shippingAddress.email : '',
                 cus_add1: result.shippingAddress ? result.shippingAddress.addressLine1 : 'Address',
                 cus_add2: result.shippingAddress ? result.shippingAddress.addressLine2 : '',
                 cus_city: result.shippingAddress ? result.shippingAddress.city : 'City',
@@ -311,11 +309,15 @@ exports.createOrder = asyncHandler(async (req, res) => {
             sslcommerz.init(data).then(apiResponse => {
                 // Redirect the user to payment gateway
                 let GatewayPageURL = apiResponse.GatewayPageURL
+                console.log(GatewayPageURL, "Redirecting to SSLCommerz");
                 return success(res, 'Order created successfully', {order: newOrder, redirectURL: GatewayPageURL}, 201);
             }).catch(error => {
                 console.error('SSLCommerz Payment Initialization Error:', error);
                 throw new customError('SSLCommerz Payment Initialization Failed', 500);
             });
+            return
+            // Clear the cart
+            await cartSchema.findByIdAndDelete(cart._id);
         }
     } catch (error) {
         console.error('Error creating order:', error);
