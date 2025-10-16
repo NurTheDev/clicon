@@ -1,6 +1,7 @@
 require("dotenv").config();
 const axios = require("axios");
 const sendSMS = async (number, message)=>{
+    console.log(number)
     try {
         await axios.post(process.env.SMS_URL, {
             "api_key" : process.env.SMS_API_KEY,

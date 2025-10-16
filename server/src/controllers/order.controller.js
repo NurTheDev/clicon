@@ -10,6 +10,9 @@ const {DeliveryCharge} = require('../models/delivery.model');
 const couponSchema = require('../models/coupon.model');
 const crypto = require('crypto');
 const invoice = require("../models/invoice.model");
+const sendSMS = require("../helpers/sendSMS");
+const {orderConfirmation} = require("../templet/emailTemplet");
+const {sendEmail} = require("../helpers/sendEmail")
 require('dotenv').config();
 const SSLCommerzPayment = require('sslcommerz-lts')
 const store_id = process.env.SSL_COMMERZE_STORE_ID;
@@ -216,6 +219,33 @@ exports.createOrder = asyncHandler(async (req, res) => {
                 notes: result.notes || ''
             });
             await newInvoice.save();
+            // send order confirmation email
+            if (result.user || result.guestId && result.shippingAddress && result.shippingAddress.email) {
+                const emailContent = orderConfirmation({
+                    orderNumber: newOrder.orderNumber,
+                    customerName: result.shippingAddress.fullName,
+                    orderDate: newOrder.orderDate,
+                    lineItems: newOrder.lineItems.map(item => ({
+                        name: item.name,
+                        quantity: item.quantity,
+                        totalPrice: item.totalPrice,
+                        image: item.product.thumbnail?.url
+                    })),
+                    subtotal: newOrder.totalAmount,
+                    shippingAmount: newOrder.shippingAmount,
+                    taxAmount: newOrder.taxAmount,
+                    totalAmount: newOrder.finalAmount,
+                    currency: newOrder.currency,
+                    shippingAddress: result.shippingAddress,
+                    paymentMethod: result.paymentMethod,
+                    estimatedDelivery: 'Within 5-7 business days'
+                });
+                await sendEmail(result.shippingAddress.email, emailContent, "Order Confirmed Successfully");
+            } else if (resul.user || result.guestId && result.shippingAddress && result.shippingAddress.phoneNumber) {
+                // send order confirmation sms
+                const message = `Dear ${result.shippingAddress.fullName}, your order ${newOrder.orderNumber} has been placed successfully. Total amount: ${newOrder.finalAmount} ${newOrder.currency}. Thank you for shopping with us!`;
+                await sendSMS(result.shippingAddress.phoneNumber, message);
+            }
             return success(res, 'Order created successfully', newOrder, 201);
         } else if (result.paymentMethod === 'SSL_COMMERZ') {
             //     Check product delivery charge
@@ -244,12 +274,12 @@ exports.createOrder = asyncHandler(async (req, res) => {
             }))
             result.totalAmount = cart.totalPrice;
             result.totalQuantity = cart.totalQuantity;
-            result.taxAmount = 0; // Assuming no tax for simplicity
+            result.taxAmount = 0;
+            result.paymentMethod = 'SSL_COMMERZ';
             // generate transaction id
             result.transactionId = transitionCode;
             // Now save the order
             const newOrder = new orderSchema.Order(result);
-            await newOrder.save();
             // create an invoice
             const newInvoice = new invoice({
                 invoiceNumber: invoiceCode,
@@ -306,18 +336,50 @@ exports.createOrder = asyncHandler(async (req, res) => {
                 ship_country: result.shippingAddress ? result.shippingAddress.country : 'Country',
             };
             const sslcommerz = new SSLCommerzPayment(store_id, store_passwd, is_live)
-            sslcommerz.init(data).then(apiResponse => {
+            sslcommerz.init(data).then(async apiResponse => {
                 // Redirect the user to payment gateway
                 let GatewayPageURL = apiResponse.GatewayPageURL
                 console.log(GatewayPageURL, "Redirecting to SSLCommerz");
+                if (!GatewayPageURL) throw new customError('SSLCommerz Gateway URL not found', 500);
+                newOrder.paymentDetails = apiResponse;
+                newOrder.verificationToken = apiResponse.val_id;
+                // now send email or sms notification
+
+                await newOrder.save();
+                await cartSchema.findByIdAndDelete(cart._id);
                 return success(res, 'Order created successfully', {order: newOrder, redirectURL: GatewayPageURL}, 201);
             }).catch(error => {
                 console.error('SSLCommerz Payment Initialization Error:', error);
                 throw new customError('SSLCommerz Payment Initialization Failed', 500);
             });
-            return
-            // Clear the cart
-            await cartSchema.findByIdAndDelete(cart._id);
+            if (result.user || result.guestId && result.shippingAddress && result.shippingAddress.email) {
+                // send order confirmation email
+                const emailContent = orderConfirmation({
+                    orderNumber: newOrder.orderNumber,
+                    customerName: result.shippingAddress.fullName,
+                    orderDate: newOrder.orderDate,
+                    lineItems: newOrder.lineItems.map(item => ({
+                        name: item.name,
+                        quantity: item.quantity,
+                        totalPrice: item.totalPrice,
+                        image: item.product.thumbnail?.url
+                    })),
+                    subtotal: newOrder.totalAmount,
+                    shippingAmount: newOrder.shippingAmount,
+                    taxAmount: newOrder.taxAmount,
+                    totalAmount: newOrder.finalAmount,
+                    currency: newOrder.currency,
+                    shippingAddress: result.shippingAddress,
+                    paymentMethod: result.paymentMethod,
+                    estimatedDelivery: 'Within 5-7 business days'
+                });
+                await sendEmail(result.shippingAddress.email, emailContent, "Order Confirmed Successfully");
+            } else if (result.user || result.guestId && result.shippingAddress && result.shippingAddress.phoneNumber) {
+                console.log(true)
+                // send order confirmation sms
+                const message = `Dear ${result.shippingAddress.fullName}, your order ${newOrder.orderNumber} has been placed successfully. Total amount: ${newOrder.finalAmount} ${newOrder.currency}. Thank you for shopping with us!`;
+                await sendSMS(result.shippingAddress.phoneNumber, message);
+            }
         }
     } catch (error) {
         console.error('Error creating order:', error);
