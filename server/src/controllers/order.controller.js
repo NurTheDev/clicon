@@ -309,10 +309,10 @@ exports.createOrder = asyncHandler(async (req, res) => {
                 total_amount: newOrder.finalAmount,
                 currency: newOrder.currency || 'BDT',
                 tran_id: transitionCode, // use order id or transaction id from your database
-                success_url: process.env.SSL_COMMERZE_SUCCESS_URL,
-                fail_url: process.env.SSL_COMMERZE_FAIL_URL,
-                cancel_url: process.env.SSL_COMMERZE_CANCEL_URL,
-                ipn_url: process.env.SSL_COMMERZE_IPN_URL,
+                success_url: `${process.env.SSL_COMMERZE_SUCCESS_URL}${process.env.API_VERSION}/payment/success`,
+                fail_url: `${process.env.SSL_COMMERZE_FAIL_URL}${process.env.API_VERSION}/payment/fail`,
+                cancel_url: `${process.env.SSL_COMMERZE_CANCEL_URL}${process.env.API_VERSION}/payment/cancel`,
+                ipn_url: `${process.env.SSL_COMMERZE_IPN_URL}${process.env.API_VERSION}/payment/ipn`,
                 shipping_method: 'NO',
                 product_name: newOrder.lineItems.length > 0 ? newOrder.lineItems[0].name : 'Product',
                 product_category: 'General',
@@ -341,12 +341,8 @@ exports.createOrder = asyncHandler(async (req, res) => {
                 let GatewayPageURL = apiResponse.GatewayPageURL
                 console.log(GatewayPageURL, "Redirecting to SSLCommerz");
                 if (!GatewayPageURL) throw new customError('SSLCommerz Gateway URL not found', 500);
-                newOrder.paymentDetails = apiResponse;
-                newOrder.verificationToken = apiResponse.val_id;
-                // now send email or sms notification
-
                 await newOrder.save();
-                await cartSchema.findByIdAndDelete(cart._id);
+                // await cartSchema.findByIdAndDelete(cart._id);
                 return success(res, 'Order created successfully', {order: newOrder, redirectURL: GatewayPageURL}, 201);
             }).catch(error => {
                 console.error('SSLCommerz Payment Initialization Error:', error);
