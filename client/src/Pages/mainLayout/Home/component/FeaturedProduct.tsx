@@ -3,7 +3,8 @@ import Container from "../../../../common/Container.tsx";
 import assets from "../../../../helpers/assetsProvider.ts";
 import PrimaryButton from "../../../../common/PrimaryButton.tsx";
 import Icons from "../../../../helpers/IconProvider.tsx";
-import {NavLink, useLocation} from "react-router";
+import { useLocation} from "react-router";
+import {NavLink} from "react-router-dom";
 
 const FeaturedProduct = () => {
     const featuredSortlinks = [
