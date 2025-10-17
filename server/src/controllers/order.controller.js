@@ -309,10 +309,10 @@ exports.createOrder = asyncHandler(async (req, res) => {
                 total_amount: newOrder.finalAmount,
                 currency: newOrder.currency || 'BDT',
                 tran_id: transitionCode, // use order id or transaction id from your database
-                success_url: `${process.env.SSL_COMMERZE_SUCCESS_URL}${process.env.API_VERSION}/payment/success`,
-                fail_url: `${process.env.SSL_COMMERZE_FAIL_URL}${process.env.API_VERSION}/payment/fail`,
-                cancel_url: `${process.env.SSL_COMMERZE_CANCEL_URL}${process.env.API_VERSION}/payment/cancel`,
-                ipn_url: `${process.env.SSL_COMMERZE_IPN_URL}${process.env.API_VERSION}/payment/ipn`,
+                success_url: `${process.env.BACKEND_URL}${process.env.API_VERSION}/payment/success`,
+                fail_url: `${process.env.BACKEND_URL}${process.env.API_VERSION}/payment/fail`,
+                cancel_url: `${process.env.BACKEND_URL}${process.env.API_VERSION}/payment/cancel`,
+                ipn_url: `${process.env.BACKEND_URL}${process.env.API_VERSION}/payment/ipn`,
                 shipping_method: 'NO',
                 product_name: newOrder.lineItems.length > 0 ? newOrder.lineItems[0].name : 'Product',
                 product_category: 'General',
@@ -410,3 +410,88 @@ exports.createOrder = asyncHandler(async (req, res) => {
         throw new customError(error.message || 'Server Error', error.statusCode || 500);
     }
 })
+
+exports.getAllOrders = asyncHandler(async (req, res) => {
+    const orders = await orderSchema.find().populate('user').populate('lineItems.product').populate('lineItems.variant').populate("deliveryCharge").sort({orderDate: -1});
+    return success(res, 'Orders fetched successfully', orders, 200);
+});
+
+exports.getOrderById = asyncHandler(async (req, res) => {
+    const orderNumber = req.params.id;
+    const order = await orderSchema.findOne(orderNumber).populate('user').populate('lineItems.product').populate("deliveryCharge").populate('lineItems.variant');
+    if (!order) {
+        throw new customError('Order not found', 404);
+    }
+    return success(res, 'Order fetched successfully', order, 200);
+});
+
+// delete order
+exports.deleteOrder = asyncHandler(async (req, res) => {
+    const orderNumber = req.params.id;
+    const order = await orderSchema.findOneAndDelete(orderNumber);
+    if (!order) {
+        throw new customError('Order not found', 404);
+    }
+    // also delete associated invoice
+    await invoice.findOneAndDelete({orderId: order._id});
+    return success(res, 'Order deleted successfully', null, 200);
+});
+
+//update status, shipping info, billing info, payment info etc.
+exports.updateOrder = asyncHandler(async (req, res) => {
+    const orderId = req.params.id;
+    const updateData = req.body;
+    const order = await orderSchema.findByIdAndUpdate(orderId, updateData, {new: true});
+    if (!order) {
+        throw new customError('Order not found', 404);
+    }
+    return success(res, 'Order updated successfully', order, 200);
+});
+
+//get all order status or order matrix for dashboard
+exports.orderMatrix = asyncHandler(async (req, res) => {
+    const matrix = await orderSchema.aggregate([
+        {
+            $group: {
+                _id: "$status",
+                count: {$sum: 1},
+                totalAmount: {$sum: "$finalAmount"},
+                avgAmount: {$avg: "$finalAmount"}
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                status: "$_id",
+                count: 1,
+                totalAmount: 1,
+                avgAmount: 1
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                orderStatusInfo: {
+                    $push: {
+                        status: "$status",
+                        count: "$count",
+                        totalAmount: "$totalAmount",
+                        avgAmount: "$avgAmount"
+                    }
+                },
+                totalOrders: {$sum: "$count"},
+                totalRevenue: {$sum: "$totalAmount"},
+                averageOrderValue: {$avg: "$avgAmount"}
+            }
+        }, {
+            $project: {
+                _id: 0,
+                orderStatusInfo: 1,
+                totalOrders: 1,
+                totalRevenue: 1,
+                averageOrderValue: 1
+            }
+        }
+    ]);
+    return success(res, 'Order matrix fetched successfully', matrix, 200);
+});
