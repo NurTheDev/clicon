@@ -91,7 +91,4 @@ const orderSchema = new Schema({
     timestamps: true, versionKey: false
 });
 
-module.exports = {
-    Order: mongoose.models.order || mongoose.model("order", orderSchema),
-    OrderLineItem: mongoose.models.orderLineItem || mongoose.model("orderLineItem", orderLineItemSchema)
-};
+module.exports = mongoose.models.order || mongoose.model("order", orderSchema);
