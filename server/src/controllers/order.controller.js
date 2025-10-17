@@ -525,8 +525,6 @@ exports.courierSendOrder = asyncHandler(async (req, res) => {
         })),
     })
     const courierResponse = courierPayload.data;
-    // console.log(courierResponse);
-    // return
     if (courierResponse.status <= 200 && courierResponse.status < 300) {
         const courier = new courierSchema({
             order: order._id,
