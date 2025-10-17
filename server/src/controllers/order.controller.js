@@ -190,7 +190,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
             // generate transaction id
             result.transactionId = transitionCode;
             // Now save the order
-            const newOrder = new orderSchema.Order(result);
+            const newOrder = new orderSchema(result);
             await newOrder.save();
             // Clear the cart
             await cartSchema.findByIdAndDelete(cart._id);
@@ -279,7 +279,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
             // generate transaction id
             result.transactionId = transitionCode;
             // Now save the order
-            const newOrder = new orderSchema.Order(result);
+            const newOrder = new orderSchema(result);
             // create an invoice
             const newInvoice = new invoice({
                 invoiceNumber: invoiceCode,
