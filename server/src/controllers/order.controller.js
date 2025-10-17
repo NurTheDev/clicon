@@ -6,13 +6,15 @@ const asyncHandler = require("../helpers/asyncHandler");
 const cartSchema = require('../models/cart.model');
 const productSchema = require('../models/product.model');
 const variantSchema = require('../models/variant.model');
-const {DeliveryCharge} = require('../models/delivery.model');
+const DeliveryCharge = require('../models/delivery.model');
+const courierSchema = require('../models/courier.model');
 const couponSchema = require('../models/coupon.model');
 const crypto = require('crypto');
 const invoice = require("../models/invoice.model");
 const sendSMS = require("../helpers/sendSMS");
 const {orderConfirmation} = require("../templet/emailTemplet");
 const {sendEmail} = require("../helpers/sendEmail")
+const axiosInstance = require("../helpers/axios");
 require('dotenv').config();
 const SSLCommerzPayment = require('sslcommerz-lts')
 const store_id = process.env.SSL_COMMERZE_STORE_ID;
@@ -495,3 +497,96 @@ exports.orderMatrix = asyncHandler(async (req, res) => {
     ]);
     return success(res, 'Order matrix fetched successfully', matrix, 200);
 });
+
+//Get all pending orders for send to courier
+exports.getPendingOrdersForCourier = asyncHandler(async (req, res) => {
+    const pendingOrders = await orderSchema.find({status: "PENDING"}).populate('user').populate('lineItems.product').populate('lineItems.variant').populate("deliveryCharge").sort({orderDate: -1});
+    return success(res, 'Pending orders fetched successfully', pendingOrders, 200);
+});
+
+//Send order to courier
+exports.courierSendOrder = asyncHandler(async (req, res) => {
+    const orderId = req.params.id;
+    const order = await orderSchema.findById(orderId);
+    const invoiceData = await invoice.findOne({orderId: orderId});
+    if (!order) throw new customError('Order not found', 404);
+    const {shippingAddress, transactionId, finalAmount} = order;
+    const courierPayload = await axiosInstance.post('/create_order', {
+        invoice: invoiceData.invoiceNumber,
+        recipient_name: shippingAddress.fullName,
+        recipient_address: `${shippingAddress.addressLine1}, ${shippingAddress.addressLine2}, ${shippingAddress.city}, ${shippingAddress.state}, ${shippingAddress.postalCode}, ${shippingAddress.country}`,
+        recipient_phone: shippingAddress.phoneNumber,
+        recipient_email: shippingAddress.email,
+        cod_amount: finalAmount,
+        items: order.lineItems.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.unitPrice
+        })),
+    })
+    const courierResponse = courierPayload.data;
+    // console.log(courierResponse);
+    // return
+    if (courierResponse.status <= 200 && courierResponse.status < 300) {
+        const courier = new courierSchema({
+            order: order._id,
+            trackingNumber: courierResponse.consignment.tracking_code,
+            status: courierResponse.consignment.status,
+            invoice: courierResponse.consignment.invoice,
+            recipient_name: courierResponse.consignment.recipient_name,
+            recipient_address: courierResponse.consignment.recipient_address,
+            recipient_phone: courierResponse.consignment.recipient_phone,
+            recipient_email: courierResponse.consignment.recipient_email,
+            codAmount: courierResponse.consignment.cod_amount,
+            notes: courierResponse.consignment.notes
+        })
+        await courier.save();
+        order.courier = courier._id;
+        order.status = 'PROCESSING';
+        await order.save();
+        return success(res, 'Order sent to courier successfully', order, 200);
+    } else {
+        throw new customError('Failed to send order to courier', 500);
+    }
+});
+
+//steadFast-webhook
+exports.steadFastWebhookHandler = asyncHandler(async (req, res) => {
+    const {invoice, status, tracking_message, consignment_id} = req.body;
+    const token = req.headers.authorization;
+    // Verify webhook token
+    if (token !== `Bearer ${process.env.STEADFAST_WEBHOOK_TOKEN}`) {
+        throw new customError('Unauthorized webhook request', 401);
+    }
+    try {
+        const courier = await courierSchema.findOne({invoice: invoice});
+        if (!courier) {
+            throw new customError('Courier record not found for the given invoice', 404);
+        }
+        courier.status = status;
+        courier.notes = tracking_message;
+        await courier.save();
+        // Also update order status based on courier status
+        const order = await orderSchema.findById(courier.order);
+        if (order) {
+            if (status === 'DELIVERED') {
+                order.status = 'DELIVERED';
+            } else if (status === 'CANCELLED') {
+                order.status = 'CANCELLED';
+            } else if (status === 'RETURNED') {
+                order.status = 'RETURNED';
+            }
+            await order.save();
+        }
+        res.status(200).json({
+            status: 'success',
+            message: 'Webhook processed successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            "status": "error",
+            "message": "Invalid consignment ID."
+        })
+    }
+});
+

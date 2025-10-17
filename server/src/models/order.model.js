@@ -41,6 +41,7 @@ const orderSchema = new Schema({
     lineItems: [orderLineItemSchema],
     productWeight: {type: Number, min: 0},
     productWeightUnit: {type: String, trim: true, default: "kg"},
+    courier: {type: Types.ObjectId, ref: "courier", default: null},
     coupon: {
         type: Types.ObjectId, ref: "coupon",
         default: null
