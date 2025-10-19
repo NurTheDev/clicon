@@ -70,7 +70,12 @@ const permissionSchema = new Schema({
         default: "read"
     },
     description: String,
-    conditions: {type: Map, of: Schema.Types.Mixed}
+    conditions: {type: Map, of: Schema.Types.Mixed},
+    scope: {
+        type: String,
+        enum: ["all", "own", "department", "none"],
+        default: "all"
+    }
 }, {timestamps: true});
 // Add compound index for unique permission combinations
 permissionSchema.index({resource: 1, action: 1}, {unique: true});

@@ -29,7 +29,7 @@ const userSchema = new Schema({
     }, password: {
         type: String, required: true, trim: true,
     }, role: {
-        type: String, enum: ["user", "admin", "superadmin", "moderator", "guest",], default: "user"
+        type: Types.ObjectId, ref: "Role"
     }, createdAt: {
         type: Date, default: Date.now
     }, updatedAt: {
