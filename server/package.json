@@ -27,7 +27,9 @@
   "main": "server.js",
   "scripts": {
     "start": "nodemon server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "seed:permissions": "node src/seeder/permission.seeder.js",
+    "seed:roles": "node src/seeder/role.seeder.js"
   },
   "author": "",
   "license": "ISC",
