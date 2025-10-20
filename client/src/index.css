@@ -352,6 +352,12 @@ body {
     justify-content: space-between;
     align-items: center;
 }
+.flexRowStart{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
 
 /* ====================== Swiper button ===================*/
 /* Base button styles */

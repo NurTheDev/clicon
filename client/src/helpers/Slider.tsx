@@ -64,7 +64,6 @@ const Slider: React.FC<SliderProps> = ({
                 slidesPerView={slidesPerView}
                 breakpoints={breakpoints}
                 onSwiper={(swiper) => console.log(swiper)}
-                onSlideChange={() => console.log('slide change')}
             >
                 {slides}
             </Swiper>

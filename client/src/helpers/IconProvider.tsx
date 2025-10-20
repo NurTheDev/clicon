@@ -8,7 +8,7 @@ import {
     FaInstagram,
     FaCartArrowDown,
     FaHeart,
-    FaUser, FaHeadphones
+    FaUser, FaHeadphones, FaStar, FaRegStar
 } from "react-icons/fa";
 import {LuMenu} from "react-icons/lu";
 import {IoClose, IoTrophyOutline} from "react-icons/io5";
@@ -43,7 +43,8 @@ const Icons: Icons = {
     "box": <BsBoxSeam />,
     "trophy": <IoTrophyOutline/>,
     "creditCard": <BsCreditCard/>,
-    "headphones": <BiHeadphone/>
-
+    "headphones": <BiHeadphone/>,
+    "starFilled": <FaStar/>,
+    "starEmpty": <FaRegStar/>
 }
 export default Icons
