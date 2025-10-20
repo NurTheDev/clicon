@@ -7,6 +7,7 @@ import {useLocation} from "react-router";
 import {NavLink} from "react-router-dom";
 import {heroBannerInfo} from "../../../../data";
 import {getImgUrl} from "../../../../helpers";
+import {useQuery} from "@tanstack/react-query";
 
 const FeaturedProduct = () => {
     const featuredSortlinks = [
@@ -19,6 +20,16 @@ const FeaturedProduct = () => {
         }
     ]
     const location = useLocation();
+    const [products, setProducts] = React.useState([]);
+    const query = useQuery({
+        queryKey: ['featuresProduct'], queryFn: async () => {
+            const response = await fetch("https://api.escuelajs.co/api/v1/products");
+            const data = await response.json();
+            setProducts(data);
+            return data;
+        }
+    });
+    console.log(products);
     return (
         <div className={"mt-5 lg:mt-10 font-public-sans text-center text-gray-900"}>
             <Container>
@@ -55,7 +66,7 @@ const FeaturedProduct = () => {
                         </div>
                     </div>
                     <div className={"lg:col-span-9 h-full"}>
-                        <div className={"lg:flexRowBetween flexColStart gap-y-4 lg:gap-y-0"}>
+                        <div className={"flex flex-col items-center lg:flex-row lg:justify-between gap-y-4 lg:gap-y-0"}>
                             <h3 className={"heading3 text-gray-900"}>Featured Products</h3>
                             <div className="overflow-x-auto scrollbar-hide">
                                 <ul className="flex items-center gap-4 sm:gap-6 mt-4 min-w-max px-2 sm:px-0">
