@@ -29,7 +29,6 @@ const FeaturedProduct = () => {
             return data;
         }
     });
-    console.log(products);
     return (
         <div className={"mt-5 lg:mt-10 font-public-sans text-center text-gray-900"}>
             <Container>
