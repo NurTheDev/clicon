@@ -1,16 +1,7 @@
 import Icons from "../helpers/IconProvider.tsx";
-
+import type {ProductDataType} from "../types/productData.ts";
 type ProductCardProps = {
-    product: {
-        id: number;
-        title: string;
-        price: number;
-        images: string[];
-        rating?: number;
-        reviews: string[];
-        discountPercentage?: number;
-        name?: string;
-    };
+    product: ProductDataType;
 };
 const ProductCard = ({product}: ProductCardProps) => {
     return (
@@ -21,11 +12,11 @@ const ProductCard = ({product}: ProductCardProps) => {
                 <div>
                     <img
                         src={product.images && product.images.length > 0 ? product.images[0] : product.images[1]}
-                        alt={product.name}
+                        alt={product.title}
                         className={"!w-[202px] !h-[172px] object-contain"}
                     />
                 </div>
-                <div className={"space-y-4"}>
+                <div className={"space-y-3"}>
                     <p>
                                                <span>
                                                    {Array.from({length: 5}, (_, i) => i < Math.floor(product.rating || 0) ? Icons.starFilled : Icons.starEmpty).map((star, index) => (
@@ -39,6 +30,7 @@ const ProductCard = ({product}: ProductCardProps) => {
                     <h4 className={"body-medium-600 text-gray-900"}>
                         {product.title}
                     </h4>
+                    <p className={"body-small-500 text-gray-600 overflow-hidden text-wrap"}>{product.description.substring(0, 70) + "..."}</p>
                     <div className={"flex items-center gap-2"}>
                         <p className={"body-small-500 line-through text-gray-500"}>
                             {product.discountPercentage
