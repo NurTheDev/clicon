@@ -14,6 +14,7 @@ const cartApi = require("./api/cart.api");
 const orderApi = require("./api/order.api");
 const deliveryApi = require("./api/delivery.api");
 const paymentApi = require("./api/payment.api");
+const RBAC_API = require("./api/RBAC.api");
 
 router.use("/payment", paymentApi)
 router.use("/delivery", deliveryApi)
@@ -29,4 +30,5 @@ router.use("/coupon", couponApi)
 router.use("/review", reviewApi)
 router.use("/warehouse", warehouseApi)
 router.use("/cart", cartApi)
+router.use("/RBAC", RBAC_API)
 module.exports = router;
