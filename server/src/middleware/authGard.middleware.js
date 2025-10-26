@@ -1,7 +1,8 @@
 const jwt = require("jsonwebtoken");
 const customError = require("../utils/customError");
 const userSchema = require("../models/user.model");
-
+const permissionSchema = require("../models/RBAC.model");
+const roleSchema = require("../models/RBAC.model");
 /**
  * Extract a JWT from the request.
  * Priority:
@@ -55,7 +56,7 @@ async function authGuard(req, res, next) {
         // Fetch only what you need
         const user = await userSchema
             .findById(userId)
-            .select("_id email role status tokenVersion")
+            .select("_id email role status tokenVersion permissions").populate('role permissions')
             .lean();
 
         if (!user) {
@@ -64,8 +65,11 @@ async function authGuard(req, res, next) {
 
         req.user = {
             id: user._id.toString(),
-            email: user.email,
+            email: user.email && user.email,
+            phone: user.phone && user.phone,
+            status: user.status,
             role: user.role,
+            permissions: user.permissions,
         };
 
         return next();

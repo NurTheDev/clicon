@@ -30,11 +30,15 @@ const userSchema = new Schema({
         type: String, required: true, trim: true,
     }, role: {
         type: Types.ObjectId, ref: "Role"
-    }, createdAt: {
+    }, permissions: [{type: Types.ObjectId, ref: "Permission"}],
+     createdAt: {
         type: Date, default: Date.now
     }, updatedAt: {
         type: Date, default: Date.now
-    }, image: String, isEmailVerified: {
+    },
+    image: {
+        url: String, public_id: String
+    }, isEmailVerified: {
         type: Boolean, default: false
     }, isPhoneVerified: {
         type: Boolean, default: false

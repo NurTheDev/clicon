@@ -5,19 +5,37 @@ const {Permission, Role} = require("../models/RBAC.model");
 const {userValidation} = require("../validators/user.validator");
 const userSchema = require("../models/user.model");
 const userModel = require("../models/user.model");
+const {uploadImage, deleteImage} = require('../helpers/claudinary');
+
 exports.createUser = asyncHandler(async (req, res) => {
+    console.log("req.body", req.body)
     const result = await userValidation(req)
     if (!result) throw new customError("User validation failed", 401)
-        if (req.files && req.files.images && req.files.images.length > 0) {
+        if (req.file && req.file.path) {
             //     check image mime type
             const validMimeTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
-            const hasInvalidImage = req.files.images.some(img => !validMimeTypes.includes(img.mimetype))
-            if (hasInvalidImage) throw new customError("Image must be a jpeg, jpg, png or webp", 400)
+            if (!validMimeTypes.includes(req.file.mimetype)) {
+                throw new customError("Image must be a jpeg, jpg, png or webp", 400)
+            }
         }
-    console.log("images", req.files.images)
-        return
+// now upload image to cloudinary
+        if (req.file && req.file.path) {
+            const uploadResult = await uploadImage(req.file.path, 'users');
+            if (uploadResult && uploadResult.public_id && uploadResult.secure_url) {
+                result.image = {
+                    public_id: uploadResult.public_id,
+                    url: uploadResult.secure_url
+                }
+            }
+        }
     const user = await userModel.create(result)
-    if (!user) throw new customError("User validation failed", 401)
+    if (!user) {
+        // if image was uploaded, delete it from cloudinary
+        if (result.image && result.image.public_id) {
+            await deleteImage(result.image.public_id);
+        }
+        throw new customError("User creation failed", 500)
+    }
     return success(res, "User created successfully", user, 201)
 })
 /**
@@ -30,5 +48,24 @@ exports.getAllUsers = asyncHandler(async (req, res) => {
     if (!users) throw new customError("User validation failed", 401)
     return success(res, "Users fetched successfully", users, 200)
 })
-
-
+// give permission to a role
+exports.setPermissionToUser = asyncHandler(async (req, res) => {
+     const {userId, permissionId} = req.body;
+     const user = await userModel.findById(userId);
+     if (!user) {
+         throw new customError("User not found", 404);
+     }
+     const permission = await Permission.findById(permissionId);
+     if (!permission) {
+         throw new customError("Permission not found", 404);
+     }
+        user.permissions.push(permission._id);
+        await user.save();
+        return success(res, "Permission updated successfully", user, 200);
+})
+// get permissions of a role
+// remove permission from a role
+// create role
+// get all roles
+// update role
+// delete role

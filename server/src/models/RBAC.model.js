@@ -39,5 +39,7 @@ const permissionSchema = new Schema({
 // Add compound index for unique permission combinations
 permissionSchema.index({resource: 1, action: 1}, {unique: true});
 
-module.exports.Role = mongoose.models.Role || mongoose.model('Role', roleSchema);
-module.exports.Permission = mongoose.models.Permission || mongoose.model('permission', permissionSchema);
+const Permission = mongoose.models.Permission || mongoose.model('Permission', permissionSchema);
+const Role = mongoose.models.Role || mongoose.model('Role', roleSchema);
+
+module.exports = { Permission, Role };
