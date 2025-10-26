@@ -8,6 +8,14 @@ const userModel = require("../models/user.model");
 exports.createUser = asyncHandler(async (req, res) => {
     const result = await userValidation(req)
     if (!result) throw new customError("User validation failed", 401)
+        if (req.files && req.files.images && req.files.images.length > 0) {
+            //     check image mime type
+            const validMimeTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
+            const hasInvalidImage = req.files.images.some(img => !validMimeTypes.includes(img.mimetype))
+            if (hasInvalidImage) throw new customError("Image must be a jpeg, jpg, png or webp", 400)
+        }
+    console.log("images", req.files.images)
+        return
     const user = await userModel.create(result)
     if (!user) throw new customError("User validation failed", 401)
     return success(res, "User created successfully", user, 201)
@@ -22,3 +30,5 @@ exports.getAllUsers = asyncHandler(async (req, res) => {
     if (!users) throw new customError("User validation failed", 401)
     return success(res, "Users fetched successfully", users, 200)
 })
+
+
