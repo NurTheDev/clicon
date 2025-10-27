@@ -25,5 +25,53 @@ router
     checkAuthorization("RBAC", "read"),
     RBAC_controller.getUserPermissions
   );
-
+router
+  .route("/remove_permission_from_user")
+  .delete(
+    authGuard,
+    checkAuthorization("RBAC", "update"),
+    RBAC_controller.removePermissionFromUser
+  );
+router
+  .route("/create_role")
+  .post(
+    authGuard,
+    checkAuthorization("RBAC", "create"),
+    RBAC_controller.createRole
+  );
+router
+  .route("/get_roles")
+  .get(
+    authGuard,
+    checkAuthorization("RBAC", "read"),
+    RBAC_controller.getAllRoles
+  );
+router
+  .route("/update_role/:roleId")
+  .put(
+    authGuard,
+    checkAuthorization("RBAC", "update"),
+    RBAC_controller.updateRole
+  );
+router
+  .route("/delete_role/:roleId")
+  .delete(
+    authGuard,
+    checkAuthorization("RBAC", "delete"),
+    RBAC_controller.deleteRole
+  );
+router
+  .route("/create_permission")
+  .post(
+    authGuard,
+    checkAuthorization("RBAC", "create"),
+    RBAC_controller.createPermission
+  );
+router
+  .route("/get_permissions")
+  .get(
+    authGuard,
+    checkAuthorization("RBAC", "read"),
+    RBAC_controller.getAllPermissions
+  );
 module.exports = router;
