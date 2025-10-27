@@ -33,7 +33,7 @@ const permissionSchema = new Schema({
     scope: {
         type: String,
         enum: ["all", "own", "department", "none"],
-        default: "all"
+        default: "none"
     }
 }, {timestamps: true});
 // Add compound index for unique permission combinations

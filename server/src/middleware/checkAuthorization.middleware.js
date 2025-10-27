@@ -20,6 +20,12 @@ const checkAuthorization = (resource, action, checkOwnership = null) => {
         if (!user) {
           return next(new customError("Unauthorized", 401));
         }
+        if (
+          user.role &&
+          (user.role.name === "Admin" || user.role.name === "Moderator")
+        ) {
+          return next();
+        }
         userPermissions = user.permissions || [];
         // Cache the permissions
         permissionCache.set(userId, userPermissions);

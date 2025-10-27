@@ -10,15 +10,20 @@ router.use(multerErrorHandler);
 router
   .route("/create_user")
   .post(authGuard, upload.single("image"), RBAC_controller.createUser);
-router
-  .route("/get_all_users")
-  .get(
-    authGuard,
-    checkAuthorization("user", "read"),
-    RBAC_controller.getAllUsers
-  );
+router.route("/get_all_users").get(authGuard, RBAC_controller.getAllUsers);
 router
   .route("/set_permission_to_user")
-  .post(authGuard, RBAC_controller.setPermissionToUser);
+  .post(
+    authGuard,
+    checkAuthorization("RBAC", "update"),
+    RBAC_controller.setPermissionToUser
+  );
+router
+  .route("/get_permissions/:userId")
+  .get(
+    authGuard,
+    checkAuthorization("RBAC", "read"),
+    RBAC_controller.getUserPermissions
+  );
 
 module.exports = router;
