@@ -15,20 +15,21 @@ const orderApi = require("./api/order.api");
 const deliveryApi = require("./api/delivery.api");
 const paymentApi = require("./api/payment.api");
 const RBAC_API = require("./api/RBAC.api");
-
-router.use("/payment", paymentApi)
-router.use("/delivery", deliveryApi)
-router.use("/order", orderApi)
-router.use("/auth", authApi)
-router.use("/category", categoryApi)
-router.use("/subCategory", subCategoryApi)
-router.use("/brand", brandApi)
-router.use("/discount", discountApi)
-router.use("/product", productApi)
-router.use("/variant", variantApi)
-router.use("/coupon", couponApi)
-router.use("/review", reviewApi)
-router.use("/warehouse", warehouseApi)
-router.use("/cart", cartApi)
-router.use("/RBAC", RBAC_API)
+const bannerApi = require("./api/banner.api");
+router.use("/payment", paymentApi);
+router.use("/delivery", deliveryApi);
+router.use("/order", orderApi);
+router.use("/auth", authApi);
+router.use("/category", categoryApi);
+router.use("/subCategory", subCategoryApi);
+router.use("/brand", brandApi);
+router.use("/discount", discountApi);
+router.use("/product", productApi);
+router.use("/variant", variantApi);
+router.use("/coupon", couponApi);
+router.use("/review", reviewApi);
+router.use("/warehouse", warehouseApi);
+router.use("/cart", cartApi);
+router.use("/RBAC", RBAC_API);
+router.use("/banner", bannerApi);
 module.exports = router;
