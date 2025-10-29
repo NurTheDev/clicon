@@ -7,7 +7,6 @@ const multerErrorHandler = require("../../middleware/multerErrorHandler.middlewa
 const checkAuthorization = require("../../middleware/checkAuthorization.middleware");
 
 router.use(multerErrorHandler);
-
 router
   .route("/create_banner")
   .post(

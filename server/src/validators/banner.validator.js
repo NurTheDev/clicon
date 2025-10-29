@@ -52,7 +52,19 @@ const bannerUpdateValidationSchema = bannerValidationSchema.fork(
 exports.bannerValidation = async (req) => {
   try {
     const result = bannerValidationSchema.validate(req.body);
-    return result.value;
+    if (req.file && req.file.path) {
+      //     check image mime type
+      const validMimeTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+        "image/webp",
+      ];
+      if (!validMimeTypes.includes(req.file.mimetype)) {
+        throw new customError("Image must be a jpeg, jpg, png or webp", 400);
+      }
+    }
+    return { ...result.value, image: req.file?.path };
   } catch (error) {
     console.error(error);
     if (error.details) {
@@ -68,7 +80,19 @@ exports.bannerValidation = async (req) => {
 exports.updateBannerValidation = async (req) => {
   try {
     const result = bannerUpdateValidationSchema.validate(req.body);
-    return result.value;
+    if (req.file && req.file.path) {
+      //     check image mime type
+      const validMimeTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+        "image/webp",
+      ];
+      if (!validMimeTypes.includes(req.file.mimetype)) {
+        throw new customError("Image must be a jpeg, jpg, png or webp", 400);
+      }
+    }
+    return { ...result.value, image: req.file?.path };
   } catch (error) {
     console.error(error);
     if (error.details) {
@@ -82,9 +106,4 @@ exports.updateBannerValidation = async (req) => {
       throw new customError(error, 400);
     }
   }
-};
-
-module.exports = {
-  bannerValidation,
-  updateBannerValidation,
 };

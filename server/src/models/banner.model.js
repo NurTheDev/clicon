@@ -48,6 +48,55 @@ const bannerSchema = new Schema(
   { timestamps: true }
 );
 
-const Banner = mongoose.models.Banner ||  mongoose.model("Banner", bannerSchema);
+bannerSchema.pre("save", function (next) {
+  if (this.startDate && this.endDate && this.startDate > this.endDate) {
+    return next(
+      new Error("Start date must be earlier than or equal to end date")
+    );
+  }
+  next();
+});
+
+bannerSchema.pre("findOneAndUpdate", function (next) {
+  const update = this.getUpdate();
+  if (update.startDate && update.endDate && update.startDate > update.endDate) {
+    return next(
+      new Error("Start date must be earlier than or equal to end date")
+    );
+  }
+  next();
+});
+
+bannerSchema.pre("save", async function (next) {
+  try {
+    if (this.isModified("title")) {
+      this.slug = this.title
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+bannerSchema.pre("findOneAndUpdate", function (next) {
+  try {
+    const update = this.getUpdate();
+    if (update.title) {
+      update.slug = update.title
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+const Banner = mongoose.models.Banner || mongoose.model("Banner", bannerSchema);
 
 module.exports = Banner;
