@@ -390,10 +390,10 @@ exports.createOrder = asyncHandler(async (req, res) => {
     // ============================================
     else if (result.paymentMethod === "SSL_COMMERZ") {
       result.paymentStatus = "PENDING";
-      // Now save the order
+
       const newOrder = new orderSchema(result);
       await newOrder.save({ session });
-      // create an invoice
+
       const newInvoice = new invoice({
         invoiceNumber: invoiceCode,
         orderId: newOrder._id,
@@ -414,111 +414,94 @@ exports.createOrder = asyncHandler(async (req, res) => {
         currency: newOrder.currency,
         issueDate: new Date(),
         dueDate: null,
-        status: result.paymentStatus === "COMPLETED" ? "PAID" : "UNPAID",
+        status: "UNPAID",
         notes: result.notes || "",
       });
       await newInvoice.save({ session });
-      // ============================================
-      // COMMIT TRANSACTION BEFORE PAYMENT GATEWAY
-      // ============================================
+
+      // Commit transaction before payment gateway
       await session.commitTransaction();
       session.endSession();
+
+      // Prepare payment data with better validation
+      const customerEmail =
+        result.shippingAddress?.email || "noreply@example.com";
+      const customerPhone =
+        result.shippingAddress?.phoneNumber || "01700000000";
+
       const data = {
-        total_amount: newOrder.finalAmount,
+        total_amount: parseFloat(newOrder.finalAmount.toFixed(2)),
         currency: newOrder.currency || "BDT",
-        tran_id: transitionCode, // use order id or transaction id from your database
+        tran_id: transitionCode,
         success_url: `${process.env.BACKEND_URL}${process.env.API_VERSION}/payment/success`,
         fail_url: `${process.env.BACKEND_URL}${process.env.API_VERSION}/payment/fail`,
         cancel_url: `${process.env.BACKEND_URL}${process.env.API_VERSION}/payment/cancel`,
         ipn_url: `${process.env.BACKEND_URL}${process.env.API_VERSION}/payment/ipn`,
         shipping_method: "NO",
-        product_name:
-          newOrder.lineItems.length > 0
-            ? newOrder.lineItems[0].name
-            : "Product",
+        product_name: newOrder.lineItems[0]?.name || "Product",
         product_category: "General",
         product_profile: "general",
-        cus_name: result.shippingAddress
-          ? result.shippingAddress.fullName
-          : "Customer",
-        cus_email: result.shippingAddress ? result.shippingAddress.email : "",
-        cus_add1: result.shippingAddress
-          ? result.shippingAddress.addressLine1
-          : "Address",
-        cus_add2: result.shippingAddress
-          ? result.shippingAddress.addressLine2
-          : "",
-        cus_city: result.shippingAddress ? result.shippingAddress.city : "City",
-        cus_state: result.shippingAddress
-          ? result.shippingAddress.state
-          : "State",
-        cus_postcode: result.shippingAddress
-          ? result.shippingAddress.postalCode
-          : "0000",
-        cus_country: result.shippingAddress
-          ? result.shippingAddress.country
-          : "Country",
-        cus_phone: result.shippingAddress
-          ? result.shippingAddress.phoneNumber
-          : "01700000000",
+        cus_name: result.shippingAddress?.fullName || "Customer",
+        cus_email: customerEmail,
+        cus_add1: result.shippingAddress?.addressLine1 || "Address",
+        cus_add2: result.shippingAddress?.addressLine2 || "",
+        cus_city: result.shippingAddress?.city || "Dhaka",
+        cus_state: result.shippingAddress?.state || "Dhaka",
+        cus_postcode: result.shippingAddress?.postalCode || "1000",
+        cus_country: result.shippingAddress?.country || "Bangladesh",
+        cus_phone: customerPhone,
         cus_fax: "",
-        ship_name: result.shippingAddress
-          ? result.shippingAddress.fullName
-          : "Customer",
-        ship_add1: result.shippingAddress
-          ? result.shippingAddress.addressLine1
-          : "Address",
-        ship_add2: result.shippingAddress
-          ? result.shippingAddress.addressLine2
-          : "",
-        ship_city: result.shippingAddress
-          ? result.shippingAddress.city
-          : "City",
-        ship_state: result.shippingAddress
-          ? result.shippingAddress.state
-          : "State",
-        ship_postcode: result.shippingAddress
-          ? result.shippingAddress.postalCode
-          : "0000",
-        ship_country: result.shippingAddress
-          ? result.shippingAddress.country
-          : "Country",
+        ship_name: result.shippingAddress?.fullName || "Customer",
+        ship_add1: result.shippingAddress?.addressLine1 || "Address",
+        ship_add2: result.shippingAddress?.addressLine2 || "",
+        ship_city: result.shippingAddress?.city || "Dhaka",
+        ship_state: result.shippingAddress?.state || "Dhaka",
+        ship_postcode: result.shippingAddress?.postalCode || "1000",
+        ship_country: result.shippingAddress?.country || "Bangladesh",
       };
-      const sslcommerz = new SSLCommerzPayment(store_id, store_passwd, is_live);
-      try {
-        const paymentSession = await sslcommerz.init(data);
-        let GatewayPageURL = apiResponse.GatewayPageURL;
-        console.log(GatewayPageURL, "Redirecting to SSLCommerz");
 
-        if (!GatewayPageURL) {
-          // Rollback order and invoice manually since transaction is committed
+      console.log("SSLCommerz Payment Data:", JSON.stringify(data, null, 2));
+
+      const sslcommerz = new SSLCommerzPayment(store_id, store_passwd, is_live);
+
+      try {
+        const apiResponse = await sslcommerz.init(data);
+
+        console.log("SSLCommerz API Response:", apiResponse);
+
+        if (!apiResponse.GatewayPageURL) {
+          console.error("SSLCommerz Error:", apiResponse);
+
+          // Rollback order and invoice
           await orderSchema.findByIdAndDelete(newOrder._id);
           await invoice.findByIdAndDelete(newInvoice._id);
-          throw new customError("SSLCommerz Gateway URL not found", 500);
-        }
 
-        // ============================================
-        // IMPORTANT FOR SSL_COMMERZ:
-        // ============================================
-        // 1. Cart will be cleared in payment success webhook
-        // 2. Email/SMS will be sent in payment success webhook
-        // 3. Payment status will be updated to COMPLETED in webhook
-        // 4. Invoice status will be updated to PAID in webhook
-        // ============================================
+          throw new customError(
+            apiResponse.failedreason || "SSLCommerz Gateway URL not found",
+            500
+          );
+        }
 
         return success(
           res,
           "Order created successfully",
-          { order: newOrder, redirectURL: GatewayPageURL },
+          {
+            order: newOrder,
+            redirectURL: apiResponse.GatewayPageURL,
+          },
           201
         );
       } catch (error) {
         console.error("SSLCommerz Payment Initialization Error:", error);
-        // Manually rollback since transaction is already committed
+
+        // Rollback order and invoice
         await orderSchema.findByIdAndDelete(newOrder._id);
         await invoice.findByIdAndDelete(newInvoice._id);
 
-        throw new customError("SSLCommerz Payment Initialization Failed", 500);
+        throw new customError(
+          error.message || "SSLCommerz Payment Initialization Failed",
+          500
+        );
       }
     }
   } catch (error) {
