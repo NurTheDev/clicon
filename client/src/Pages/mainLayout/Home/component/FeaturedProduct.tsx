@@ -75,16 +75,18 @@ const FeaturedProduct = () => {
                   ENDS OF CHRISTMAS
                 </span>
               </div>
-              <PrimaryButton
-                className={
-                  "body-medium-600 py-2 sm:py-3 text-gray-00 bg-primary-500 px-5 sm:px-4" +
-                  " rounded-xs lg:px-8" +
-                  " flex items-center gap-2 hover:scale-105 transition-all duration-200"
-                }
-                aria-label="Shop now">
-                <span>Shop Now</span>
-                <span>{Icons.rightArrow}</span>
-              </PrimaryButton>
+              <div className="inline-block transition-transform duration-200 hover:scale-105">
+                <PrimaryButton
+                  className={
+                    "body-medium-600 py-2 sm:py-3 text-gray-00 bg-primary-500 px-5 sm:px-4" +
+                    " rounded-xs lg:px-8" +
+                    " flex items-center gap-2"
+                  }
+                  aria-label="Shop now">
+                  <span>Shop Now</span>
+                  <span>{Icons.rightArrow}</span>
+                </PrimaryButton>
+              </div>
             </div>
             <img
               src={assets.featureProductBg}
@@ -138,15 +140,18 @@ const FeaturedProduct = () => {
                 className={
                   "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 mt-6 gap-4 lg:gap-x-6 lg:gap-y-4"
                 }>
-                {isLoading ? (
-                  <ProductCardSkeleton />
-                ) : (
-                  products
-                    ?.slice(0, 8)
-                    .map((product: ProductDataType) => (
-                      <ProductCard product={product} />
+                {isLoading
+                  ? Array.from({ length: 8 }).map((_, index) => (
+                      <ProductCardSkeleton key={index} />
                     ))
-                )}
+                  : products
+                      ?.slice(0, 8)
+                      .map((product: ProductDataType, index: number) => (
+                        <ProductCard
+                          key={product.id ?? index}
+                          product={product}
+                        />
+                      ))}
               </div>
             </div>
           </div>
