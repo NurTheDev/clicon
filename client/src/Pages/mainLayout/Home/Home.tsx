@@ -1,3 +1,4 @@
+import AllProduct from "./component/AllProduct.tsx";
 import CategoryShop from "./component/CategoryShop.tsx";
 import FeaturedProduct from "./component/FeaturedProduct.tsx";
 import Features from "./component/Features.tsx";
@@ -13,6 +14,7 @@ const Home = () => {
         <CategoryShop />
         <FeaturedProduct />
         <NewArrivals />
+        <AllProduct />
       </div>
     </div>
   );
