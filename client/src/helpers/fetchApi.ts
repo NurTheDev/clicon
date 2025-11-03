@@ -4,7 +4,7 @@ const useFetchProducts = (endpoint: string = "") => {
   return useQuery({
     queryKey: ["all-products", endpoint],
     queryFn: async () => {
-      const response = await fetch(`https://dummyjson.com/products${endpoint}`);
+      const response = await fetch(`https://dummyjson.com/products/${endpoint}`);
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
