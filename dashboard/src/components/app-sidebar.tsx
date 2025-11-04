@@ -60,12 +60,12 @@ const data = {
       items: [
         {
           title: "Create New",
-          url: "#",
+          url: "add-banner",
           icon: BadgePlus,
         },
         {
           title: "See All",
-          url: "#",
+          url: "banners",
           icon: Menu,
         },
       ],

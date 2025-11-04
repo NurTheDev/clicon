@@ -10,19 +10,17 @@ router.use(multerErrorHandler);
 router
   .route("/create_banner")
   .post(
-    authGuard,
-    checkAuthorization("Banner", "create"),
+    // authGuard,
+    // checkAuthorization("Banner", "create"),
     upload.single("image"),
     bannerController.createBanner
   );
 
-router
-  .route("/get_all_banners")
-  .get(
-    authGuard,
-    checkAuthorization("Banner", "read"),
-    bannerController.getAllBanners
-  );
+router.route("/get_all_banners").get(
+  // authGuard,
+  // checkAuthorization("Banner", "read"),
+  bannerController.getAllBanners
+);
 
 router
   .route("/update_banner/:bannerId")
