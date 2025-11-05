@@ -74,10 +74,13 @@ const AddBanner = () => {
       formData.append("image", file);
 
       // Replace with your actual upload endpoint
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://clicon-h56m.onrender.com/api/v1/upload/image",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const data = await response.json();
 
@@ -98,13 +101,16 @@ const AddBanner = () => {
       console.log("Form data:", data);
 
       // Replace with your actual API endpoint
-      const response = await fetch("/api/banners", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+      const response = await fetch(
+        "https://clicon-h56m.onrender.com/api/v1/banner/create_banner",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to create banner");

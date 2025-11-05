@@ -7,19 +7,23 @@ const multerErrorHandler = require("../../middleware/multerErrorHandler.middlewa
 const checkAuthorization = require("../../middleware/checkAuthorization.middleware");
 
 router.use(multerErrorHandler);
-router
-  .route("/create_banner")
-  .post(
-    // authGuard,
-    // checkAuthorization("Banner", "create"),
-    upload.single("image"),
-    bannerController.createBanner
-  );
+router.route("/create_banner").post(
+  // authGuard,
+  // checkAuthorization("Banner", "create"),
+  upload.single("image"),
+  bannerController.createBanner
+);
 
 router.route("/get_all_banners").get(
   // authGuard,
   // checkAuthorization("Banner", "read"),
   bannerController.getAllBanners
+);
+
+router.route("/get_banner/:bannerId").get(
+  // authGuard,
+  // checkAuthorization("Banner", "read"),
+  bannerController.getSingleBanner
 );
 
 router

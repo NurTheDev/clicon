@@ -80,22 +80,25 @@ const GetAllBanner = () => {
     queryKey: ["banners"],
     queryFn: async () => {
       const response = await fetch(
-        "http://localhost:3000/api/v1/banner/get_all_banners"
+        "https://clicon-h56m.onrender.com/api/v1/banner/get_all_banners"
       );
       if (!response.ok) {
         throw new Error("Failed to fetch banners");
       }
-      return response.json();
+      const data = await response.json();
+      return data.data; // Assuming the API response has a 'data' field containing the banners
     },
     staleTime: 5 * 60 * 1000,
   });
-
   // Delete banner mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`/api/banners/${id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `https://clicon-h56m.onrender.com/api/v1/banner/delete_banner/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to delete banner");
       }
@@ -115,13 +118,16 @@ const GetAllBanner = () => {
   // Toggle active status mutation
   const toggleActiveMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
-      const response = await fetch(`/api/banners/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ isActive: !isActive }),
-      });
+      const response = await fetch(
+        `https://clicon-h56m.onrender.com/api/v1/banner/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ isActive: !isActive }),
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to update banner");
       }
@@ -204,7 +210,9 @@ const GetAllBanner = () => {
                 Manage your website banners and promotions
               </CardDescription>
             </div>
-            <Button onClick={() => navigate("/dashboard/banners/add")}>
+            <Button
+              onClick={() => navigate("/dashboard/add-banner")}
+              className="cursor-pointer">
               <Plus className="mr-2 h-4 w-4" />
               Add Banner
             </Button>

@@ -32,6 +32,13 @@ exports.getAllBanners = asyncHandler(async (req, res) => {
   success(res, "Banners retrieved successfully", banners, 200);
 });
 
+exports.getSingleBanner = asyncHandler(async (req, res) => {
+  const { bannerId } = req.params;
+  const banner = await Banner.findById(bannerId);
+  if (!banner) throw new customError("Banner not found", 404);
+  success(res, "Banner retrieved successfully", banner, 200);
+});
+
 exports.updateBanner = asyncHandler(async (req, res) => {
   const { bannerId } = req.params;
   const existingBanner = await Banner.findById(bannerId);
