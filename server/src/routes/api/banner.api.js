@@ -26,21 +26,17 @@ router.route("/get_banner/:bannerId").get(
   bannerController.getSingleBanner
 );
 
-router
-  .route("/update_banner/:bannerId")
-  .put(
-    authGuard,
-    checkAuthorization("Banner", "update"),
-    upload.single("image"),
-    bannerController.updateBanner
-  );
+router.route("/update_banner/:bannerId").patch(
+  // authGuard,
+  // checkAuthorization("Banner", "update"),
+  upload.single("image"),
+  bannerController.updateBanner
+);
 
-router
-  .route("/delete_banner/:bannerId")
-  .delete(
-    authGuard,
-    checkAuthorization("Banner", "delete"),
-    bannerController.deleteBanner
-  );
+router.route("/delete_banner/:bannerId").delete(
+  // authGuard,
+  // checkAuthorization("Banner", "delete"),
+  bannerController.deleteBanner
+);
 
 module.exports = router;

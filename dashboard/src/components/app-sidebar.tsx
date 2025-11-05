@@ -3,12 +3,14 @@
 import {
   AudioWaveform,
   BadgePlus,
+  Binoculars,
   BookOpen,
-  Bot,
   Command,
   Frame,
   GalleryVerticalEnd,
   ImagePlus,
+  LayoutList,
+  ListPlus,
   Map,
   Menu,
   PieChart,
@@ -30,8 +32,8 @@ import {
 // This is sample data.
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
+    name: "Nur Islam",
+    email: "nur756.islam@gmail.com",
     avatar: "/avatars/shadcn.jpg",
   },
   teams: [
@@ -54,34 +56,36 @@ const data = {
   navMain: [
     {
       title: "Banners",
-      url: "#",
+      url: "/dashboard/banners",
       icon: ImagePlus,
       isActive: true,
       items: [
         {
           title: "Create New",
-          url: "add-banner",
+          url: "/dashboard/add-banner",
           icon: BadgePlus,
         },
         {
           title: "See All",
-          url: "banners",
+          url: "/dashboard/banners",
           icon: Menu,
         },
       ],
     },
     {
-      title: "Models",
-      url: "#",
-      icon: Bot,
+      title: "Categories",
+      url: "/dashboard/categories",
+      icon: LayoutList,
       items: [
         {
-          title: "Genesis",
-          url: "#",
+          title: "Create New",
+          url: "/dashboard/categories/add-category",
+          icon: ListPlus,
         },
         {
-          title: "Explorer",
-          url: "#",
+          title: "See All",
+          url: "/dashboard/categories",
+          icon: Binoculars,
         },
         {
           title: "Quantum",

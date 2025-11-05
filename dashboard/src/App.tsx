@@ -1,8 +1,11 @@
 import { Route, Routes } from "react-router";
 import Index from "./page/Index";
-import AddBanner from "./page/components/AddBanner";
-import GetAllBanner from "./page/components/GetAllBanner";
-import ViewBanner from "./page/components/ViewBanner";
+import AddBanner from "./page/banner/AddBanner";
+import EditBanner from "./page/banner/EditBanner";
+import GetAllBanner from "./page/banner/GetAllBanner";
+import ViewBanner from "./page/banner/ViewBanner";
+import AddCategory from "./page/category/AddCategory";
+import GetAllCategories from "./page/category/GetAllCategories";
 const App = () => {
   return (
     <Routes>
@@ -10,6 +13,9 @@ const App = () => {
         <Route path="add-banner" element={<AddBanner />} />
         <Route path="banners" element={<GetAllBanner />} />
         <Route path="banners/:id" element={<ViewBanner />} />
+        <Route path="banners/edit/:id" element={<EditBanner />} />
+        <Route path="categories/add-category" element={<AddCategory />} />
+        <Route path="categories" element={<GetAllCategories />} />
       </Route>
     </Routes>
   );

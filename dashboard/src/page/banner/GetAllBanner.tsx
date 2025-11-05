@@ -46,6 +46,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { Bounce, toast } from "react-toastify";
 
 type Banner = {
   _id: string;
@@ -80,7 +81,9 @@ const GetAllBanner = () => {
     queryKey: ["banners"],
     queryFn: async () => {
       const response = await fetch(
-        "https://clicon-h56m.onrender.com/api/v1/banner/get_all_banners"
+        `${import.meta.env.VITE_BASE_URL}${
+          import.meta.env.VITE_API_VERSION
+        }/banner/get_all_banners`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch banners");
@@ -90,11 +93,14 @@ const GetAllBanner = () => {
     },
     staleTime: 5 * 60 * 1000,
   });
+
   // Delete banner mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await fetch(
-        `https://clicon-h56m.onrender.com/api/v1/banner/delete_banner/${id}`,
+        `${import.meta.env.VITE_BASE_URL}${
+          import.meta.env.VITE_API_VERSION
+        }/banner/delete_banner/${id}`,
         {
           method: "DELETE",
         }
@@ -102,6 +108,17 @@ const GetAllBanner = () => {
       if (!response.ok) {
         throw new Error("Failed to delete banner");
       }
+      toast.success("Banner deleted successfully!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
       return response.json();
     },
     onSuccess: () => {
@@ -119,7 +136,9 @@ const GetAllBanner = () => {
   const toggleActiveMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
       const response = await fetch(
-        `https://clicon-h56m.onrender.com/api/v1/banner/${id}`,
+        `${import.meta.env.VITE_BASE_URL}${
+          import.meta.env.VITE_API_VERSION
+        }/banner/update_banner/${id}`,
         {
           method: "PATCH",
           headers: {

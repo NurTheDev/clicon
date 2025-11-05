@@ -52,7 +52,9 @@ const ViewBanner = () => {
     queryKey: ["banner", id],
     queryFn: async () => {
       const response = await fetch(
-        `https://clicon-h56m.onrender.com/api/v1/banner/get_banner/${id}`
+        `${import.meta.env.VITE_BASE_URL}${
+          import.meta.env.VITE_API_VERSION
+        }/banner/get_banner/${id}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch banner");

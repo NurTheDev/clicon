@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { Bounce, toast } from "react-toastify";
 import * as z from "zod";
 
 const bannerFormSchema = z
@@ -43,18 +44,15 @@ const bannerFormSchema = z
 type BannerFormValues = z.infer<typeof bannerFormSchema>;
 
 const AddBanner = () => {
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
-  const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<BannerFormValues>({
     resolver: zodResolver(bannerFormSchema),
     defaultValues: {
       title: "",
       description: "",
-      image: {
-        public_id: "",
-        url: "",
-      },
       link: "",
       priority: 0,
       isActive: true,
@@ -63,69 +61,91 @@ const AddBanner = () => {
     },
   });
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsUploading(true);
-    try {
-      // Create FormData for image upload
-      const formData = new FormData();
-      formData.append("image", file);
+    // Set the file for upload
+    setImageFile(file);
 
-      // Replace with your actual upload endpoint
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const onSubmit = async (data: BannerFormValues) => {
+    if (!imageFile) {
+      alert("Please select an image");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Create FormData to send both form data and image
+      const formData = new FormData();
+      formData.append("title", data.title);
+      if (data.description) formData.append("description", data.description);
+      if (data.link) formData.append("link", data.link);
+      formData.append("priority", data.priority.toString());
+      formData.append("isActive", data.isActive.toString());
+      if (data.startDate) formData.append("startDate", data.startDate);
+      if (data.endDate) formData.append("endDate", data.endDate);
+
+      // Append the image file
+      formData.append("image", imageFile);
+
       const response = await fetch(
-        "https://clicon-h56m.onrender.com/api/v1/upload/image",
+        `${import.meta.env.VITE_BASE_URL}${
+          import.meta.env.VITE_API_VERSION
+        }/banner/create_banner`,
         {
           method: "POST",
           body: formData,
         }
       );
-
-      const data = await response.json();
-
-      // Set image data in form
-      form.setValue("image.public_id", data.public_id);
-      form.setValue("image.url", data.url);
-      setImagePreview(data.url);
-    } catch (error) {
-      console.error("Image upload failed:", error);
-      // Handle error (show toast notification, etc.)
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const onSubmit = async (data: BannerFormValues) => {
-    try {
-      console.log("Form data:", data);
-
-      // Replace with your actual API endpoint
-      const response = await fetch(
-        "https://clicon-h56m.onrender.com/api/v1/banner/create_banner",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to create banner");
-      }
-
       const result = await response.json();
       console.log("Banner created:", result);
-
+      // Check if response is successful based on your API structure
+      if (!response.ok || result.status !== "success") {
+        throw new Error(result.message || "Failed to create banner");
+      }
       // Reset form and show success message
       form.reset();
+      setImageFile(null);
       setImagePreview("");
       // Show success toast/notification
+      toast.success("Banner created successfully!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
     } catch (error) {
       console.error("Failed to create banner:", error);
-      // Show error toast/notification
+      // Show error toast
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create banner",
+        {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+          transition: Bounce,
+        }
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -174,40 +194,25 @@ const AddBanner = () => {
               />
 
               {/* Image Upload */}
-              <FormField
-                control={form.control}
-                name="image"
-                render={() => (
-                  <FormItem>
-                    <FormLabel>Banner Image *</FormLabel>
-                    <FormControl>
-                      <div className="space-y-4">
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          disabled={isUploading}
-                        />
-                        {imagePreview && (
-                          <div className="relative w-full h-48 border rounded-lg overflow-hidden">
-                            <img
-                              src={imagePreview}
-                              alt="Preview"
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        )}
-                        {isUploading && (
-                          <p className="text-sm text-muted-foreground">
-                            Uploading image...
-                          </p>
-                        )}
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              <div className="space-y-2">
+                <FormLabel>Banner Image *</FormLabel>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  disabled={isSubmitting}
+                  required
+                />
+                {imagePreview && (
+                  <div className="relative w-full h-48 border rounded-lg overflow-hidden mt-4">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 )}
-              />
+              </div>
 
               {/* Link */}
               <FormField
@@ -306,9 +311,9 @@ const AddBanner = () => {
               <div className="flex gap-4">
                 <Button
                   type="submit"
-                  disabled={isUploading}
+                  disabled={isSubmitting || !imageFile}
                   className="cursor-pointer">
-                  Create Banner
+                  {isSubmitting ? "Creating..." : "Create Banner"}
                 </Button>
                 <Button
                   className="cursor-pointer"
@@ -316,6 +321,7 @@ const AddBanner = () => {
                   variant="outline"
                   onClick={() => {
                     form.reset();
+                    setImageFile(null);
                     setImagePreview("");
                   }}>
                   Reset
