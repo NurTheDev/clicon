@@ -245,7 +245,7 @@ const GetAllCategories = () => {
               </CardTitle>
               <CardDescription>Manage your product categories</CardDescription>
             </div>
-            <Button onClick={() => navigate("/dashboard/categories/add")}>
+            <Button onClick={() => navigate("/dashboard/add-banner")}>
               <Plus className="mr-2 h-4 w-4" />
               Add Category
             </Button>
@@ -370,7 +370,7 @@ const GetAllCategories = () => {
                             <DropdownMenuItem
                               onClick={() =>
                                 navigate(
-                                  `/dashboard/categories/${category._id}`
+                                  `/dashboard/categories/${category.slug}`
                                 )
                               }>
                               <Eye className="mr-2 h-4 w-4" />
@@ -379,7 +379,7 @@ const GetAllCategories = () => {
                             <DropdownMenuItem
                               onClick={() =>
                                 navigate(
-                                  `/dashboard/categories/edit/${category._id}`
+                                  `/dashboard/categories/edit/${category.slug}`
                                 )
                               }>
                               <Pencil className="mr-2 h-4 w-4" />

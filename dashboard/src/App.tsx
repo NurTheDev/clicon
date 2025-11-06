@@ -6,6 +6,7 @@ import GetAllBanner from "./page/banner/GetAllBanner";
 import ViewBanner from "./page/banner/ViewBanner";
 import AddCategory from "./page/category/AddCategory";
 import GetAllCategories from "./page/category/GetAllCategories";
+import ViewCategory from "./page/category/ViewCategory";
 const App = () => {
   return (
     <Routes>
@@ -16,6 +17,7 @@ const App = () => {
         <Route path="banners/edit/:id" element={<EditBanner />} />
         <Route path="categories/add-category" element={<AddCategory />} />
         <Route path="categories" element={<GetAllCategories />} />
+        <Route path="categories/:slug" element={<ViewCategory />} />
       </Route>
     </Routes>
   );
