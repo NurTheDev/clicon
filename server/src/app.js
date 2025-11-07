@@ -14,7 +14,7 @@ const globalError = require("./utils/globalError");
 const app = express();
 
 // Core middleware
-app.use(cors()); // In production, configure allowed origins
+app.use(cors({ origin: true, credentials: true })); // In production, configure allowed origins
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -23,8 +23,8 @@ app.use(cookieParser());
 
 // Simple root route
 app.get("/", (req, res) => {
-    res.send("Hello from server");
-    console.log("Hello from server");
+  res.send("Hello from server");
+  console.log("Hello from server");
 });
 
 // Routes (ensure API_VERSION is set, e.g. /api/v1)

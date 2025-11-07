@@ -1,5 +1,7 @@
 import { Route, Routes } from "react-router";
 import Index from "./page/Index";
+import Login from "./page/authentication/Login";
+import Register from "./page/authentication/Register";
 import AddBanner from "./page/banner/AddBanner";
 import EditBanner from "./page/banner/EditBanner";
 import GetAllBanner from "./page/banner/GetAllBanner";
@@ -19,6 +21,8 @@ import ViewSubCategory from "./page/subcategory/ViewSubCategory";
 const App = () => {
   return (
     <Routes>
+      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Login />} />
       <Route path="dashboard" element={<Index />}>
         <Route path="add-banner" element={<AddBanner />} />
         <Route path="banners" element={<GetAllBanner />} />
