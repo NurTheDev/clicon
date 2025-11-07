@@ -48,56 +48,59 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Bounce, toast } from "react-toastify";
 
-type Category = {
+type SubCategory = {
   _id: string;
   name: string;
   slug: string;
-  image: {
-    public_id: string;
-    url: string;
-  };
   isActive: boolean;
-  subCategories: string[];
+  category: {
+    _id: string;
+    name: string;
+  };
+  discount?: {
+    _id: string;
+    name: string;
+  };
   products: string[];
-  discount: string[];
   createdAt: string;
   updatedAt: string;
 };
 
-const GetAllCategories = () => {
+const GetAllSubCategories = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteSlug, setDeleteSlug] = useState<string | null>(null);
 
-  // Fetch all categories
+  // Fetch all subcategories
   const {
-    data: categories,
+    data: subCategories,
     isLoading,
     error,
-  } = useQuery<Category[]>({
-    queryKey: ["categories"],
+  } = useQuery<SubCategory[]>({
+    queryKey: ["subcategories"],
     queryFn: async () => {
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}${
           import.meta.env.VITE_API_VERSION
-        }/category/get-allCategory`
+        }/subCategory/get-allSubCategory`
       );
       if (!response.ok) {
-        throw new Error("Failed to fetch categories");
+        throw new Error("Failed to fetch subcategories");
       }
       const result = await response.json();
       return result.data;
     },
     staleTime: 5 * 60 * 1000,
   });
-  // Delete category mutation
+
+  // Delete subcategory mutation
   const deleteMutation = useMutation({
     mutationFn: async (slug: string) => {
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}${
           import.meta.env.VITE_API_VERSION
-        }/category/delete-category/${slug}`,
+        }/subCategory/delete-subCategory/${slug}`,
         {
           method: "DELETE",
         }
@@ -106,16 +109,17 @@ const GetAllCategories = () => {
       const result = await response.json();
 
       if (!response.ok || result.status !== "success") {
-        throw new Error(result.message || "Failed to delete category");
+        throw new Error(result.message || "Failed to delete subcategory");
       }
 
       return result;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subcategories"] });
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      setDeleteId(null);
+      setDeleteSlug(null);
 
-      toast.success("Category deleted successfully!", {
+      toast.success("Subcategory deleted successfully!", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -127,7 +131,7 @@ const GetAllCategories = () => {
       });
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to delete category", {
+      toast.error(error.message || "Failed to delete subcategory", {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -146,13 +150,13 @@ const GetAllCategories = () => {
       slug,
       isActive,
     }: {
-      id: string;
+      slug: string;
       isActive: boolean;
     }) => {
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}${
           import.meta.env.VITE_API_VERSION
-        }/category/update-category/${slug}`,
+        }/subCategory/update-subCategory/${slug}`,
         {
           method: "PATCH",
           headers: {
@@ -165,15 +169,15 @@ const GetAllCategories = () => {
       const result = await response.json();
 
       if (!response.ok || result.status !== "success") {
-        throw new Error(result.message || "Failed to update category");
+        throw new Error(result.message || "Failed to update subcategory");
       }
 
       return result;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["subcategories"] });
 
-      toast.success("Category status updated!", {
+      toast.success("Subcategory status updated!", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -185,7 +189,7 @@ const GetAllCategories = () => {
       });
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to update category", {
+      toast.error(error.message || "Failed to update subcategory", {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -198,18 +202,22 @@ const GetAllCategories = () => {
     },
   });
 
-  // Filter categories based on search query
-  const filteredCategories = categories?.filter((category) =>
-    category.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter subcategories based on search query
+  const filteredSubCategories = subCategories?.filter(
+    (subCategory) =>
+      subCategory.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      subCategory.category?.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
   );
 
-  const handleDelete = (id: string) => {
-    setDeleteId(id);
+  const handleDelete = (slug: string) => {
+    setDeleteSlug(slug);
   };
 
   const confirmDelete = () => {
-    if (deleteId) {
-      deleteMutation.mutate(deleteId);
+    if (deleteSlug) {
+      deleteMutation.mutate(deleteSlug);
     }
   };
 
@@ -233,13 +241,14 @@ const GetAllCategories = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center text-destructive">
-              Error loading categories. Please try again.
+              Error loading subcategories. Please try again.
             </div>
           </CardContent>
         </Card>
       </div>
     );
   }
+
   return (
     <div className="container mx-auto py-8">
       <Card>
@@ -247,13 +256,15 @@ const GetAllCategories = () => {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <CardTitle className="text-2xl font-bold">
-                All Categories
+                All Subcategories
               </CardTitle>
-              <CardDescription>Manage your product categories</CardDescription>
+              <CardDescription>
+                Manage your product subcategories
+              </CardDescription>
             </div>
-            <Button onClick={() => navigate("/dashboard/add-banner")}>
+            <Button onClick={() => navigate("/dashboard/subcategories/add")}>
               <Plus className="mr-2 h-4 w-4" />
-              Add Category
+              Add Subcategory
             </Button>
           </div>
         </CardHeader>
@@ -263,7 +274,7 @@ const GetAllCategories = () => {
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search categories..."
+                placeholder="Search subcategories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -276,17 +287,17 @@ const GetAllCategories = () => {
             <Card>
               <CardContent className="pt-6">
                 <div className="text-2xl font-bold">
-                  {categories?.length || 0}
+                  {subCategories?.length || 0}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Total Categories
+                  Total Subcategories
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6">
                 <div className="text-2xl font-bold">
-                  {categories?.filter((c) => c.isActive).length || 0}
+                  {subCategories?.filter((sc) => sc.isActive).length || 0}
                 </div>
                 <p className="text-xs text-muted-foreground">Active</p>
               </CardContent>
@@ -294,7 +305,7 @@ const GetAllCategories = () => {
             <Card>
               <CardContent className="pt-6">
                 <div className="text-2xl font-bold">
-                  {categories?.filter((c) => !c.isActive).length || 0}
+                  {subCategories?.filter((sc) => !sc.isActive).length || 0}
                 </div>
                 <p className="text-xs text-muted-foreground">Inactive</p>
               </CardContent>
@@ -302,8 +313,8 @@ const GetAllCategories = () => {
             <Card>
               <CardContent className="pt-6">
                 <div className="text-2xl font-bold">
-                  {categories?.reduce(
-                    (acc, c) => acc + c.products?.length,
+                  {subCategories?.reduce(
+                    (acc, sc) => acc + sc.products.length,
                     0
                   ) || 0}
                 </div>
@@ -317,51 +328,58 @@ const GetAllCategories = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[100px]">Image</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Slug</TableHead>
+                  <TableHead>Parent Category</TableHead>
                   <TableHead className="text-center">Status</TableHead>
-                  <TableHead className="text-center">Sub Categories</TableHead>
                   <TableHead className="text-center">Products</TableHead>
+                  <TableHead className="text-center">Discount</TableHead>
                   <TableHead>Created</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredCategories && filteredCategories.length > 0 ? (
-                  filteredCategories.map((category) => (
-                    <TableRow key={category._id}>
-                      <TableCell>
-                        <img
-                          src={category.image.url}
-                          alt={category.name}
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                      </TableCell>
+                {filteredSubCategories && filteredSubCategories.length > 0 ? (
+                  filteredSubCategories.map((subCategory) => (
+                    <TableRow key={subCategory._id}>
                       <TableCell className="font-medium">
-                        {category.name}
+                        {subCategory.name}
                       </TableCell>
                       <TableCell className="text-muted-foreground font-mono text-sm">
-                        {category.slug}
+                        {subCategory.slug}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {subCategory.category?.name || "N/A"}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge
-                          variant={category.isActive ? "default" : "secondary"}>
-                          {category.isActive ? "Active" : "Inactive"}
+                          variant={
+                            subCategory.isActive ? "default" : "secondary"
+                          }>
+                          {subCategory.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge variant="outline">
-                          {category.subCategories.length}
+                          {subCategory.products.length}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center">
-                        <Badge variant="outline">
-                          {category.products?.length}
-                        </Badge>
+                        {subCategory.discount ? (
+                          <Badge variant="secondary">Applied</Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">
+                            -
+                          </span>
+                        )}
                       </TableCell>
                       <TableCell className="text-sm">
-                        {format(new Date(category.createdAt), "MMM dd, yyyy")}
+                        {format(
+                          new Date(subCategory.createdAt),
+                          "MMM dd, yyyy"
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
@@ -376,7 +394,7 @@ const GetAllCategories = () => {
                             <DropdownMenuItem
                               onClick={() =>
                                 navigate(
-                                  `/dashboard/categories/${category.slug}`
+                                  `/dashboard/subcategories/${subCategory.slug}`
                                 )
                               }>
                               <Eye className="mr-2 h-4 w-4" />
@@ -385,7 +403,7 @@ const GetAllCategories = () => {
                             <DropdownMenuItem
                               onClick={() =>
                                 navigate(
-                                  `/dashboard/categories/edit/${category.slug}`
+                                  `/dashboard/subcategories/edit/${subCategory.slug}`
                                 )
                               }>
                               <Pencil className="mr-2 h-4 w-4" />
@@ -395,15 +413,15 @@ const GetAllCategories = () => {
                             <DropdownMenuItem
                               onClick={() =>
                                 toggleActiveMutation.mutate({
-                                  slug: category.slug,
-                                  isActive: category.isActive,
+                                  slug: subCategory.slug,
+                                  isActive: subCategory.isActive,
                                 })
                               }>
-                              {category.isActive ? "Deactivate" : "Activate"}
+                              {subCategory.isActive ? "Deactivate" : "Activate"}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              onClick={() => handleDelete(category.slug)}
+                              onClick={() => handleDelete(subCategory.slug)}
                               className="text-destructive">
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete
@@ -419,8 +437,8 @@ const GetAllCategories = () => {
                       colSpan={8}
                       className="text-center h-24 text-muted-foreground">
                       {searchQuery
-                        ? "No categories found matching your search."
-                        : "No categories yet. Create your first category!"}
+                        ? "No subcategories found matching your search."
+                        : "No subcategories yet. Create your first subcategory!"}
                     </TableCell>
                   </TableRow>
                 )}
@@ -431,14 +449,14 @@ const GetAllCategories = () => {
       </Card>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+      <AlertDialog open={!!deleteSlug} onOpenChange={() => setDeleteSlug(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the
-              category and remove it from our servers. All associated
-              subcategories and products will be affected.
+              subcategory and remove it from the parent category. All associated
+              products will be affected.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -455,4 +473,4 @@ const GetAllCategories = () => {
   );
 };
 
-export default GetAllCategories;
+export default GetAllSubCategories;

@@ -1,10 +1,10 @@
 "use client";
 
 import {
+  AlignHorizontalJustifyStart,
   AudioWaveform,
   BadgePlus,
   Binoculars,
-  BookOpen,
   Command,
   Frame,
   GalleryVerticalEnd,
@@ -14,7 +14,7 @@ import {
   Map,
   Menu,
   PieChart,
-  Settings2,
+  Slack,
 } from "lucide-react";
 import * as React from "react";
 
@@ -87,55 +87,39 @@ const data = {
           url: "/dashboard/categories",
           icon: Binoculars,
         },
+      ],
+    },
+    {
+      title: "Subcategory",
+      url: "/dashboard/subcategories",
+      icon: AlignHorizontalJustifyStart,
+      items: [
         {
-          title: "Quantum",
-          url: "#",
+          title: "Create New",
+          icon: ListPlus,
+          url: "/dashboard/subcategories/add-subcategory",
+        },
+        {
+          title: "See All",
+          icon: Binoculars,
+          url: "/dashboard/subcategories",
         },
       ],
     },
     {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
+      title: "Brand",
+      url: "/dashboard/brands",
+      icon: Slack,
       items: [
         {
-          title: "Introduction",
-          url: "#",
+          title: "Create New",
+          url: "/dashboard/brands/add-brand",
+          icon: ListPlus,
         },
         {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
+          title: "See All",
+          icon: Binoculars,
+          url: "/dashboard/brands",
         },
       ],
     },

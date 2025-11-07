@@ -347,7 +347,7 @@ const ViewCategory = () => {
               <Button
                 className="w-full"
                 variant="outline"
-                onClick={() => navigate(`/dashboard/categories/edit/${id}`)}>
+                onClick={() => navigate(`/dashboard/categories/edit/${slug}`)}>
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit Category
               </Button>
