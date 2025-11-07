@@ -45,11 +45,11 @@ type Category = {
 const ViewCategory = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-console.log(
-        `${import.meta.env.VITE_BASE_URL}${
-          import.meta.env.VITE_API_VERSION
-        }/category/get-category/${slug}`
-      );
+  console.log(
+    `${import.meta.env.VITE_BASE_URL}${
+      import.meta.env.VITE_API_VERSION
+    }/category/get-category/${slug}`
+  );
   // Fetch single category
   const {
     data: category,
@@ -106,7 +106,6 @@ console.log(
       </div>
     );
   }
-
   return (
     <div className="container mx-auto py-8">
       {/* Header */}
@@ -123,7 +122,7 @@ console.log(
             <p className="text-muted-foreground">Category Details</p>
           </div>
         </div>
-        <Button onClick={() => navigate(`/dashboard/categories/edit/${id}`)}>
+        <Button onClick={() => navigate(`/dashboard/categories/edit/${slug}`)}>
           <Pencil className="mr-2 h-4 w-4" />
           Edit Category
         </Button>

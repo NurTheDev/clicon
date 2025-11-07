@@ -79,7 +79,9 @@ exports.getAllCategories = asyncHandler(async (req, res) => {
  */
 exports.getCategory = asyncHandler(async (req, res) => {
   const { slug } = req.params;
-  const category = await categorySchema.findOne({ slug });
+  const category = await categorySchema
+    .findOne({ slug })
+    .populate("subCategories");
   if (!category) {
     throw new customError("Category not found", 400);
   }
@@ -100,6 +102,7 @@ exports.updateCategory = asyncHandler(async (req, res) => {
   if (!category) throw new customError("Category not found", 400);
   if (name) category.name = name;
   if (image) category.image = await uploadImage(image.path);
+  category.isActive = req.body.isActive ?? category.isActive;
   await category.save();
   success(res, "Category updated successfully", category, 200);
 });

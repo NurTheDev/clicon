@@ -7,7 +7,7 @@ const multerErrorHandler = require("../../middleware/multerErrorHandler.middlewa
 const { deleteCategory } = require("../../controllers/category.controller");
 
 router.route("/create-category").post(
-  authGard,
+  // authGard,
   upload.fields([
     {
       name: "image",
@@ -19,8 +19,8 @@ router.route("/create-category").post(
 );
 router.route("/get-allCategory").get(categoryController.getAllCategories);
 router.route("/get-category/:slug").get(categoryController.getCategory);
-router.route("/update-category/:slug").put(
-  authGard,
+router.route("/update-category/:slug").patch(
+  // authGard,
   upload.fields([
     {
       name: "image",

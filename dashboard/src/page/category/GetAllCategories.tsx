@@ -91,6 +91,7 @@ const GetAllCategories = () => {
     },
     staleTime: 5 * 60 * 1000,
   });
+  console.log(categories);
   // Delete category mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {

@@ -78,11 +78,11 @@ const AddCategory = () => {
       formData.append("name", data.name);
       formData.append("isActive", data.isActive.toString());
       formData.append("image", imageFile);
-
+      console.log("Submitting form data:", formData);
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}${
           import.meta.env.VITE_API_VERSION
-        }/category/create_category`,
+        }/category/create-category`,
         {
           method: "POST",
           body: formData,

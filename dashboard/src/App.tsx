@@ -5,6 +5,7 @@ import EditBanner from "./page/banner/EditBanner";
 import GetAllBanner from "./page/banner/GetAllBanner";
 import ViewBanner from "./page/banner/ViewBanner";
 import AddCategory from "./page/category/AddCategory";
+import EditCategory from "./page/category/EditCategory";
 import GetAllCategories from "./page/category/GetAllCategories";
 import ViewCategory from "./page/category/ViewCategory";
 const App = () => {
@@ -18,6 +19,7 @@ const App = () => {
         <Route path="categories/add-category" element={<AddCategory />} />
         <Route path="categories" element={<GetAllCategories />} />
         <Route path="categories/:slug" element={<ViewCategory />} />
+        <Route path="categories/edit/:slug" element={<EditCategory />} />
       </Route>
     </Routes>
   );
