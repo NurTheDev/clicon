@@ -30,6 +30,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import instance from "@/lib/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Eye, EyeOff, Mail, Phone } from "lucide-react";
@@ -123,23 +124,11 @@ const Login = () => {
       data: EmailLoginValues | PhoneLoginValues
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ): Promise<any> => {
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}${
-          import.meta.env.VITE_API_VERSION
-        }/auth/sign_in`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // Important for cookies
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await instance.post("/auth/sign_in", data);
 
-      const result = await response.json();
-      console.log("Login response:", result);
-      if (!response.ok || result.status !== "success") {
+      const result = response.data;
+
+      if (response.status !== 200 || result.status !== "success") {
         throw new Error(result.message || "Login failed");
       }
 
@@ -165,7 +154,9 @@ const Login = () => {
       }, 1000);
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Login failed", {
+      const message =
+        error.response?.data?.message || error.message || "Login failed";
+      toast.error(message, {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
