@@ -1,45 +1,53 @@
-const mongoose = require('mongoose');
-const {Schema, Types} = mongoose;
+const mongoose = require("mongoose");
+const { Schema, Types } = mongoose;
 
 // Define Role Schema
-const roleSchema = new Schema({
+const roleSchema = new Schema(
+  {
     name: {
-        type: String,
-        required: true,
-        trim: true,
-        unique: true
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
     },
     description: String,
     isActive: {
-        type: Boolean,
-        default: true
+      type: Boolean,
+      default: true,
     },
-}, {timestamps: true});
+    permissions: [{ type: Types.ObjectId, ref: "Permission" }],
+  },
+  { timestamps: true }
+);
 
-const permissionSchema = new Schema({
+const permissionSchema = new Schema(
+  {
     resource: {
-        type: String,
-        required: true,
-        trim: true
+      type: String,
+      required: true,
+      trim: true,
     },
     action: {
-        type: String,
-        required: true,
-        enum: ["create", "update", "delete", "read"],
-        default: "read"
+      type: String,
+      required: true,
+      enum: ["create", "update", "delete", "read"],
+      default: "read",
     },
     description: String,
-    conditions: {type: Map, of: Schema.Types.Mixed},
+    conditions: { type: Map, of: Schema.Types.Mixed },
     scope: {
-        type: String,
-        enum: ["all", "own", "department", "none"],
-        default: "none"
-    }
-}, {timestamps: true});
+      type: String,
+      enum: ["all", "own", "department", "none"],
+      default: "none",
+    },
+  },
+  { timestamps: true }
+);
 // Add compound index for unique permission combinations
-permissionSchema.index({resource: 1, action: 1}, {unique: true});
+permissionSchema.index({ resource: 1, action: 1 }, { unique: true });
 
-const Permission = mongoose.models.Permission || mongoose.model('Permission', permissionSchema);
-const Role = mongoose.models.Role || mongoose.model('Role', roleSchema);
+const Permission =
+  mongoose.models.Permission || mongoose.model("Permission", permissionSchema);
+const Role = mongoose.models.Role || mongoose.model("Role", roleSchema);
 
 module.exports = { Permission, Role };

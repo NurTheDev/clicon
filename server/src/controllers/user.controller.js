@@ -157,9 +157,11 @@ exports.login = asyncHandler(async (req, res) => {
     res,
     "User logged in successfully",
     {
-      accessToken,
+      // accessToken,
       name: user.name,
       email: user.email,
+      phone: user.phone,
+      roles: user.role || user.roles,
     },
     200
   );

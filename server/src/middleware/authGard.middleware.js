@@ -16,8 +16,8 @@ function extractToken(req) {
   if (typeof auth === "string" && auth.startsWith("Bearer ")) {
     return auth.slice(7).trim();
   }
-  if (req.cookie?.access_token) {
-    return req.cookies.access_token;
+  if (req.cookies?.accessToken) {
+    return req.cookies.accessToken;
   }
   if (req.body?.token) {
     return req.body.token;
@@ -56,12 +56,10 @@ async function authGuard(req, res, next) {
       if (!isValidSecret) {
         return next(new customError("Invalid secret", 401));
       }
-      console.log("isValidSecret", isValidSecret);
     } else {
       console.log("ℹ️  Secret verification disabled");
     }
     const token = extractToken(req);
-    console.log("Extracted token:", token);
     if (!token) {
       return next(new customError("Unauthorized", 401));
     }
