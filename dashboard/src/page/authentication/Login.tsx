@@ -125,13 +125,11 @@ const Login = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ): Promise<any> => {
       const response = await instance.post("/auth/sign_in", data);
-
+      console.log("Login response:", response);
       const result = response.data;
-
       if (response.status !== 200 || result.status !== "success") {
         throw new Error(result.message || "Login failed");
       }
-
       return result;
     },
     onSuccess: (data) => {
@@ -148,7 +146,6 @@ const Login = () => {
 
       // Store user data if needed
       localStorage.setItem("user", JSON.stringify(data.data));
-
       setTimeout(() => {
         navigate("/dashboard");
       }, 1000);

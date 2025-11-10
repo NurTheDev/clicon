@@ -8,7 +8,7 @@ const checkAuthorization = require("../../middleware/checkAuthorization.middlewa
 
 router.use(multerErrorHandler);
 router.route("/create_banner").post(
-  // authGuard,
+  authGuard,
   // checkAuthorization("Banner", "create"),
   upload.single("image"),
   bannerController.createBanner

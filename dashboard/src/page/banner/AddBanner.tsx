@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import instance from "@/lib/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -97,19 +98,15 @@ const AddBanner = () => {
       // Append the image file
       formData.append("image", imageFile);
 
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}${
-          import.meta.env.VITE_API_VERSION
-        }/banner/create_banner`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-      const result = await response.json();
+      const response = await instance.post("/banner/create_banner", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      const result = response.data;
       console.log("Banner created:", result);
       // Check if response is successful based on your API structure
-      if (!response.ok || result.status !== "success") {
+      if (result.status !== "success" || result.statusCode !== 201) {
         throw new Error(result.message || "Failed to create banner");
       }
       // Reset form and show success message

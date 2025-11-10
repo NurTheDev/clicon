@@ -1,23 +1,16 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api",
-  timeout: 10000,
+  baseURL: `${import.meta.env.VITE_BASE_URL}${
+    import.meta.env.VITE_API_VERSION
+  }`,
+  timeout: 90000,
   withCredentials: true,
 });
 
 instance.interceptors.request.use(
   (config) => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      const token = JSON.parse(user).accessToken;
-      if (token) {
-        config.headers = {
-          ...config.headers,
-          Authorization: `Bearer ${token}`,
-        };
-      }
-    }
+    console.log("Request config:", config);
     return config;
   },
   (error) => {
@@ -29,7 +22,7 @@ instance.interceptors.response.use(
   (response) => {
     return response;
   },
-  (error) => {
+  async (error) => {
     const originalRequest = error.config;
     if (
       error.response &&
@@ -38,12 +31,13 @@ instance.interceptors.response.use(
     ) {
       originalRequest._retry = true;
       try {
-        const response = await instance.post("/auth/refresh-token");
-        const newToken = response.data.accessToken;
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
-        user.accessToken = newToken;
-        localStorage.setItem("user", JSON.stringify(user));
-        originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+        await instance.post(
+          "/auth/refresh-token",
+          {},
+          {
+            withCredentials: true,
+          }
+        );
         return instance(originalRequest);
       } catch (error) {
         localStorage.removeItem("user");
