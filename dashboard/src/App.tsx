@@ -1,6 +1,10 @@
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router";
 import PageLoading from "./loading/PageLoadingProps";
+import AddProduct from "./page/product/AddProduct";
+import EditProduct from "./page/product/EditProduct";
+import GetAllProducts from "./page/product/GetAllProducts";
+import ViewProduct from "./page/product/ViewProduct";
 const Index = lazy(() => import("./page/Index"));
 const Login = lazy(() => import("./page/authentication/Login"));
 const Register = lazy(() => import("./page/authentication/Register"));
@@ -41,6 +45,7 @@ const App = () => {
               path="register"
               element={<Navigate to="/dashboard" replace />}
             />
+            <Route path="/" element={<Navigate to={"/dashboard"} />} />
             <Route path="dashboard" element={<Index />}>
               <Route path="add-banner" element={<AddBanner />} />
               <Route path="banners" element={<GetAllBanner />} />
@@ -64,6 +69,10 @@ const App = () => {
               <Route path="brands" element={<GetAllBrands />} />
               <Route path="brands/:slug" element={<ViewBrand />} />
               <Route path="brands/edit/:slug" element={<EditBrand />} />
+              <Route path="products/add-product" element={<AddProduct />} />
+              <Route path="products" element={<GetAllProducts />} />
+              <Route path="products/:slug" element={<ViewProduct />} />
+              <Route path="products/edit/:slug" element={<EditProduct />} />
             </Route>
           </>
         ) : (

@@ -12,9 +12,9 @@ const objectId = Joi.string()
 
 const singleProductValidationSchema = Joi.object({
   name: Joi.string().trim().required(),
-  brand: objectId,
-  category: objectId,
-  subCategory: objectId,
+  brand: objectId.allow("", null), // ✅ Make optional
+  category: objectId.required(), // Keep required
+  subCategory: objectId.allow("", null),
   images: Joi.array().items(Joi.string().trim()).min(1),
   thumbnail: Joi.string().trim(),
   description: Joi.string().trim().required(),
@@ -76,9 +76,9 @@ const updateSingleProductValidationSchema = singleProductValidationSchema.fork(
 );
 const multiProductValidationSchema = Joi.object({
   name: Joi.string().trim().required(),
-  brand: objectId.required(),
+  brand: objectId.allow("", null),
   category: objectId.required(),
-  subCategory: objectId.required(),
+  subCategory: objectId.allow("", null),
   thumbnail: Joi.string().trim(),
   description: Joi.string().trim().required(),
   tags: Joi.array().items(Joi.string().trim()),
@@ -90,6 +90,13 @@ const multiProductValidationSchema = Joi.object({
 
 exports.productValidation = async (req) => {
   try {
+    // Clean up empty strings
+    const cleanedBody = { ...req.body };
+    Object.keys(cleanedBody).forEach((key) => {
+      if (cleanedBody[key] === "" || cleanedBody[key] === "undefined") {
+        delete cleanedBody[key];
+      }
+    });
     if (req.body.variantType === "single") {
       const result = await singleProductValidationSchema.validateAsync(
         req.body
@@ -118,20 +125,21 @@ exports.productValidation = async (req) => {
           400
         );
       }
-      // Check given category, subCategory and brand are valid or not
-      if (!result.category) throw new customError("Category is required", 400);
-      if (!result.subCategory)
-        throw new customError("Sub category is required", 400);
-      if (!result.brand) throw new customError("Brand is required", 400);
-      const categoryExits = await categorySchema.findById(result.category);
-      if (!categoryExits) throw new customError("Category not found", 404);
-      const subCategoryExits = await subCategorySchema.findById(
-        result.subCategory
-      );
-      if (!subCategoryExits)
-        throw new customError("Sub category not found", 404);
-      const brandExits = await brandSchema.findById(result.brand);
-      if (!brandExits) throw new customError("Brand not found", 404);
+      if (result.category) {
+        const categoryExits = await categorySchema.findById(result.category);
+        if (!categoryExits) throw new customError("Category not found", 404);
+      }
+      if (result.subCategory) {
+        const subCategoryExits = await subCategorySchema.findById(
+          result.subCategory
+        );
+        if (!subCategoryExits)
+          throw new customError("Sub category not found", 404);
+      }
+      if (result.brand) {
+        const brandExits = await brandSchema.findById(result.brand);
+        if (!brandExits) throw new customError("Brand not found", 404);
+      }
       return {
         ...result,
         images: req.files.images,
@@ -168,6 +176,7 @@ exports.productValidation = async (req) => {
         throw new customError("Sub category not found", 404);
       const brandExits = await brandSchema.findById(result.brand);
       if (!brandExits) throw new customError("Brand not found", 404);
+      console.log(result);
       return {
         ...result,
         thumbnail: req.files.thumbnail[0],
