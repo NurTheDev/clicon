@@ -2,8 +2,10 @@ import React from "react";
 import { BiHeadphone } from "react-icons/bi";
 import { BsBoxSeam, BsCreditCard } from "react-icons/bs";
 import {
+  FaApple,
   FaCartArrowDown,
   FaFacebook,
+  FaGooglePlay,
   FaHeadphones,
   FaHeart,
   FaInstagram,
@@ -21,7 +23,7 @@ import {
   FaRegEye,
   FaXTwitter,
 } from "react-icons/fa6";
-import { IoMdHelp } from "react-icons/io";
+import { IoMdHelp, IoMdSend } from "react-icons/io";
 import { IoClose, IoTrophyOutline } from "react-icons/io5";
 import { LuMenu } from "react-icons/lu";
 import { MdWifiCalling3 } from "react-icons/md";
@@ -56,5 +58,8 @@ const Icons: Icons = {
   starFilled: <FaStar />,
   starEmpty: <FaRegStar />,
   openEye: <FaRegEye />,
+  send: <IoMdSend />,
+  googlePlay: <FaGooglePlay />,
+  apple: <FaApple />,
 };
 export default Icons;

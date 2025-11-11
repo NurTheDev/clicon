@@ -1,3 +1,4 @@
+import Newsletter from "../../../common/NewsLetter.tsx";
 import AllProduct from "./component/AllProduct.tsx";
 import CategoryShop from "./component/CategoryShop.tsx";
 import FeaturedProduct from "./component/FeaturedProduct.tsx";
@@ -15,6 +16,7 @@ const Home = () => {
         <FeaturedProduct />
         <NewArrivals />
         <AllProduct />
+        <Newsletter />
       </div>
     </div>
   );
