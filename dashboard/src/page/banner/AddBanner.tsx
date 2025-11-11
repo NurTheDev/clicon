@@ -126,21 +126,18 @@ const AddBanner = () => {
         transition: Bounce,
       });
     } catch (error) {
-      console.error("Failed to create banner:", error);
+      console.error("Failed to create brand:", error.response.data?.message);
       // Show error toast
-      toast.error(
-        error instanceof Error ? error.message : "Failed to create banner",
-        {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "light",
-          transition: Bounce,
-        }
-      );
+      toast.error(error.response.data?.message || "Failed to create banner", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+        transition: Bounce,
+      });
     } finally {
       setIsSubmitting(false);
     }

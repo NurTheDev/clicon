@@ -145,10 +145,20 @@ const Login = () => {
       });
 
       // Store user data if needed
-      localStorage.setItem("user", JSON.stringify(data.data));
+      const userInfo = {
+        name: data.data.name,
+        email: data.data.email,
+        phone: data.data.phone,
+        role: data.data.role,
+        id: data.data._id,
+        permission: data.data.permissions,
+      };
+      localStorage.setItem("user", JSON.stringify(userInfo));
+
+      // Navigate to dashboard after a short delay
       setTimeout(() => {
         navigate("/dashboard");
-      }, 1000);
+      }, 2000);
     },
     onError: (error: Error) => {
       const message =

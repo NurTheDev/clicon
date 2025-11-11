@@ -23,6 +23,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import instance from "@/lib/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Eye, EyeOff, Mail, Phone } from "lucide-react";
@@ -107,26 +108,12 @@ const Register = () => {
       data: EmailRegisterValues | PhoneRegisterValues
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ): Promise<any> => {
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}${
-          import.meta.env.VITE_API_VERSION
-        }/auth/register`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok || result.status !== "success") {
+      const response = await instance.post("/auth/register", data);
+      const result = response.data;
+      if (result.status !== "success") {
         throw new Error(result.message || "Registration failed");
       }
-
-      return result;
+      return result.data;
     },
     onSuccess: (data, variables) => {
       toast.success(`Registration successful! OTP sent to your ${activeTab}.`, {
@@ -172,26 +159,13 @@ const Register = () => {
           ? { email: userIdentifier, otp }
           : { phone: userIdentifier, otp };
 
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}${
-          import.meta.env.VITE_API_VERSION
-        }/auth/verify-account`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(body),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok || result.status !== "success") {
+      const response = await instance.post("/auth/verify-account", body);
+      const result = response.data;
+      if (result.status !== "success") {
         throw new Error(result.message || "OTP verification failed");
       }
 
-      return result;
+      return result.data;
     },
     onSuccess: () => {
       toast.success("Account verified successfully!", {
@@ -230,27 +204,12 @@ const Register = () => {
         activeTab === "email"
           ? { email: userIdentifier }
           : { phone: userIdentifier };
-
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}${
-          import.meta.env.VITE_API_VERSION
-        }/auth/resend-otp`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(body),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok || result.status !== "success") {
+      const response = await instance.post("/auth/resend-otp", body);
+      const result = response.data;
+      if (result.status !== "success") {
         throw new Error(result.message || "Failed to resend OTP");
       }
-
-      return result;
+      return result.data;
     },
     onSuccess: () => {
       toast.success("OTP resent successfully!", {

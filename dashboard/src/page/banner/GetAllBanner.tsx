@@ -34,6 +34,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import instance from "@/lib/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
@@ -80,32 +81,21 @@ const GetAllBanner = () => {
   } = useQuery<Banner[]>({
     queryKey: ["banners"],
     queryFn: async () => {
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}${
-          import.meta.env.VITE_API_VERSION
-        }/banner/get_all_banners`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch banners");
+      const response = await instance.get("/banner/get_all_banners");
+      const result = response.data;
+      if (result.status !== "success") {
+        throw new Error(result.message || "Failed to fetch banners");
       }
-      const data = await response.json();
-      return data.data; // Assuming the API response has a 'data' field containing the banners
+      return result.data; // Assuming the API response has a 'data' field containing the banners
     },
     staleTime: 5 * 60 * 1000,
   });
-
   // Delete banner mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}${
-          import.meta.env.VITE_API_VERSION
-        }/banner/delete_banner/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
-      if (!response.ok) {
+      const response = await instance.delete(`/banner/delete_banner/${id}`);
+      const result = response.data;
+      if (result.status !== "success") {
         throw new Error("Failed to delete banner");
       }
       toast.success("Banner deleted successfully!", {
@@ -135,22 +125,16 @@ const GetAllBanner = () => {
   // Toggle active status mutation
   const toggleActiveMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}${
-          import.meta.env.VITE_API_VERSION
-        }/banner/update_banner/${id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ isActive: !isActive }),
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Failed to update banner");
+      const response = await instance.patch(`/banner/update_banner/${id}`, {
+        isActive: !isActive,
+      });
+      const result = response.data;
+
+      if (result.status !== "success") {
+        throw new Error(result.message || "Failed to update banner");
       }
-      return response.json();
+
+      return result.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["banners"] });

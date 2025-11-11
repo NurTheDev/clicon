@@ -117,9 +117,8 @@ const AddBrand = () => {
         navigate("/dashboard/brands");
       }, 1000);
     } catch (error) {
-      console.error("Failed to create brand:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to create brand",
+        error.response.data?.data?.message || "Failed to create brand",
         {
           position: "top-right",
           autoClose: 5000,

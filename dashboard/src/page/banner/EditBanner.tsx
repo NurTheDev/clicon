@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import instance from "@/lib/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
@@ -127,17 +128,11 @@ const EditBanner = () => {
   // Update banner mutation
   const updateMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}${
-          import.meta.env.VITE_API_VERSION
-        }/banner/update_banner/${id}`,
-        {
-          method: "PATCH",
-          body: formData,
-        }
+      const response = await instance.patch(
+        `/banner/update_banner/${id}`,
+        formData
       );
-
-      const result = await response.json();
+      const result = response.data;
 
       if (!response.ok || result.status !== "success") {
         throw new Error(result.message || "Failed to update banner");

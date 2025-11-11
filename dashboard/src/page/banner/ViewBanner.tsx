@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import instance from "@/lib/axios";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
@@ -51,21 +52,17 @@ const ViewBanner = () => {
   } = useQuery<Banner>({
     queryKey: ["banner", id],
     queryFn: async () => {
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}${
-          import.meta.env.VITE_API_VERSION
-        }/banner/get_banner/${id}`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch banner");
+      const response = await instance.get(`/banner/get_banner/${id}`);
+      const result = response.data;
+      if (result.status !== "success") {
+        throw new Error(result.message || "Failed to fetch banner details");
       }
-      const result = await response.json();
       return result.data;
     },
     enabled: !!id,
     staleTime: 5 * 60 * 1000,
   });
-
+  console.log(banner);
   const getBannerStatus = (banner: Banner) => {
     if (!banner.isActive)
       return { label: "Inactive", variant: "secondary" as const };
