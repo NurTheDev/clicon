@@ -1,6 +1,10 @@
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router";
 import PageLoading from "./loading/PageLoadingProps";
+import CreateCoupon from "./page/coupon/CreateCoupon";
+import EditCoupon from "./page/coupon/EditCoupon";
+import ViewAllCoupons from "./page/coupon/ViewAllCoupons";
+import ViewCoupon from "./page/coupon/ViewCoupon";
 import AddProduct from "./page/product/AddProduct";
 import EditProduct from "./page/product/EditProduct";
 import GetAllProducts from "./page/product/GetAllProducts";
@@ -31,11 +35,11 @@ const ViewSubCategory = lazy(
   () => import("./page/subcategory/ViewSubCategory")
 );
 const App = () => {
-  const { email } = JSON.parse(localStorage.getItem("user") || "{}");
+  const { email, phone } = JSON.parse(localStorage.getItem("user") || "{}");
   return (
     <Suspense fallback={<PageLoading />}>
       <Routes>
-        {email ? (
+        {email || phone ? (
           <>
             <Route
               path="login"
@@ -73,6 +77,10 @@ const App = () => {
               <Route path="products" element={<GetAllProducts />} />
               <Route path="products/:slug" element={<ViewProduct />} />
               <Route path="products/edit/:slug" element={<EditProduct />} />
+              <Route path="coupons/add-coupon" element={<CreateCoupon />} />
+              <Route path="coupons" element={<ViewAllCoupons />} />
+              <Route path="coupons/:slug" element={<ViewCoupon />} />
+              <Route path="coupons/edit/:slug" element={<EditCoupon />} />
             </Route>
           </>
         ) : (

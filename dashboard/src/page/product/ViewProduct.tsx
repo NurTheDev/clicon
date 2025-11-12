@@ -1,10 +1,20 @@
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import instance from "@/lib/axios";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
   ArrowLeft,
@@ -16,8 +26,9 @@ import {
   Tag,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import { Bounce, toast } from "react-toastify";
 
 type Product = {
   _id: string;
@@ -77,9 +88,11 @@ type Product = {
 };
 
 const ViewProduct = () => {
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<string>("");
+  const queryClient = useQueryClient();
 
   // Fetch product
   const {
@@ -102,10 +115,73 @@ const ViewProduct = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Set initial selected image
-  if (product && !selectedImage) {
-    setSelectedImage(product.thumbnail.url);
-  }
+  // Set initial selected image once product loads
+  useEffect(() => {
+    if (product && !selectedImage) {
+      setSelectedImage(product.thumbnail.url);
+    }
+  }, [product, selectedImage]);
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (productSlug: string) => {
+      const response = await instance.delete(
+        `/product/delete-product/${productSlug}`
+      );
+      const result = response.data;
+
+      if (result.status !== "success") {
+        throw new Error(result.message || "Failed to delete product");
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      setDeleteId(null);
+
+      toast.success("Product deleted successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+        transition: Bounce,
+      });
+
+      // Navigate back to products list after successful deletion
+      navigate("/dashboard/products");
+    },
+    onError: (error: any) => {
+      console.error("Delete failed:", error);
+
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to delete product";
+
+      toast.error(message, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+        transition: Bounce,
+      });
+
+      setDeleteId(null);
+    },
+  });
+
+  const confirmDelete = () => {
+    if (deleteId) {
+      deleteMutation.mutate(deleteId);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -133,6 +209,10 @@ const ViewProduct = () => {
     );
   }
 
+  const handleDelete = (productSlug: string) => {
+    setDeleteId(productSlug);
+  };
+
   return (
     <div className="container mx-auto py-8 space-y-6">
       {/* Header */}
@@ -154,9 +234,12 @@ const ViewProduct = () => {
             <Edit className="h-4 w-4 mr-2" />
             Edit Product
           </Button>
-          <Button variant="destructive">
+          <Button
+            variant="destructive"
+            onClick={() => handleDelete(product.slug)}
+            disabled={deleteMutation.isPending}>
             <Trash2 className="h-4 w-4 mr-2" />
-            Delete
+            {deleteMutation.isPending ? "Deleting..." : "Delete"}
           </Button>
         </div>
       </div>
@@ -533,7 +616,8 @@ const ViewProduct = () => {
                   <TableRow>
                     <TableCell className="font-medium">Created At</TableCell>
                     <TableCell className="text-right">
-                      {format(new Date(product.createdAt), "PPpp")}
+                      {product.createdAt &&
+                        format(new Date(product.createdAt), "PPpp")}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -548,6 +632,35 @@ const ViewProduct = () => {
           </Card>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent className="bg-white border rounded-lg shadow-lg p-6 max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-semibold">
+              Are you absolutely sure?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground mt-2">
+              This action cannot be undone. This will permanently delete the
+              product "{product?.name}" and remove it from all categories and
+              brands.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 flex gap-2">
+            <AlertDialogCancel
+              className="px-4 py-2"
+              disabled={deleteMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 px-4 py-2">
+              {deleteMutation.isPending ? "Deleting..." : "Delete Product"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

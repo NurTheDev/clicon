@@ -51,60 +51,6 @@ exports.register = asyncHandler(async (req, res) => {
   success(res, "User registered successfully", sanitizeUser(user), 201);
 });
 /**
- * Verify email
- * @type {(function(*, *): Promise<void>)|*}
- * @returns {Promise<void>}
- * @throws {customError}
- */
-exports.emailVerify = asyncHandler(async (req, res) => {
-  const { email, otp } = await emailOTPValidation(req);
-  const user = await userSchema.findOne({ email });
-  if (!user) {
-    throw new customError("User not found", 400);
-  }
-  await verifyOTP(
-    user,
-    otp,
-    "emailVerificationToken",
-    "emailVerificationExpire"
-  );
-  await clearOTPField(
-    otp,
-    user,
-    "emailVerificationToken",
-    "emailVerificationExpire"
-  );
-  await user.save();
-  success(res, "Email verified successfully", sanitizeUser(user), 200);
-});
-/**
- * Verify phone
- * @type {(function(*, *): Promise<void>)|*}
- * @returns {Promise<void>}
- * @throws {customError}
- */
-exports.phoneVerify = asyncHandler(async (req, res) => {
-  const { phone, otp } = await phoneOTPValidation(req);
-  const user = await userSchema.findOne({ phone });
-  if (!user) {
-    throw new customError("User not found", 400);
-  }
-  await verifyOTP(
-    user,
-    otp,
-    "phoneVerificationToken",
-    "phoneVerificationExpire"
-  );
-  await clearOTPField(
-    otp,
-    user,
-    "phoneVerificationToken",
-    "phoneVerificationExpire"
-  );
-  await user.save();
-  success(res, "Phone verified successfully", user, 200);
-});
-/**
  * Login user
  * @type {(function(*, *): Promise<void>)|*}
  * @returns {Promise<void>}
@@ -179,7 +125,7 @@ exports.verifyAccount = asyncHandler(async (req, res) => {
     if (!user) {
       throw new customError("User not found", 400);
     }
-    await verifyOTP(
+    const isVerified = await verifyOTP(
       otp,
       user,
       "phoneVerificationToken",
@@ -189,8 +135,10 @@ exports.verifyAccount = asyncHandler(async (req, res) => {
       otp,
       user,
       "phoneVerificationToken",
-      "phoneVerificationExpire"
+      "phoneVerificationExpire",
+      "isPhoneVerified"
     );
+    user.isPhoneVerified = isVerified;
     await user.save();
     success(res, "Phone verified successfully", sanitizeUser(user), 200);
   }
@@ -199,7 +147,7 @@ exports.verifyAccount = asyncHandler(async (req, res) => {
     if (!user) {
       throw new customError("User not found", 400);
     }
-    await verifyOTP(
+    const isVerified = await verifyOTP(
       otp,
       user,
       "emailVerificationToken",
@@ -211,6 +159,7 @@ exports.verifyAccount = asyncHandler(async (req, res) => {
       "emailVerificationExpire",
       "isEmailVerified"
     );
+    user.isEmailVerified = isVerified;
     await user.save();
     success(res, "Email verified successfully", sanitizeUser(user), 200);
   }

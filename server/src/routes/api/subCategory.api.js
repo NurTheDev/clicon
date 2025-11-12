@@ -5,7 +5,7 @@ router
   .route("/create-subCategory")
   .post(subCategoryController.createSubCategory);
 router
-  .route("/get-allSubCategory")
+  .route("/get-allSubCategories")
   .get(subCategoryController.getAllSubCategories);
 router
   .route("/get-subCategory/:slug")

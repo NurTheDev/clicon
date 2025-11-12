@@ -190,7 +190,7 @@ const EditProduct = () => {
   const { data: product, isLoading: isLoadingProduct } = useQuery<Product>({
     queryKey: ["product", slug],
     queryFn: async () => {
-      const response = await instance.get(`/product/${slug}`);
+      const response = await instance.get(`/product/product/${slug}`);
       const result = response.data;
 
       if (result.status !== "success") {

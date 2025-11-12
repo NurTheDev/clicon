@@ -117,7 +117,6 @@ const Login = () => {
       confirmPassword: "",
     },
   });
-
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: async (
@@ -125,7 +124,6 @@ const Login = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ): Promise<any> => {
       const response = await instance.post("/auth/sign_in", data);
-      console.log("Login response:", response);
       const result = response.data;
       if (response.status !== 200 || result.status !== "success") {
         throw new Error(result.message || "Login failed");
@@ -143,7 +141,6 @@ const Login = () => {
         theme: "light",
         transition: Bounce,
       });
-
       // Store user data if needed
       const userInfo = {
         name: data.data.name,
@@ -163,6 +160,7 @@ const Login = () => {
     onError: (error: Error) => {
       const message =
         error.response?.data?.message || error.message || "Login failed";
+      console.log("Login mutation setup message:", error);
       toast.error(message, {
         position: "top-right",
         autoClose: 5000,
@@ -517,7 +515,6 @@ const Login = () => {
           </p>
         </CardFooter>
       </Card>
-
       {/* Forgot Password Dialog */}
       <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
         <DialogContent>
