@@ -1,14 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router";
 import PageLoading from "./loading/PageLoadingProps";
-import CreateCoupon from "./page/coupon/CreateCoupon";
-import EditCoupon from "./page/coupon/EditCoupon";
-import ViewAllCoupons from "./page/coupon/ViewAllCoupons";
-import ViewCoupon from "./page/coupon/ViewCoupon";
-import AddProduct from "./page/product/AddProduct";
-import EditProduct from "./page/product/EditProduct";
-import GetAllProducts from "./page/product/GetAllProducts";
-import ViewProduct from "./page/product/ViewProduct";
 const Index = lazy(() => import("./page/Index"));
 const Login = lazy(() => import("./page/authentication/Login"));
 const Register = lazy(() => import("./page/authentication/Register"));
@@ -31,9 +23,21 @@ const EditSubCategory = lazy(
 const GetAllSubCategories = lazy(
   () => import("./page/subcategory/GetAllSubCategories")
 );
+const GetAllDiscounts = lazy(() => import("./page/discount/DiscountList"));
 const ViewSubCategory = lazy(
   () => import("./page/subcategory/ViewSubCategory")
 );
+const CreateCoupon = lazy(() => import("./page/coupon/CreateCoupon"));
+const EditCoupon = lazy(() => import("./page/coupon/EditCoupon"));
+const ViewAllCoupons = lazy(() => import("./page/coupon/ViewAllCoupons"));
+const ViewCoupon = lazy(() => import("./page/coupon/ViewCoupon"));
+const AddDiscount = lazy(() => import("./page/discount/AddDiscount"));
+const AddProduct = lazy(() => import("./page/product/AddProduct"));
+const EditProduct = lazy(() => import("./page/product/EditProduct"));
+const GetAllProducts = lazy(() => import("./page/product/GetAllProducts"));
+const ViewProduct = lazy(() => import("./page/product/ViewProduct"));
+const ViewDiscount = lazy(() => import("./page/discount/ViewDiscount"));
+const EditDiscount = lazy(() => import("./page/discount/EditDiscount"));
 const App = () => {
   const { email, phone } = JSON.parse(localStorage.getItem("user") || "{}");
   return (
@@ -81,6 +85,10 @@ const App = () => {
               <Route path="coupons" element={<ViewAllCoupons />} />
               <Route path="coupons/:slug" element={<ViewCoupon />} />
               <Route path="coupons/edit/:slug" element={<EditCoupon />} />
+              <Route path="discounts/add-discount" element={<AddDiscount />} />
+              <Route path="discounts" element={<GetAllDiscounts />} />
+              <Route path="discounts/:slug" element={<ViewDiscount />} />
+              <Route path="discounts/edit/:slug" element={<EditDiscount />} />
             </Route>
           </>
         ) : (

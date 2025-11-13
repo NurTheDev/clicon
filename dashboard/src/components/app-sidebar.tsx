@@ -13,10 +13,11 @@ import {
   ListPlus,
   Map,
   Menu,
+  Percent,
   PieChart,
+  Puzzle,
   ShoppingBasket,
   Slack,
-  Puzzle,
 } from "lucide-react";
 import * as React from "react";
 
@@ -156,6 +157,23 @@ const data = {
           title: "See All",
           icon: Binoculars,
           url: "/dashboard/coupons",
+        },
+      ],
+    },
+    {
+      title: "Discounts",
+      url: "/dashboard/Discounts",
+      icon: Percent,
+      items: [
+        {
+          title: "Create New",
+          url: "/dashboard/discounts/add-discount",
+          icon: ListPlus,
+        },
+        {
+          title: "See All",
+          icon: Binoculars,
+          url: "/dashboard/discounts",
         },
       ],
     },
