@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet, Route, Routes } from "react-router";
 import Footer from "../../common/Footer.tsx";
-import Navbar from "../../common/Navbar.tsx";
+import Navbar from "../../common/navbar/Navbar.tsx";
 import PaymentCancel from "../payment/PaymentCancel.tsx";
 
 const Index = () => {

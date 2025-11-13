@@ -1,0 +1,98 @@
+import React from 'react';
+import Breadcrumbs from "../../../common/Breadcrumbs.tsx";
+import Container from "../../../common/Container.tsx";
+import {useQuery} from "@tanstack/react-query";
+import ProductCard from "../../../common/ProductCard.tsx";
+import ProductCardSkeleton from "../../../skeletons/ProductCardSkeleton.tsx";
+interface SideBarLinksProps {
+    selectedCategory: string;
+    onSelect: (category: string) => void;
+}
+const SideBarLinks:React.FC<SideBarLinksProps> = ({selectedCategory, onSelect})=>{
+    const {data, isLoading} = useQuery({
+        queryKey: ['products'],
+        queryFn: async () => {
+            const response = await fetch('https://dummyjson.com/products/category-list');
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        },
+        staleTime: 5 * 60 * 1000, // 5 minutes
+    })
+    const [visibleCategories, setVisibleCategories] = React.useState<string[]>([]);
+    return (
+        <div>
+            <h2 className={"label2 mb-4"}>Category</h2>
+            <ul className={"flex flex-col gap-3"}>
+                {data?.map((category: string, index: number) => (
+                    isLoading ? (
+                        <li className="flex items-center gap-2 animate-pulse">
+                            <div className="w-5 h-5 bg-gray-300 rounded-full"></div>
+                            <div className="h-4 bg-gray-300 rounded w-24"></div>
+                        </li>
+                    ) : (
+                        <li
+                            key={index}
+                            className="flex items-center gap-2 py-2 last:border-b last:border-gray-100 last:pb-6"
+                        >
+                            <input
+                                type="radio"
+                                name="radio-5"
+                                className="radio text-primary-500 w-5 h-5"
+                                value={category}
+                                checked={selectedCategory === category}
+                                onClick={() => onSelect(category)}
+                            />
+                            <span className="ml-2 body-medium-400">{category.charAt(0).toUpperCase() + category.slice(1)}</span>
+                        </li>
+                    )
+                ))}
+            </ul>
+        </div>
+    )
+}
+const Shop:React.FC = () => {
+    const [selectedCategory, setSelectedCategory] = React.useState<string>("beauty");
+    const {data, isLoading} = useQuery({
+        queryKey: ['products', selectedCategory],
+        queryFn: async () => {
+            const response = await fetch(`https://dummyjson.com/products/category/${selectedCategory}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        },
+        staleTime: 5 * 60 * 1000, // 5 minutes
+    })
+    const products = data?.products;
+    console.log(products);
+    return (
+        <div>
+            <Breadcrumbs/>
+            <Container><div className={"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-8"}>
+                {/* Sidebar - Filters */}
+                <div className={"col-span-1"}>
+                    <SideBarLinks selectedCategory={selectedCategory} onSelect ={setSelectedCategory}/>
+                </div>
+                <div className={"col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start"}>
+                    {isLoading ? (
+                        Array.from({ length: 8 }, (_, index) => (
+                            <ProductCardSkeleton key={index} />
+                        ))
+
+                    ) : (
+                        products?.map((product:any)=>(
+                            <div>
+                                <ProductCard key={product.id} product={product} />
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+            </Container>
+        </div>
+    );
+};
+
+export default React.memo(Shop);

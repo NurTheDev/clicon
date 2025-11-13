@@ -7,12 +7,14 @@ import PaymentCancel from "./Pages/payment/PaymentCancel.tsx";
 const App = () => {
     const Home = lazy(() => import("./Pages/mainLayout/Home/Home"));
     const Index = lazy(() => import("./Pages/mainLayout/Index"));
+    const Shop = lazy(() => import("./Pages/mainLayout/shop/Shop.tsx"));
     return (
         <div>
             <Suspense fallback={<div>Loading...</div>}>
                 <Routes>
                     <Route element={<Index/>}>
                         <Route path={"/"} element={<Home/>}/>
+                        <Route path={"/shop"} element={<Shop/>}/>
                     </Route>
                     <Route path="/payment/success" element={<PaymentSuccess/>}/>
                     <Route path="/payment/fail" element={<PaymentFailure/>}/>
