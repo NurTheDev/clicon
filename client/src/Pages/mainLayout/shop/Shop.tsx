@@ -4,6 +4,7 @@ import Container from "../../../common/Container.tsx";
 import {useQuery} from "@tanstack/react-query";
 import ProductCard from "../../../common/ProductCard.tsx";
 import ProductCardSkeleton from "../../../skeletons/ProductCardSkeleton.tsx";
+import Icons from "../../../helpers/IconProvider.tsx";
 interface SideBarLinksProps {
     selectedCategory: string;
     onSelect: (category: string) => void;
@@ -20,12 +21,12 @@ const SideBarLinks:React.FC<SideBarLinksProps> = ({selectedCategory, onSelect})=
         },
         staleTime: 5 * 60 * 1000, // 5 minutes
     })
-    const [visibleCategories, setVisibleCategories] = React.useState<string[]>([]);
+    const [visibleCategories, setvisibleCategories] = React.useState<number>(5);
     return (
         <div>
             <h2 className={"label2 mb-4"}>Category</h2>
             <ul className={"flex flex-col gap-3"}>
-                {data?.map((category: string, index: number) => (
+                {data?.slice(0, visibleCategories).map((category: string, index: number) => (
                     isLoading ? (
                         <li className="flex items-center gap-2 animate-pulse">
                             <div className="w-5 h-5 bg-gray-300 rounded-full"></div>
@@ -48,6 +49,14 @@ const SideBarLinks:React.FC<SideBarLinksProps> = ({selectedCategory, onSelect})=
                         </li>
                     )
                 ))}
+                {data && data.length > visibleCategories && (
+                    <button
+                        className="mt-4 text-primary-500 body-medium-500 text-start flex items-center gap-1"
+                        onClick={() => setvisibleCategories(prev => prev + 5)}
+                    >
+                        <span>Show More </span> <span>{Icons.rightArrow}</span>
+                    </button>
+                )}
             </ul>
         </div>
     )
