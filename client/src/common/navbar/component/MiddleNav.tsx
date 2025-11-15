@@ -11,9 +11,9 @@ const MiddleNav = () => {
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [isLoggedIn] = useState(false);
     const [showCartModal, setShowCartModal] = useState(false);
-    const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(event.target.value);
-    };
+        const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+            console.log(event.target.value);
+        };
     return (
         <div className="bg-secondary-700 text-gray-00 py-4 sm:py-5 border-b border-gray-00/10 shadow-sm">
             <Container>

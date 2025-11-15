@@ -2,7 +2,7 @@ import React from "react";
 import { BiHeadphone } from "react-icons/bi";
 import { BsBoxSeam, BsCreditCard } from "react-icons/bs";
 import {
-  FaApple,
+  FaApple, FaArrowDown,
   FaCartArrowDown,
   FaFacebook,
   FaGooglePlay,
@@ -43,6 +43,7 @@ const Icons: Icons = {
   heart: <FaHeart />,
   user: <FaUser />,
   rightArrow: <FaArrowRightLong />,
+  downArrow: <FaArrowDown />,
   search: <FaMagnifyingGlass />,
   menu: <LuMenu />,
   close: <IoClose />,
