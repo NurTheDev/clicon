@@ -5,7 +5,7 @@ interface SideBarLinksProps {
     selectedCategory: string;
     onSelect: (category: string) => void;
 }
-const SideBarLinks:React.FC<SideBarLinksProps> = ({selectedCategory, onSelect})=>{
+const Sidebar_CategoryLink:React.FC<SideBarLinksProps> = ({selectedCategory, onSelect})=>{
     const {data, isLoading} = useQuery({
         queryKey: ['products'],
         queryFn: async () => {
@@ -58,4 +58,4 @@ const SideBarLinks:React.FC<SideBarLinksProps> = ({selectedCategory, onSelect})=
     )
 }
 
-export default React.memo(SideBarLinks);
+export default React.memo(Sidebar_CategoryLink);

@@ -6,7 +6,8 @@ import ProductCard from "../../../common/ProductCard.tsx";
 import ProductCardSkeleton from "../../../skeletons/ProductCardSkeleton.tsx";
 import Icons from "../../../helpers/IconProvider.tsx";
 import SearchBar from "../../../common/SearchBar.tsx";
-import SideBarLinks from "./component/SideBar.tsx";
+import Sidebar_CategoryLink from "./component/SideBar_CategoryLink.tsx";
+import PrizeRange from "./component/PrizeRange.tsx";
 const Shop:React.FC = () => {
     const [selectedCategory, setSelectedCategory] = React.useState<string>("beauty");
     const {data, isLoading} = useQuery({
@@ -30,7 +31,12 @@ const Shop:React.FC = () => {
             <Container><div className={"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-8"}>
                 {/* Sidebar - Filters */}
                 <div className={"col-span-1"}>
-                    <SideBarLinks selectedCategory={selectedCategory} onSelect ={setSelectedCategory}/>
+                    <div className={"mb-8 border-b pb-6 border-gray-100"}>
+                        <Sidebar_CategoryLink selectedCategory={selectedCategory} onSelect ={setSelectedCategory}/>
+                    </div>
+                    <div>
+                        <PrizeRange/>
+                    </div>
                 </div>
                 <div className={"col-span-3 "}>
                     <div className={"flexRowBetween "}>
