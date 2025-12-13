@@ -38,7 +38,7 @@ const Sidebar_CategoryLink:React.FC<SideBarLinksProps> = ({selectedCategory, onS
                                 name="radio-5"
                                 className="radio text-primary-500 w-5 h-5"
                                 value={category}
-                                checked={selectedCategory === category}
+                                defaultChecked={selectedCategory === category}
                                 onClick={() => onSelect(category)}
                             />
                             <span className="ml-2 body-medium-400">{category.charAt(0).toUpperCase() + category.slice(1)}</span>

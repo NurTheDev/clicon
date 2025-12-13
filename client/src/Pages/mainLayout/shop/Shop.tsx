@@ -76,8 +76,8 @@ const Shop:React.FC = () => {
                            ))
                        ) : (
                            products?.map((product:any)=>(
-                               <div>
-                                   <ProductCard key={product.id} product={product} />
+                               <div key={product.id}>
+                                   <ProductCard  product={product} />
                                </div>
                            ))
                        )}

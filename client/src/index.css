@@ -580,5 +580,34 @@ body {
   outline: 2px solid var(--color-primary-500);
   outline-offset: 2px;
 }
+/* End of file */
+/*=============================================*/
+/*Range slide*/
+/*.range-slider {*/
+/*    width: 480px;*/
+/*    margin: 24px auto 0;*/
+/*}*/
 
+/*.range-slider.margin-lg {*/
+/*    margin: 42px auto 0;*/
+/*}*/
+
+#range-slider-yellow .range-slider__range {
+    background: var(--color-primary-500);
+    transition: height 0.3s;
+}
+
+#range-slider-yellow .range-slider__thumb {
+    background: var(--color-gray-00);
+    transition: transform 0.3s;
+    border: 3px solid var(--color-primary-500);
+}
+
+#range-slider-yellow .range-slider__thumb[data-active] {
+    transform: translate(-50%, -50%) scale(1.25);
+}
+
+#range-slider-yellow .range-slider__range[data-active] {
+    height: 16px;
+}
 /* End of file */
