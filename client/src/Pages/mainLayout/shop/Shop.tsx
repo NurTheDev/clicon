@@ -8,6 +8,7 @@ import Icons from "../../../helpers/IconProvider.tsx";
 import SearchBar from "../../../common/SearchBar.tsx";
 import Sidebar_CategoryLink from "./component/SideBar_CategoryLink.tsx";
 import PrizeRange from "./component/PrizeRange.tsx";
+import PopularBrands from "./component/PopularBrands.tsx";
 const Shop:React.FC = () => {
     const [selectedCategory, setSelectedCategory] = React.useState<string>("beauty");
     const {data, isLoading} = useQuery({
@@ -34,8 +35,11 @@ const Shop:React.FC = () => {
                     <div className={"mb-8 border-b pb-6 border-gray-100"}>
                         <Sidebar_CategoryLink selectedCategory={selectedCategory} onSelect ={setSelectedCategory}/>
                     </div>
-                    <div>
+                    <div className={"border-b border-gray-200 pb-6 mb-8"}>
                         <PrizeRange/>
+                    </div>
+                    <div className={"border-b border-gray-200 pb-6 mb-8"}>
+                        <PopularBrands />
                     </div>
                 </div>
                 <div className={"col-span-3 "}>
