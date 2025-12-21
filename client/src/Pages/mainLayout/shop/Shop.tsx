@@ -9,6 +9,7 @@ import SearchBar from "../../../common/SearchBar.tsx";
 import Sidebar_CategoryLink from "./component/SideBar_CategoryLink.tsx";
 import PrizeRange from "./component/PrizeRange.tsx";
 import PopularBrands from "./component/PopularBrands.tsx";
+import BannerCard from "./component/BannerCard.tsx";
 const Shop:React.FC = () => {
     const [selectedCategory, setSelectedCategory] = React.useState<string>("beauty");
     const {data, isLoading} = useQuery({
@@ -40,6 +41,9 @@ const Shop:React.FC = () => {
                     </div>
                     <div className={"border-b border-gray-200 pb-6 mb-8"}>
                         <PopularBrands />
+                    </div>
+                    <div>
+                        <BannerCard/>
                     </div>
                 </div>
                 <div className={"col-span-3 "}>
