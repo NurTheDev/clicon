@@ -178,7 +178,7 @@ exports.updateVariant = asyncHandler(async (req, res) => {
 
 /**
  * Delete an image from a variant
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @route DELETE /api/v1/variants/:slug/images
  * @access Private
  * @param {Object} req - Express request object

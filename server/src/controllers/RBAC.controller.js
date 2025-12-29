@@ -46,7 +46,7 @@ exports.createUser = asyncHandler(async (req, res) => {
 });
 /**
  * Get all users which has a role assigned except common users
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  */
 exports.getAllUsers = asyncHandler(async (req, res) => {
   // const role = {role: {$ne: 'user'}}

@@ -1,6 +1,6 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {Badge} from "@/components/ui/badge";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {
     Form,
     FormControl,
@@ -10,7 +10,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import {Input} from "@/components/ui/input";
 import {
     Select,
     SelectContent,
@@ -18,77 +18,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
+import {Switch} from "@/components/ui/switch";
+import {Textarea} from "@/components/ui/textarea";
 import instance from "@/lib/axios";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { ImagePlus, X } from "lucide-react";
-import React, { useState } from "react";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {useMutation, useQuery} from "@tanstack/react-query";
+import {ImagePlus, X} from "lucide-react";
+import React, {useState} from "react";
 import {type SubmitHandler, useForm} from "react-hook-form";
-import { useNavigate } from "react-router";
-import { Bounce, toast } from "react-toastify";
-import * as z from "zod";
-
-const productFormSchema = z.object({
-    name: z.string().min(1, "Product name is required").trim(),
-    description: z.string().min(10, "Description must be at least 10 characters"),
-    price: z.coerce.number().min(0, "Price must be positive"),
-    stock: z.coerce.number().min(0, "Stock must be positive"),
-    wholeSalePrice: z.coerce.number().optional(),
-    retailPrice: z.coerce.number().optional(),
-    category: z.string().min(1, "Category is required"),
-    subCategory: z.string().optional(),
-    brand: z.string().optional(),
-    tags: z.string().optional(),
-    sku: z.string().optional(),
-    warranty: z.string().optional(),
-    shipping: z.string().optional(),
-    returnPolicy: z.string().optional(),
-    minimumOrderQuantity: z.coerce.number().min(1, "Minimum quantity is 1"),
-    variantType: z.enum(["single", "multiple"]),
-    size: z.enum(["xs", "s", "m", "l", "xl", "xxl"]).optional(),
-    color: z
-        .enum([
-            "red",
-            "blue",
-            "green",
-            "yellow",
-            "black",
-            "white",
-            "gray",
-            "brown",
-            "purple",
-            "orange",
-            "custom",
-        ])
-        .optional(),
-    customColor: z.string().optional(),
-    groupUnit: z.enum(["box", "pack", "set", "pair", "unit", "other"]),
-    groupQuantity: z.coerce.number().min(1),
-    unit: z.enum(["piece", "kg", "gram", "litre", "ml", "other"]),
-    alertQuantity: z.coerce.number().min(5, "Alert quantity must be at least 5"),
-    isActive: z.boolean().default(true),
-    isAvailable: z.boolean().default(true),
-});
-
-type ProductFormValues = z.infer<typeof productFormSchema>;
-
-type Category = {
-    _id: string;
-    name: string;
-};
-
-type SubCategory = {
-    _id: string;
-    name: string;
-    category: string;
-};
-
-type Brand = {
-    _id: string;
-    name: string;
-};
+import {useNavigate} from "react-router";
+import {Bounce, toast} from "react-toastify";
+import type {Category, SubCategory, Brand} from "@/types/productData";
+import {productFormSchema, type ProductFormValues } from "@/schema/product.schema";
 
 const AddProduct: React.FC = () => {
     const navigate = useNavigate();
@@ -133,7 +74,7 @@ const AddProduct: React.FC = () => {
     const selectedColor = form.watch("color");
     const variantType = form.watch("variantType");
 
-    const { data: categories } = useQuery<Category[]>({
+    const {data: categories} = useQuery<Category[]>({
         queryKey: ["categories"],
         queryFn: async () => {
             const response = await instance.get("/category/get-allCategory");
@@ -141,7 +82,7 @@ const AddProduct: React.FC = () => {
         },
     });
 
-    const { data: subCategories } = useQuery<SubCategory[]>({
+    const {data: subCategories} = useQuery<SubCategory[]>({
         queryKey: ["subcategories"],
         queryFn: async () => {
             const response = await instance.get("/subCategory/get-allSubCategory");
@@ -149,7 +90,7 @@ const AddProduct: React.FC = () => {
         },
     });
 
-    const { data: brands } = useQuery<Brand[]>({
+    const {data: brands} = useQuery<Brand[]>({
         queryKey: ["brands"],
         queryFn: async () => {
             const response = await instance.get("/brand/all-brand");
@@ -357,13 +298,14 @@ const AddProduct: React.FC = () => {
                                 <FormField
                                     control={form.control}
                                     name="name"
-                                    render={({ field }) => (
+                                    render={({field}) => (
                                         <FormItem>
                                             <FormLabel>Product Name *</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Enter product name" {...field} disabled={isSubmitting} />
+                                                <Input placeholder="Enter product name" {...field}
+                                                       disabled={isSubmitting}/>
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
                                     )}
                                 />
@@ -371,13 +313,14 @@ const AddProduct: React.FC = () => {
                                 <FormField
                                     control={form.control}
                                     name="description"
-                                    render={({ field }) => (
+                                    render={({field}) => (
                                         <FormItem>
                                             <FormLabel>Description *</FormLabel>
                                             <FormControl>
-                                                <Textarea placeholder="Enter product description" rows={5} {...field} disabled={isSubmitting} />
+                                                <Textarea placeholder="Enter product description" rows={5} {...field}
+                                                          disabled={isSubmitting}/>
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
                                     )}
                                 />
@@ -385,174 +328,27 @@ const AddProduct: React.FC = () => {
                                 <FormField
                                     control={form.control}
                                     name="sku"
-                                    render={({ field }) => (
+                                    render={({field}) => (
                                         <FormItem>
                                             <FormLabel>SKU</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Enter SKU" {...field} disabled={isSubmitting} />
+                                                <Input placeholder="Enter SKU" {...field} disabled={isSubmitting}/>
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
                                     )}
                                 />
                             </div>
-
-                            {/* Images */}
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-semibold">Product Images</h3>
-
-                                <div className="space-y-2">
-                                    <FormLabel>Thumbnail Image *</FormLabel>
-                                    <Input type="file" accept="image/*" onChange={handleThumbnailChange} disabled={isSubmitting} />
-                                    <p className="text-sm text-muted-foreground">Main product image. Recommended: 800x800px, Max: 5MB</p>
-                                    {thumbnailPreview && (
-                                        <div className="relative w-48 h-48 border rounded-lg overflow-hidden">
-                                            <img src={thumbnailPreview} alt="Thumbnail preview" className="w-full h-full object-cover" />
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <FormLabel>Product Images * (Max 10)</FormLabel>
-                                    <Input type="file" accept="image/*" multiple onChange={handleImagesChange} disabled={isSubmitting || imageFiles.length >= 10} />
-                                    <p className="text-sm text-muted-foreground">Additional product images. Max: 10 images, 5MB each</p>
-
-                                    {imagePreviews.length > 0 && (
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                                            {imagePreviews.map((preview, index) => (
-                                                <div key={index} className="relative group border rounded-lg overflow-hidden aspect-square">
-                                                    <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
-                                                    <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removeImage(index)}>
-                                                        <X className="h-4 w-4" />
-                                                    </Button>
-                                                    <Badge className="absolute bottom-2 left-2">{index + 1}</Badge>
-                                                </div>
-                                            ))}
-                                            {imageFiles.length < 10 && (
-                                                <div className="border-2 border-dashed rounded-lg aspect-square flex items-center justify-center text-muted-foreground">
-                                                    <div className="text-center">
-                                                        <ImagePlus className="h-8 w-8 mx-auto mb-2" />
-                                                        <p className="text-sm">Add more</p>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Pricing */}
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-semibold">Pricing & Stock</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <FormField control={form.control} name="price" render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Price *</FormLabel>
-                                            <FormControl>
-                                                <Input type="number" step="0.01" placeholder="0.00" {...field} disabled={isSubmitting} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-
-                                    <FormField control={form.control} name="stock" render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Stock Quantity *</FormLabel>
-                                            <FormControl>
-                                                <Input type="number" placeholder="0" {...field} disabled={isSubmitting} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-
-                                    <FormField control={form.control} name="wholeSalePrice" render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Wholesale Price</FormLabel>
-                                            <FormControl>
-                                                <Input type="number" step="0.01" placeholder="0.00" {...field} disabled={isSubmitting} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-
-                                    <FormField control={form.control} name="retailPrice" render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Retail Price</FormLabel>
-                                            <FormControl>
-                                                <Input type="number" step="0.01" placeholder="0.00" {...field} disabled={isSubmitting} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                            </div>
-
-                            {/* Categories */}
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-semibold">Classification</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <FormField control={form.control} name="category" render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Category *</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
-                                                <FormControl>
-                                                    <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {categories?.map((category) => (
-                                                        <SelectItem key={category._id} value={category._id}>{category.name}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-
-                                    <FormField control={form.control} name="subCategory" render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Sub Category</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting || !selectedCategory}>
-                                                <FormControl>
-                                                    <SelectTrigger><SelectValue placeholder="Select sub category" /></SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {filteredSubCategories?.map((subCategory) => (
-                                                        <SelectItem key={subCategory._id} value={subCategory._id}>{subCategory.name}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-
-                                    <FormField control={form.control} name="brand" render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Brand</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
-                                                <FormControl>
-                                                    <SelectTrigger><SelectValue placeholder="Select brand" /></SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {brands?.map((brand) => (
-                                                        <SelectItem key={brand._id} value={brand._id}>{brand.name}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                            </div>
-
                             {/* Variant Type Selection */}
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold">Variant Configuration</h3>
-                                <FormField control={form.control} name="variantType" render={({ field }) => (
+                                <FormField control={form.control} name="variantType" render={({field}) => (
                                     <FormItem>
                                         <FormLabel>Variant Type *</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}
+                                                disabled={isSubmitting}>
                                             <FormControl>
-                                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                                <SelectTrigger><SelectValue/></SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
                                                 <SelectItem value="single">Single Variant</SelectItem>
@@ -564,19 +360,21 @@ const AddProduct: React.FC = () => {
                                                 ? "Product has one size/color combination"
                                                 : "Product has multiple size/color combinations (add variants after creating product)"}
                                         </FormDescription>
-                                        <FormMessage />
+                                        <FormMessage/>
                                     </FormItem>
-                                )} />
+                                )}/>
 
                                 {/* Show size/color only for single variant */}
                                 {variantType === "single" && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/50">
-                                        <FormField control={form.control} name="size" render={({ field }) => (
+                                    <div
+                                        className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/50">
+                                        <FormField control={form.control} name="size" render={({field}) => (
                                             <FormItem>
                                                 <FormLabel>Size</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}
+                                                        disabled={isSubmitting}>
                                                     <FormControl>
-                                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                                        <SelectTrigger><SelectValue/></SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
                                                         <SelectItem value="xs">XS</SelectItem>
@@ -587,16 +385,17 @@ const AddProduct: React.FC = () => {
                                                         <SelectItem value="xxl">XXL</SelectItem>
                                                     </SelectContent>
                                                 </Select>
-                                                <FormMessage />
+                                                <FormMessage/>
                                             </FormItem>
-                                        )} />
+                                        )}/>
 
-                                        <FormField control={form.control} name="color" render={({ field }) => (
+                                        <FormField control={form.control} name="color" render={({field}) => (
                                             <FormItem>
                                                 <FormLabel>Color</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}
+                                                        disabled={isSubmitting}>
                                                     <FormControl>
-                                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                                        <SelectTrigger><SelectValue/></SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
                                                         <SelectItem value="red">Red</SelectItem>
@@ -612,20 +411,21 @@ const AddProduct: React.FC = () => {
                                                         <SelectItem value="custom">Custom</SelectItem>
                                                     </SelectContent>
                                                 </Select>
-                                                <FormMessage />
+                                                <FormMessage/>
                                             </FormItem>
-                                        )} />
+                                        )}/>
 
                                         {selectedColor === "custom" && (
-                                            <FormField control={form.control} name="customColor" render={({ field }) => (
+                                            <FormField control={form.control} name="customColor" render={({field}) => (
                                                 <FormItem className="md:col-span-2">
                                                     <FormLabel>Custom Color</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="Enter custom color" {...field} disabled={isSubmitting} />
+                                                        <Input placeholder="Enter custom color" {...field}
+                                                               disabled={isSubmitting}/>
                                                     </FormControl>
-                                                    <FormMessage />
+                                                    <FormMessage/>
                                                 </FormItem>
-                                            )} />
+                                            )}/>
                                         )}
                                     </div>
                                 )}
@@ -633,22 +433,203 @@ const AddProduct: React.FC = () => {
                                 {variantType === "multiple" && (
                                     <div className="p-4 border rounded-lg bg-blue-50 dark:bg-blue-950">
                                         <p className="text-sm text-blue-700 dark:text-blue-300">
-                                            <strong>Note:</strong> After creating this product, you can add multiple variants with different sizes, colors, prices, and stock levels from the product details page.
+                                            <strong>Note:</strong> After creating this product, you can add multiple
+                                            variants with different sizes, colors, prices, and stock levels from the
+                                            product details page.
                                         </p>
                                     </div>
                                 )}
+                            </div>
+                            {/* Images */}
+                            <div className="space-y-4">
+                                <h3 className="text-lg font-semibold">Product Images</h3>
+
+                                <div className="space-y-2">
+                                    <FormLabel>Thumbnail Image *</FormLabel>
+                                    <Input type="file" accept="image/*" onChange={handleThumbnailChange}
+                                           disabled={isSubmitting}/>
+                                    <p className="text-sm text-muted-foreground">Main product image. Recommended:
+                                        800x800px, Max: 5MB</p>
+                                    {thumbnailPreview && (
+                                        <div className="relative w-48 h-48 border rounded-lg overflow-hidden">
+                                            <img src={thumbnailPreview} alt="Thumbnail preview"
+                                                 className="w-full h-full object-cover"/>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {variantType === "single" && (
+                                    <div className="space-y-2">
+                                        <FormLabel>Product Images * (Max 10)</FormLabel>
+                                        <Input type="file" accept="image/*" multiple onChange={handleImagesChange}
+                                               disabled={isSubmitting || imageFiles.length >= 10}/>
+                                        <p className="text-sm text-muted-foreground">Additional product images. Max: 10
+                                            images, 5MB each</p>
+
+                                        {imagePreviews.length > 0 && (
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                                                {imagePreviews.map((preview, index) => (
+                                                    <div key={index}
+                                                         className="relative group border rounded-lg overflow-hidden aspect-square">
+                                                        <img src={preview} alt={`Preview ${index + 1}`}
+                                                             className="w-full h-full object-cover"/>
+                                                        <Button type="button" variant="destructive" size="icon"
+                                                                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                onClick={() => removeImage(index)}>
+                                                            <X className="h-4 w-4"/>
+                                                        </Button>
+                                                        <Badge className="absolute bottom-2 left-2">{index + 1}</Badge>
+                                                    </div>
+                                                ))}
+                                                {imageFiles.length < 10 && (
+                                                    <div
+                                                        className="border-2 border-dashed rounded-lg aspect-square flex items-center justify-center text-muted-foreground">
+                                                        <div className="text-center">
+                                                            <ImagePlus className="h-8 w-8 mx-auto mb-2"/>
+                                                            <p className="text-sm">Add more</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Pricing */}
+                            <div className="space-y-4">
+                                <h3 className="text-lg font-semibold">Pricing & Stock</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <FormField control={form.control} name="price" render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Price *</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    step="0.01"
+                                                    placeholder="0.00"
+                                                    {...field}
+                                                    onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                                                    disabled={isSubmitting}
+                                                />
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}/>
+
+
+                                    <FormField control={form.control} name="stock" render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Stock Quantity *</FormLabel>
+                                            <FormControl>
+                                                <Input type="number" placeholder="0" {...field}
+                                                       disabled={isSubmitting}/>
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}/>
+
+                                    <FormField control={form.control} name="wholeSalePrice" render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Wholesale Price</FormLabel>
+                                            <FormControl>
+                                                <Input type="number" step="0.01" placeholder="0.00" {...field}
+                                                       disabled={isSubmitting}/>
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}/>
+
+                                    <FormField control={form.control} name="retailPrice" render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Retail Price</FormLabel>
+                                            <FormControl>
+                                                <Input type="number" step="0.01" placeholder="0.00" {...field}
+                                                       disabled={isSubmitting}/>
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}/>
+                                </div>
+                            </div>
+
+                            {/* Categories */}
+                            <div className="space-y-4">
+                                <h3 className="text-lg font-semibold">Classification</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <FormField control={form.control} name="category" render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Category *</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}
+                                                    disabled={isSubmitting}>
+                                                <FormControl>
+                                                    <SelectTrigger><SelectValue
+                                                        placeholder="Select category"/></SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {categories?.map((category) => (
+                                                        <SelectItem key={category._id}
+                                                                    value={category._id}>{category.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}/>
+
+                                    <FormField control={form.control} name="subCategory" render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Sub Category</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}
+                                                    disabled={isSubmitting || !selectedCategory}>
+                                                <FormControl>
+                                                    <SelectTrigger><SelectValue
+                                                        placeholder="Select sub category"/></SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {filteredSubCategories?.map((subCategory) => (
+                                                        <SelectItem key={subCategory._id}
+                                                                    value={subCategory._id}>{subCategory.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}/>
+
+                                    <FormField control={form.control} name="brand" render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Brand</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}
+                                                    disabled={isSubmitting}>
+                                                <FormControl>
+                                                    <SelectTrigger><SelectValue
+                                                        placeholder="Select brand"/></SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {brands?.map((brand) => (
+                                                        <SelectItem key={brand._id}
+                                                                    value={brand._id}>{brand.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}/>
+                                </div>
                             </div>
 
                             {/* Units & Quantities */}
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold">Units & Quantities</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <FormField control={form.control} name="unit" render={({ field }) => (
+                                    <FormField control={form.control} name="unit" render={({field}) => (
                                         <FormItem>
                                             <FormLabel>Unit *</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}
+                                                    disabled={isSubmitting}>
                                                 <FormControl>
-                                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                                    <SelectTrigger><SelectValue/></SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
                                                     <SelectItem value="piece">Piece</SelectItem>
@@ -659,16 +640,17 @@ const AddProduct: React.FC = () => {
                                                     <SelectItem value="other">Other</SelectItem>
                                                 </SelectContent>
                                             </Select>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
-                                    )} />
+                                    )}/>
 
-                                    <FormField control={form.control} name="groupUnit" render={({ field }) => (
+                                    <FormField control={form.control} name="groupUnit" render={({field}) => (
                                         <FormItem>
                                             <FormLabel>Group Unit *</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}
+                                                    disabled={isSubmitting}>
                                                 <FormControl>
-                                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                                    <SelectTrigger><SelectValue/></SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
                                                     <SelectItem value="box">Box</SelectItem>
@@ -679,40 +661,43 @@ const AddProduct: React.FC = () => {
                                                     <SelectItem value="other">Other</SelectItem>
                                                 </SelectContent>
                                             </Select>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
-                                    )} />
+                                    )}/>
 
-                                    <FormField control={form.control} name="groupQuantity" render={({ field }) => (
+                                    <FormField control={form.control} name="groupQuantity" render={({field}) => (
                                         <FormItem>
                                             <FormLabel>Group Quantity *</FormLabel>
                                             <FormControl>
-                                                <Input type="number" placeholder="1" {...field} disabled={isSubmitting} />
+                                                <Input type="number" placeholder="1" {...field}
+                                                       disabled={isSubmitting}/>
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
-                                    )} />
+                                    )}/>
 
-                                    <FormField control={form.control} name="minimumOrderQuantity" render={({ field }) => (
+                                    <FormField control={form.control} name="minimumOrderQuantity" render={({field}) => (
                                         <FormItem>
                                             <FormLabel>Minimum Order Quantity *</FormLabel>
                                             <FormControl>
-                                                <Input type="number" placeholder="1" {...field} disabled={isSubmitting} />
+                                                <Input type="number" placeholder="1" {...field}
+                                                       disabled={isSubmitting}/>
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
-                                    )} />
+                                    )}/>
 
-                                    <FormField control={form.control} name="alertQuantity" render={({ field }) => (
+                                    <FormField control={form.control} name="alertQuantity" render={({field}) => (
                                         <FormItem>
                                             <FormLabel>Alert Quantity *</FormLabel>
                                             <FormControl>
-                                                <Input type="number" placeholder="5" {...field} disabled={isSubmitting} />
+                                                <Input type="number" placeholder="5" {...field}
+                                                       disabled={isSubmitting}/>
                                             </FormControl>
                                             <FormDescription>Alert when stock falls below this</FormDescription>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
-                                    )} />
+                                    )}/>
                                 </div>
                             </div>
 
@@ -720,76 +705,84 @@ const AddProduct: React.FC = () => {
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold">Additional Information</h3>
 
-                                <FormField control={form.control} name="tags" render={({ field }) => (
+                                <FormField control={form.control} name="tags" render={({field}) => (
                                     <FormItem>
                                         <FormLabel>Tags</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="electronics, gadgets, smart (comma separated)" {...field} disabled={isSubmitting} />
+                                            <Input
+                                                placeholder="electronics, gadgets, smart (comma separated)" {...field}
+                                                disabled={isSubmitting}/>
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage/>
                                     </FormItem>
-                                )} />
+                                )}/>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <FormField control={form.control} name="warranty" render={({ field }) => (
+                                    <FormField control={form.control} name="warranty" render={({field}) => (
                                         <FormItem>
                                             <FormLabel>Warranty</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="1 year warranty" {...field} disabled={isSubmitting} />
+                                                <Input placeholder="1 year warranty" {...field}
+                                                       disabled={isSubmitting}/>
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
-                                    )} />
+                                    )}/>
 
-                                    <FormField control={form.control} name="shipping" render={({ field }) => (
+                                    <FormField control={form.control} name="shipping" render={({field}) => (
                                         <FormItem>
                                             <FormLabel>Shipping Info</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Free shipping" {...field} disabled={isSubmitting} />
+                                                <Input placeholder="Free shipping" {...field} disabled={isSubmitting}/>
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
-                                    )} />
+                                    )}/>
                                 </div>
 
-                                <FormField control={form.control} name="returnPolicy" render={({ field }) => (
+                                <FormField control={form.control} name="returnPolicy" render={({field}) => (
                                     <FormItem>
                                         <FormLabel>Return Policy</FormLabel>
                                         <FormControl>
-                                            <Textarea placeholder="7 days return policy" {...field} disabled={isSubmitting} />
+                                            <Textarea placeholder="7 days return policy" {...field}
+                                                      disabled={isSubmitting}/>
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage/>
                                     </FormItem>
-                                )} />
+                                )}/>
                             </div>
 
                             {/* Status Switches */}
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold">Status</h3>
                                 <div className="flex gap-8">
-                                    <FormField control={form.control} name="isActive" render={({ field }) => (
-                                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 flex-1">
+                                    <FormField control={form.control} name="isActive" render={({field}) => (
+                                        <FormItem
+                                            className="flex flex-row items-center justify-between rounded-lg border p-4 flex-1">
                                             <div className="space-y-0.5">
                                                 <FormLabel className="text-base">Active</FormLabel>
                                                 <FormDescription>Show this product on website</FormDescription>
                                             </div>
                                             <FormControl>
-                                                <Switch checked={field.value} onCheckedChange={field.onChange} disabled={isSubmitting} />
+                                                <Switch checked={field.value} onCheckedChange={field.onChange}
+                                                        disabled={isSubmitting}/>
                                             </FormControl>
                                         </FormItem>
-                                    )} />
+                                    )}/>
 
-                                    <FormField control={form.control} name="isAvailable" render={({ field }) => (
-                                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 flex-1">
+                                    <FormField control={form.control} name="isAvailable" render={({field}) => (
+                                        <FormItem
+                                            className="flex flex-row items-center justify-between rounded-lg border p-4 flex-1">
                                             <div className="space-y-0.5">
                                                 <FormLabel className="text-base">Available</FormLabel>
                                                 <FormDescription>Product is in stock</FormDescription>
                                             </div>
                                             <FormControl>
-                                                <Switch checked={field.value} onCheckedChange={field.onChange} disabled={isSubmitting} />
+                                                <Switch checked={field.value} onCheckedChange={field.onChange}
+                                                        disabled={isSubmitting}/>
                                             </FormControl>
                                         </FormItem>
-                                    )} />
+                                    )}/>
                                 </div>
                             </div>
 
@@ -807,7 +800,8 @@ const AddProduct: React.FC = () => {
                                 }} disabled={isSubmitting} className="cursor-pointer">
                                     Reset
                                 </Button>
-                                <Button type="button" variant="ghost" onClick={() => navigate("/dashboard/products")} disabled={isSubmitting} className="cursor-pointer">
+                                <Button type="button" variant="ghost" onClick={() => navigate("/dashboard/products")}
+                                        disabled={isSubmitting} className="cursor-pointer">
                                     Cancel
                                 </Button>
                             </div>

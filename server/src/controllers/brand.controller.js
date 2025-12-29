@@ -10,7 +10,7 @@ const { uploadImage, deleteImage } = require("../helpers/claudinary");
 
 /**
  * @description Create a new brand
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -35,7 +35,7 @@ exports.createBrand = asyncHandler(async (req, res) => {
 
 /**
  * @description Get all brands
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -50,7 +50,7 @@ exports.getAllBrand = asyncHandler(async (req, res) => {
 });
 /**
  * @description Get a brand by slug
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -67,7 +67,7 @@ exports.getBrand = asyncHandler(async (req, res) => {
 
 /**
  * @description Update a brand by slug
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -85,7 +85,7 @@ exports.updateBrand = asyncHandler(async (req, res) => {
 });
 /**
  * @description Delete a brand by slug
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}

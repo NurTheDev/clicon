@@ -10,7 +10,7 @@ const categorySchema = require("../models/category.model");
 
 /**
  * @description Create a subCategory
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -39,7 +39,7 @@ exports.createSubCategory = asyncHandler(async (req, res) => {
 
 /**
  * @description Get all subCategories
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -52,7 +52,7 @@ exports.getAllSubCategories = asyncHandler(async (req, res) => {
 
 /**
  * @description Get a subCategory by slug
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -67,7 +67,7 @@ exports.getSubCategory = asyncHandler(async (req, res) => {
 });
 /**
  * @description Update a subCategory by slug
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -109,7 +109,7 @@ exports.updateSubCategory = asyncHandler(async (req, res) => {
 
 /**
  * @description Delete a subCategory by slug
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}

@@ -19,7 +19,7 @@ const { verifyOTP, clearOTPField } = require("../utils/otpVerification");
 const { emailOTPSend, phoneOTPSend } = require("../helpers/handleOTPSend");
 /**
  * Register user
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @returns {Promise<void>}
  * @throws {customError}
  */
@@ -52,7 +52,7 @@ exports.register = asyncHandler(async (req, res) => {
 });
 /**
  * Login user
- * @type {(function(*, *): Promise<void>)|*}
+ * types {(function(*, *): Promise<void>)|*}
  * @returns {Promise<void>}
  * @throws {customError}
  */
@@ -114,7 +114,7 @@ exports.login = asyncHandler(async (req, res) => {
 });
 /**
  * Verify account
- * @type {(function(*, *): Promise<void>)|*}
+ * types {(function(*, *): Promise<void>)|*}
  * @returns {Promise<void>}
  * @throws {customError}
  */
@@ -166,7 +166,7 @@ exports.verifyAccount = asyncHandler(async (req, res) => {
 });
 /**
  * Resend OTP
- * @type {(function(*, *): Promise<void>)|*}
+ * types {(function(*, *): Promise<void>)|*}
  * @returns {Promise<void>}
  * @throws {customError}
  */
@@ -200,7 +200,7 @@ exports.resendOTP = asyncHandler(async (req, res) => {
 });
 /**
  * Forgot password
- * @type {(function(*, *): Promise<void>)|*}
+ * types {(function(*, *): Promise<void>)|*}
  * @returns {Promise<void>}
  * @throws {customError}
  */
@@ -240,7 +240,7 @@ exports.forgotPassword = asyncHandler(async (req, res) => {
 });
 /**
  * Reset password
- * @type {(function(*, *): Promise<void>)|*}
+ * types {(function(*, *): Promise<void>)|*}
  * @returns {Promise<void>}
  * @throws {customError}
  */
@@ -281,7 +281,7 @@ exports.resetPassword = asyncHandler(async (req, res) => {
 
 /**
  * Logout user
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @returns {Promise<void>}
  * @throws {customError}
  */
@@ -310,7 +310,7 @@ exports.logout = asyncHandler(async (req, res) => {
 
 /**
  * Get use
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @returns {Promise<void>}
  * @throws {customError}
  */
@@ -324,7 +324,7 @@ exports.getUser = asyncHandler(async (req, res) => {
 
 /**
  * Get refresh token
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @returns {Promise<void>}
  * @throws {customError}
  */

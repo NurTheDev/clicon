@@ -10,7 +10,7 @@ const { uploadImage, deleteImage } = require("../helpers/claudinary");
 
 /**
  * @description Create a new category
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -31,7 +31,7 @@ exports.createCategory = asyncHandler(async (req, res) => {
 
 /**
  * @description Get all categories
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -72,7 +72,7 @@ exports.getAllCategories = asyncHandler(async (req, res) => {
 
 /**
  * @description Get a single category
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -90,7 +90,7 @@ exports.getCategory = asyncHandler(async (req, res) => {
 
 /**
  * @description Update a category
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -108,7 +108,7 @@ exports.updateCategory = asyncHandler(async (req, res) => {
 });
 /**
  * @description Delete a category
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}

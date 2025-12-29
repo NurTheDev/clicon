@@ -9,7 +9,7 @@ const brandSchema = require("../models/brand.model")
 const productSchema = require("../models/product.model")
 /**
  * @description Create a new discount
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -63,7 +63,7 @@ exports.createDiscount = asyncHandler(async (req, res) => {
 })
 /**
  * @description Update a discount
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -129,7 +129,7 @@ exports.updateDiscount = asyncHandler(async (req, res) => {
 
 /**
  * @description Delete a discount
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -154,7 +154,7 @@ exports.deleteDiscount = asyncHandler(async (req, res) => {
 })
 /**
  * @description Get a discount
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -167,7 +167,7 @@ exports.getDiscount = asyncHandler(async (req, res) => {
 })
 /**
  * @description Get all discounts
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}

@@ -9,7 +9,7 @@ const CouponSchema = require("../models/coupon.model");
 
 /**
  * @description Create a new coupon
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -22,7 +22,7 @@ exports.createCoupon = asyncHandler(async (req, res) => {
 });
 /**
  * @description Get all coupons
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -34,7 +34,7 @@ exports.getAllCoupons = asyncHandler(async (req, res) => {
 });
 /**
  * @description Get a coupon by slug
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -47,7 +47,7 @@ exports.getCoupon = asyncHandler(async (req, res) => {
 });
 /**
  * @description Update a coupon by slug
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -64,7 +64,7 @@ exports.updateCoupon = asyncHandler(async (req, res) => {
 });
 /**
  * @description Delete a coupon by slug
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}

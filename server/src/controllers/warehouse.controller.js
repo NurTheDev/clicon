@@ -6,7 +6,7 @@ const {validateCreateWarehouse, validateUpdateWarehouse} = require('../validator
 
 /**
  * @description Create a new warehouse
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -19,7 +19,7 @@ exports.createWarehouse = asyncHandler(async (req, res) => {
 })
 /**
  * @description Get all warehouses
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -32,7 +32,7 @@ exports.getAllWarehouses = asyncHandler(async (req, res) => {
 
 /**
  * @description Update a warehouse by warehouseId
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -47,7 +47,7 @@ exports.updateWarehouse = asyncHandler(async (req, res) => {
 
 /**
  * @description Delete a warehouse by warehouseId
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -61,7 +61,7 @@ exports.deleteWarehouse = asyncHandler(async (req, res) => {
 
 /**
  * @description Get a warehouse by warehouseId
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}

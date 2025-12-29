@@ -19,7 +19,7 @@ const myCache = new NodeCache({stdTTL: 100, checkperiod: 120});
 
 /**
  * @description Create a new product
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -87,7 +87,7 @@ exports.createProduct = asyncHandler(async (req, res) => {
 })
 /**
  * @description Get all products with pagination, sorting and searching
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -131,7 +131,7 @@ exports.getAllProducts = asyncHandler(async (req, res) => {
 })
 /**
  * @description Get a single product by slug
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -143,7 +143,7 @@ exports.getSingleProduct = asyncHandler(async (req, res) => {
     success(res, 'Product fetched successfully', product, 200);
 })
 /** * @description Update a product by slug
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -198,7 +198,7 @@ exports.updateProduct = asyncHandler(async (req, res) => {
 })
 /**
  * @description Delete a product by slug
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -216,7 +216,7 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
 
 /**
  * @description Get filtered products by category, subCategory, brand, price range
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -281,7 +281,7 @@ exports.getFilteredProducts = asyncHandler(async (req, res) => {
     success(res, "Filtered products fetched successfully", {products, pagination}, 200)
 })
 /** * @description Get total number of products
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -297,7 +297,7 @@ exports.getTotalProducts = asyncHandler(async (req, res) => {
 })
 /**
  * @description Get total number of products in a category
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -314,7 +314,7 @@ exports.getTotalProductsInCategory = asyncHandler(async (req, res) => {
 })
 /**
  * @description Get total number of products in a subCategory
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -331,7 +331,7 @@ exports.getTotalProductsInSubCategory = asyncHandler(async (req, res) => {
 })
 /**
  * @description Get total number of products in a brand
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -347,7 +347,7 @@ exports.getTotalProductsInBrand = asyncHandler(async (req, res) => {
     success(res, "Total products in brand fetched successfully", {total}, 200);
 })
 /** * @description Get all products with low stock
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -358,7 +358,7 @@ exports.getLowStockProducts = asyncHandler(async (req, res) => {
 })
 /**
  * @description Get all products with a specific tag
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -373,7 +373,7 @@ exports.getProductsByTag = asyncHandler(async (req, res) => {
     success(res, "Products by tag fetched successfully", {products}, 200);
 })
 /** * @description Get related products by category and subCategory
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -392,7 +392,7 @@ exports.getRelatedProducts = asyncHandler(async (req, res) => {
     success(res, "Related products fetched successfully", {products}, 200);
 })
 /** * @description Get all products that are on discount
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}

@@ -8,7 +8,7 @@ const variantSchema = require("../models/variant.model");
 const {getIOInstance} = require("../socket/socket");
 /**
  * @description Create or update a cart
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -137,7 +137,7 @@ exports.createCart = asyncHandler(async (req, res) => {
 
 /**
  * @description Get cart by userId or guestId
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -156,7 +156,7 @@ exports.getCart = asyncHandler(async (req, res) => {
 //update cart quntity
 /**
  * @description Update cart item quantity
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -222,7 +222,7 @@ exports.updateCart = asyncHandler(async (req, res) => {
 //increament cart item quantity
 /**
  * @description Increment cart item quantity
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -275,7 +275,7 @@ exports.incrementCartItem = asyncHandler(async (req, res) => {
 //decreament cart item quantity
 /**
  * @description Decrement cart item quantity
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -337,7 +337,7 @@ exports.decrementCartItem = asyncHandler(async (req, res) => {
 //Delete cart Item
 /**
  * @description Delete a cart
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}

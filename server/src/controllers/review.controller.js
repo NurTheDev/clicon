@@ -8,7 +8,7 @@ const ProductSchema = require('../models/product.model');
 const UserSchema = require('../models/user.model');
 /**
  * @description Create a new review
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -39,7 +39,7 @@ exports.createReview = asyncHandler(async (req, res) => {
 
 /**
  * @description Get all reviews
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -52,7 +52,7 @@ exports.getAllReviews = asyncHandler(async (req, res) => {
 
 /**
  * get all reviews by product
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -66,7 +66,7 @@ exports.getReviewsByProduct = asyncHandler(async (req, res) => {
 
 /**
  * @description Get a review by userID
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -80,7 +80,7 @@ exports.getReviewByUserId = asyncHandler(async (req, res) => {
 })
 /**
  * @description Update a review by reviewId
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
@@ -124,7 +124,7 @@ exports.deleteReviewImages = asyncHandler(async (req, res) => {
 })
 /**
  * @description Delete a review by reviewId
- * @type {(function(*, *, *): Promise<void>)|*}
+ * types {(function(*, *, *): Promise<void>)|*}
  * @param {Object} req - The request object
  * @param {Object} res - The response object
  * @returns {Promise<void>}
