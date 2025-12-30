@@ -3,14 +3,16 @@ import type { ProductDataType } from "../types/productData.ts";
 type ProductCardProps = {
   product: ProductDataType;
 };
+import {useNavigate} from "react-router-dom";
 const ProductCard = ({ product }: ProductCardProps) => {
+    const navigate = useNavigate();
   return (
       <div
           className={
               "flexColumnStart text-start gap-y-2 p-4 rounded-sm" +
               " border border-gray-100 cursor-pointer hover:shadow transition-all relative" +
               " duration-150 hover:scale-105"
-          }
+          } onClick={() => navigate(`/product/${product.id}`)}
           key={product.id}>
         <div className="relative group overflow-hidden">
           <img

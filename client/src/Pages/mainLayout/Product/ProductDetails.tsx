@@ -6,25 +6,52 @@ import {IoChevronBack, IoChevronForward} from 'react-icons/io5';
 import {HiMinus, HiPlus} from 'react-icons/hi';
 import {BsCart2} from 'react-icons/bs';
 import {useParams} from "react-router-dom";
+import {useQuery} from "@tanstack/react-query";
+import ProductTabs from "./component/ProductTabs.tsx";
+import AllProduct from "../Home/component/AllProduct.tsx";
+import ProductDetailsSkeleton from "../../../skeletons/ProductDetailsSkeleton.tsx";
+import {addToCompare} from "../../../helpers/compareUtils.ts";
 
 const ProductDetails = () => {
-    const [selectedImage, setSelectedImage] = useState(0);
+    const [selectedImage, setSelectedImage] = useState("");
+    const [currentImgIndex, setCurrentImgIndex] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [selectedColor, setSelectedColor] = useState(0);
     const params = useParams();
-    console.log(params.productId);
-
-    const images = [
-        '/imac.png',
-        '/imac.png',
-        '/imac.png',
-        '/imac.png',
-        '/imac.png',
-        '/imac.png',
-    ];
-
-    const colors = ['#FFB800', '#E0E0E0'];
-
+    const {data:product, isLoading} = useQuery({
+        queryKey : ["productDetails", params?.id],
+        queryFn : async()=>{
+            const response = await fetch(`https://dummyjson.com/products/${params?.productId}`)
+            if (!response.ok) throw new Error("Error in fetching product")
+            return response.json()
+        }
+    })
+    const handleNextImage =()=>{
+        if(!product?.images?.length) return
+        const newIndex = currentImgIndex === product?.images.length -1 ? 0: currentImgIndex +1
+        setCurrentImgIndex(newIndex)
+        setSelectedImage(product?.images[newIndex])
+    }
+    const handlePrevImage=()=>{
+        if(!product?.images?.length) return
+        const newIndex = currentImgIndex === 0 ? product?.images.length -1: currentImgIndex -1
+        setCurrentImgIndex(newIndex)
+        setSelectedImage(product?.images[newIndex])
+    }
+    const handleAddToCompare = () => {
+        const result = addToCompare(product);
+        alert(result.message);
+    };
+    console.log(product)
+    const colors = ['#FFB800', '#E0E0E0', '#FF0000', '#00FF00', '#0000FF'];
+    if (isLoading) {
+        return (
+            <div className="min-h-screen">
+                <Breadcrumbs />
+                <ProductDetailsSkeleton />
+            </div>
+        );
+    }
     return (
         <div className="min-h-screen">
             <Breadcrumbs/>
@@ -35,7 +62,7 @@ const ProductDetails = () => {
                         {/* Main Image */}
                         <div className="border border-gray-200 rounded-lg p-4 mb-4">
                             <img
-                                src={images[selectedImage]}
+                                src={selectedImage || product?.thumbnail}
                                 alt="Product"
                                 className="w-full h-[250px] sm:h-[350px] md:h-[400px] object-contain"
                             />
@@ -44,23 +71,24 @@ const ProductDetails = () => {
                         {/* Thumbnail Gallery */}
                         <div className="flex items-center gap-2">
                             <button
+                                onClick={handlePrevImage}
                                 className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary-500 text-white flex items-center justify-center flex-shrink-0">
                                 <IoChevronBack/>
                             </button>
                             <div className="flex gap-2 overflow-x-auto flex-1">
-                                {images.map((img, index) => (
+                                {product?.images.map((img:string, index: number) => (
                                     <div
                                         key={index}
-                                        onClick={() => setSelectedImage(index)}
+                                        onClick={() => setSelectedImage(img)}
                                         className={`w-14 h-14 md:w-20 md:h-20 border-2 rounded cursor-pointer p-1 flex-shrink-0 ${
-                                            selectedImage === index ? 'border-primary-500' : 'border-gray-200'
+                                            selectedImage === img ? 'border-primary-500' : 'border-gray-200'
                                         }`}
                                     >
                                         <img src={img} alt="" className="w-full h-full object-contain"/>
                                     </div>
                                 ))}
                             </div>
-                            <button
+                            <button onClick={handleNextImage}
                                 className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary-500 text-white flex items-center justify-center flex-shrink-0">
                                 <IoChevronForward/>
                             </button>
@@ -76,33 +104,33 @@ const ProductDetails = () => {
                                     <FaStar key={i} className="w-4 h-4"/>
                                 ))}
                             </div>
-                            <span className="font-semibold text-sm md:text-base">4.7 Star Rating</span>
-                            <span className="text-gray-500 text-xs md:text-sm">(21,671 User feedback)</span>
+                            <span className="font-semibold text-sm md:text-base">{product?.rating}</span>
+                            <span className="text-gray-500 text-xs md:text-sm">({product?.reviews.length} User feedback)</span>
                         </div>
 
                         {/* Title */}
                         <h1 className="text-lg md:text-2xl font-semibold mb-4">
-                            2020 Apple MacBook Pro with Apple M1 Chip (13-inch, 8GB RAM, 256GB SSD Storage) - Space Gray
+                            {product?.title}
                         </h1>
 
                         {/* SKU & Availability */}
                         <div className="flex flex-col sm:flex-row sm:justify-between text-sm mb-2 gap-1">
-                            <span><span className="text-gray-500">Sku:</span> A264671</span>
-                            <span><span className="text-gray-500">Availability:</span> <span className="text-green-500">In Stock</span></span>
+                            <span><span className="text-gray-500">Sku: </span> {product?.sku}</span>
+                            <span><span className="text-gray-500">Availability:</span> <span className="text-green-500">{product?.availabilityStatus}</span></span>
                         </div>
 
                         {/* Brand & Category */}
                         <div className="flex flex-col sm:flex-row sm:justify-between text-sm mb-4 gap-1">
-                            <span><span className="text-gray-500">Brand:</span> Apple</span>
-                            <span><span className="text-gray-500">Category:</span> Electronics Devices</span>
+                            <span><span className="text-gray-500">Brand:</span> {product?.brand}</span>
+                            <span><span className="text-gray-500">Category:</span> {product?.category}</span>
                         </div>
 
                         {/* Price */}
                         <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-6">
-                            <span className="text-xl md:text-2xl font-semibold text-primary-500">$1699</span>
-                            <span className="text-gray-400 line-through text-sm md:text-base">$1999.00</span>
+                            <span className="text-xl md:text-2xl font-semibold text-primary-500">${product?.price}</span>
+                            <span className="text-gray-400 line-through text-sm md:text-base">${(product?.price + (100/product?.discountPercentage)).toFixed(2)}</span>
                             <span
-                                className="bg-yellow-400 text-white px-2 py-1 text-xs md:text-sm rounded">21% OFF</span>
+                                className="bg-yellow-400 text-white px-2 py-1 text-xs md:text-sm rounded">{product?.discountPercentage}% OFF</span>
                         </div>
 
                         <hr className="mb-6"/>
@@ -186,6 +214,7 @@ const ProductDetails = () => {
                                     <FaHeart/> Add to Wishlist
                                 </button>
                                 <button
+                                    onClick={handleAddToCompare}
                                     className="flex items-center gap-2 text-gray-600 hover:text-primary-500 text-sm">
                                     <FaExchangeAlt/> Add to Compare
                                 </button>
@@ -215,6 +244,8 @@ const ProductDetails = () => {
                     </div>
                 </div>
             </div>
+            <ProductTabs productDetails={product} />
+            <div className="my-10"><AllProduct /></div>
         </div>
     );
 };
