@@ -74,7 +74,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
       if (!product) {
         throw new customError(
           `Product with ID ${item.productId} not found`,
-          404
+          404,
         );
       }
       if (item.variant) {
@@ -82,13 +82,13 @@ exports.createOrder = asyncHandler(async (req, res) => {
         if (!variant) {
           throw new customError(
             `Variant with ID ${item.variant} not found`,
-            404
+            404,
           );
         }
         if (variant.stock < item.quantity) {
           throw new customError(
             `Insufficient stock for variant ${variant.slug}`,
-            400
+            400,
           );
         }
         variant.stock -= item.quantity;
@@ -103,7 +103,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
         if (product.stock < item.quantity) {
           throw new customError(
             `Insufficient stock for product ${product.name}`,
-            400
+            400,
           );
         }
         product.stock -= item.quantity;
@@ -147,7 +147,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
       ) {
         throw new customError(
           `Minimum purchase amount for this coupon is ${couponObj.minPurchaseAmount}`,
-          400
+          400,
         );
       }
       // Check usage limits
@@ -230,7 +230,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
       if (!isApplicable) {
         throw new customError(
           "Coupon is not applicable to the products in your cart",
-          400
+          400,
         );
       }
       // check max usage limit
@@ -274,7 +274,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
       throw new customError("Delivery Zone is required", 400);
     }
     const deliveryCharge = await DeliveryCharge.findById(
-      result.deliveryCharge
+      result.deliveryCharge,
     ).session(session);
     if (!deliveryCharge) {
       throw new customError("Delivery Charge not found", 404);
@@ -371,7 +371,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
         await sendEmail(
           result.shippingAddress.email,
           emailContent,
-          "Order Confirmed Successfully"
+          "Order Confirmed Successfully",
         );
       } else if (
         result.user ||
@@ -478,7 +478,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
 
           throw new customError(
             apiResponse.failedreason || "SSLCommerz Gateway URL not found",
-            500
+            500,
           );
         }
 
@@ -489,7 +489,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
             order: newOrder,
             redirectURL: apiResponse.GatewayPageURL,
           },
-          201
+          201,
         );
       } catch (error) {
         console.error("SSLCommerz Payment Initialization Error:", error);
@@ -497,10 +497,9 @@ exports.createOrder = asyncHandler(async (req, res) => {
         // Rollback order and invoice
         await orderSchema.findByIdAndDelete(newOrder._id);
         await invoice.findByIdAndDelete(newInvoice._id);
-
         throw new customError(
           error.message || "SSLCommerz Payment Initialization Failed",
-          500
+          500,
         );
       }
     }
@@ -515,7 +514,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
     console.error("Error creating order:", error);
     throw new customError(
       error.message || "Server Error",
-      error.statusCode || 500
+      error.statusCode || 500,
     );
   }
 });
@@ -632,7 +631,7 @@ exports.getPendingOrdersForCourier = asyncHandler(async (req, res) => {
     res,
     "Pending orders fetched successfully",
     pendingOrders,
-    200
+    200,
   );
 });
 
@@ -693,7 +692,7 @@ exports.steadFastWebhookHandler = asyncHandler(async (req, res) => {
     if (!courier) {
       throw new customError(
         "Courier record not found for the given invoice",
-        404
+        404,
       );
     }
     courier.status = status;
